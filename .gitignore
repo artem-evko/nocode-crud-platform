@@ -1,14 +1,47 @@
+# Maven / Java
 /target/
-.idea/
-.vscode/
-.settings
-.project
-.classpath
+/**/target/
+*.log
 
+# IntelliJ
+/.idea/
+/**/.idea/
 *.iml
-.DS_Store
 
-# The following files are generated/updated by vaadin-maven-plugin
+# OS
+.DS_Store
+Thumbs.db
+
+# Vaadin (dev mode build artifacts)
 node_modules/
+/**/node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Vaadin generated frontend / dev bundle (может появляться в разных местах)
+frontend/generated/
+/**/frontend/generated/
 src/main/frontend/generated/
-vite.generated.ts
+/**/src/main/frontend/generated/
+
+# Vite / Webpack caches (Vaadin 24/25)
+.vite/
+/**/.vite/
+webpack.generated.js
+stats.json
+
+# Vaadin dev server / copilot plugin artifacts (если появляются)
+.vaadin/
+/**/.vaadin/
+
+# IntelliJ
+.idea/
+*.iml
+
+# GIGA ID plugin / local settings
+.gigaide/
+gigaide.properties
+
+# Vaadin frontend (не коммитим для Flow-only проекта)
+platform-web/src/main/frontend/

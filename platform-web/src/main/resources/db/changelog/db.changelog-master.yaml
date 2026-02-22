@@ -1,0 +1,62 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: nocode
+      changes:
+        - createTable:
+            tableName: projects
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: group_id
+                  type: varchar(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: artifact_id
+                  type: varchar(200)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: base_package
+                  type: varchar(300)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: spec_text
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: projects
+            indexName: idx_projects_artifact
+            columns:
+              - column:
+                  name: artifact_id

@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:55432/nocode_platform
+    username: nocode
+    password: nocode
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+
+  # чтобы НЕ было двойного запуска (мы запускаем Liquibase через LiquibaseConfig)
+  liquibase:
+    enabled: false
+
+logging:
+  level:
+    com.zaxxer.hikari: INFO
+    liquibase: INFO
