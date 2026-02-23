@@ -11,12 +11,14 @@
 
     <modules>
         <module>platform-web</module>
+        <module>generator-core</module>
     </modules>
 
     <properties>
         <java.version>21</java.version>
         <vaadin.version>25.0.5</vaadin.version>
         <spring-boot.version>4.0.3</spring-boot.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>
@@ -40,20 +42,40 @@
     </dependencyManagement>
 
     <build>
+        <!-- ВАЖНО: root (packaging=pom) не должен пытаться запускаться -->
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
                 </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
                     <configuration>
                         <release>${java.version}</release>
+                        <!-- Чтобы Spring видел имена параметров (UUID id и т.п.) -->
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
+
 </project>
