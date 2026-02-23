@@ -1,5 +1,6 @@
 package com.nocode.platform.ui.views;
 
+import com.nocode.platform.generator.GeneratorFacade;
 import com.nocode.platform.project.ProjectEntity;
 import com.nocode.platform.project.ProjectService;
 import com.nocode.platform.ui.MainLayout;
@@ -27,7 +28,7 @@ public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
     private final TextArea spec = new TextArea("Spec (YAML)");
     private final Button save = new Button("Save");
 
-    public ProjectView(ProjectService projectService) {
+    public ProjectView(ProjectService projectService, GeneratorFacade generatorFacade) {
         this.projectService = projectService;
 
         setPadding(true);
@@ -42,7 +43,13 @@ public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
             Notification.show("Saved");
         });
 
-        add(title, meta, spec, save);
+        Button generate = new Button("Generate ZIP");
+        generate.addClickListener(e -> {
+            if (projectId == null) return;
+            getUI().ifPresent(ui -> ui.getPage().open("/api/projects/" + projectId + "/download"));
+        });
+
+        add(title, meta, spec, save, generate);
     }
 
     @Override

@@ -1,0 +1,43 @@
+package com.nocode.platform.generator;
+
+import com.nocode.platform.project.ProjectEntity;
+import com.nocode.platform.project.ProjectService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/projects")
+public class ProjectDownloadController {
+
+    private final ProjectService projectService;
+    private final GeneratorFacade generatorFacade;
+
+    public ProjectDownloadController(ProjectService projectService, GeneratorFacade generatorFacade) {
+        this.projectService = projectService;
+        this.generatorFacade = generatorFacade;
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> download(@PathVariable("id") UUID id) {
+        ProjectEntity p = projectService.get(id);
+        byte[] zip = generatorFacade.generateStub(p);
+
+        String fileName = p.getArtifactId() + "-" + p.getVersion() + ".zip";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/zip"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition(fileName))
+                .body(zip);
+    }
+
+    private String contentDisposition(String fileName) {
+        // корректно для кириллицы/пробелов в имени
+        String encoded = java.net.URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
+        return "attachment; filename*=UTF-8''" + encoded;
+    }
+}
