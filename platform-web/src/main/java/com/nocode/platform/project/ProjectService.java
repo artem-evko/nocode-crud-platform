@@ -36,4 +36,17 @@ public class ProjectService {
 
         return repo.save(p);
     }
+
+    @Transactional(readOnly = true)
+    public ProjectEntity get(UUID id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + id));
+    }
+
+    @Transactional
+    public ProjectEntity updateSpec(UUID id, String specText) {
+        ProjectEntity p = get(id);
+        p.setSpecText(specText == null ? "" : specText);
+        return repo.save(p);
+    }
 }
