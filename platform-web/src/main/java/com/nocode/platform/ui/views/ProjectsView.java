@@ -60,8 +60,14 @@ public class ProjectsView extends VerticalLayout {
         grid.addColumn(ProjectEntity::getArtifactId).setHeader("ArtifactId").setAutoWidth(true);
         grid.addColumn(ProjectEntity::getVersion).setHeader("Version").setAutoWidth(true);
         grid.addColumn(ProjectEntity::getBasePackage).setHeader("Base package").setAutoWidth(true);
+
         grid.setWidthFull();
         grid.setHeight("70vh");
+
+        grid.addItemClickListener(e -> {
+            var id = e.getItem().getId();
+            getUI().ifPresent(ui -> ui.navigate("projects/" + id));
+        });
     }
 
     private void refresh() {
