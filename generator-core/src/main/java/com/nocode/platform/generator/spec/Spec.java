@@ -18,12 +18,30 @@ public record Spec(
     public record Entity(
             String name,
             String table,
-            List<Field> fields
+            List<Field> fields,
+            List<Relation> relations
     ) {}
+
+    public enum FieldType {
+        STRING, INTEGER, BOOLEAN, DATE, DECIMAL
+    }
 
     public record Field(
             String name,
-            String type,
-            boolean required
+            FieldType type,
+            boolean required,
+            Integer min,
+            Integer max,
+            String pattern
+    ) {}
+
+    public enum RelationType {
+        MANY_TO_ONE, ONE_TO_MANY
+    }
+
+    public record Relation(
+            String name,
+            String targetEntity,
+            RelationType type
     ) {}
 }
