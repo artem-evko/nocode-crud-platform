@@ -25,7 +25,7 @@ public class ProjectDownloadController {
     @GetMapping("/{id}/download")
     public ResponseEntity<byte[]> download(@PathVariable("id") UUID id) {
         ProjectEntity p = projectService.get(id);
-        byte[] zip = generatorFacade.generateStub(p);
+        byte[] zip = generatorFacade.generateReal(p);
 
         String fileName = p.getArtifactId() + "-" + p.getVersion() + ".zip";
 

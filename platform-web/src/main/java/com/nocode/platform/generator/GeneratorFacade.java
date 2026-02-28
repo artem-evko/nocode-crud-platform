@@ -1,23 +1,32 @@
 package com.nocode.platform.generator;
 
-import com.nocode.platform.generator.api.GeneratedProject;
-import com.nocode.platform.generator.stub.StubZipGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.nocode.platform.generator.engine.ProjectGenerator;
+import com.nocode.platform.generator.spec.Spec;
 import com.nocode.platform.project.ProjectEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 
 @Service
 public class GeneratorFacade {
 
-    private final StubZipGenerator stub = new StubZipGenerator();
+    private final ProjectGenerator projectGenerator = new ProjectGenerator();
+    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    public byte[] generateStub(ProjectEntity p) {
-        return stub.generate(new GeneratedProject(
-                p.getGroupId(),
-                p.getArtifactId(),
-                p.getVersion(),
-                p.getBasePackage(),
-                p.getName(),
-                p.getSpecText()
-        ));
+    public byte[] generateReal(ProjectEntity p) {
+        try {
+            Spec spec;
+            if (p.getSpecText() != null && !p.getSpecText().isBlank()) {
+               spec = mapper.readValue(p.getSpecText(), Spec.class);
+            } else {
+               Spec.Project sp = new Spec.Project(p.getGroupId(), p.getArtifactId(), p.getName(), p.getBasePackage(), p.getVersion());
+               spec = new Spec(1, sp, new ArrayList<>());
+            }
+            return projectGenerator.generate(spec);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate project", e);
+        }
     }
 }

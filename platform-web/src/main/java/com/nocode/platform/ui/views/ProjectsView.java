@@ -90,27 +90,13 @@ public class ProjectsView extends VerticalLayout {
         groupId.setValue("com.example");
         basePackage.setValue("com.example.app");
 
-        TextArea spec = new TextArea("Spec (YAML)");
-        spec.setWidthFull();
-        spec.setHeight("200px");
-        spec.setValue("""
-                specVersion: 1
-                project:
-                  groupId: com.example
-                  artifactId: demo-crud
-                  name: Demo CRUD
-                  basePackage: com.example.demo
-                entities: []
-                """);
-
-        FormLayout form = new FormLayout(name, groupId, artifactId, version, basePackage, spec);
-        form.setColspan(spec, 2);
-        form.setWidth("800px");
+        FormLayout form = new FormLayout(name, groupId, artifactId, version, basePackage);
+        form.setWidth("600px");
 
         Button cancel = new Button("Cancel", e -> dialog.close());
         Button save = new Button("Save", e -> {
             if (isBlank(name.getValue()) || isBlank(groupId.getValue()) || isBlank(artifactId.getValue())
-                    || isBlank(version.getValue()) || isBlank(basePackage.getValue()) || isBlank(spec.getValue())) {
+                    || isBlank(version.getValue()) || isBlank(basePackage.getValue())) {
                 Notification.show("Fill all fields");
                 return;
             }
@@ -121,7 +107,7 @@ public class ProjectsView extends VerticalLayout {
                     artifactId.getValue(),
                     version.getValue(),
                     basePackage.getValue(),
-                    spec.getValue()
+                    "" // empty spec text, will be built dynamically
             ));
 
             dialog.close();

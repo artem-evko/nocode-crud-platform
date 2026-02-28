@@ -1,5 +1,8 @@
 package com.nocode.platform.generator.engine;
 
+import com.nocode.platform.generator.engine.poet.ControllerGenerator;
+import com.nocode.platform.generator.engine.poet.EntityGenerator;
+import com.nocode.platform.generator.engine.poet.RepositoryGenerator;
 import com.nocode.platform.generator.spec.Spec;
 import com.nocode.platform.generator.template.TemplateRenderer;
 
@@ -13,6 +16,10 @@ import java.util.zip.ZipOutputStream;
 public class ProjectGenerator {
 
     private final TemplateRenderer renderer = new TemplateRenderer();
+    private final EntityGenerator entityGenerator = new EntityGenerator();
+    private final RepositoryGenerator repoGenerator = new RepositoryGenerator();
+    private final ControllerGenerator controllerGenerator = new ControllerGenerator();
+    private final LiquibaseGenerator liquibaseGenerator = new LiquibaseGenerator();
 
     public byte[] generate(Spec spec) {
         String artifactId = spec.project().artifactId();
@@ -36,6 +43,7 @@ public class ProjectGenerator {
         String appJava = renderer.render("Application.java.ftl", model);
         String mainViewJava = renderer.render("MainView.java.ftl", model);
         String applicationYml = renderer.render("application.yml.ftl", model);
+        String changelogYaml = liquibaseGenerator.generateChangelog(spec.entities());
 
         // путь пакета в файловой системе (com.a.b -> com/a/b)
         String pkgPath = basePackage.replace('.', '/');
@@ -48,8 +56,26 @@ public class ProjectGenerator {
             putText(zos, root + "spec.yaml", "specVersion: " + spec.specVersion() + "\n");
 
             putText(zos, root + "src/main/resources/application.yml", applicationYml);
+            putText(zos, root + "src/main/resources/db/changelog/db.changelog-master.yaml", changelogYaml);
+            
             putText(zos, root + "src/main/java/" + pkgPath + "/Application.java", appJava);
             putText(zos, root + "src/main/java/" + pkgPath + "/ui/MainView.java", mainViewJava);
+
+            if (spec.entities() != null) {
+                for (Spec.Entity entity : spec.entities()) {
+                    String entityCode = entityGenerator.generate(entity, basePackage);
+                    String repoCode = repoGenerator.generate(entity, basePackage);
+                    String controllerCode = controllerGenerator.generate(entity, basePackage);
+
+                    String entityPath = root + "src/main/java/" + pkgPath + "/domain/" + entity.name() + ".java";
+                    String repoPath = root + "src/main/java/" + pkgPath + "/repository/" + entity.name() + "Repository.java";
+                    String controllerPath = root + "src/main/java/" + pkgPath + "/controller/" + entity.name() + "Controller.java";
+
+                    putText(zos, entityPath, entityCode);
+                    putText(zos, repoPath, repoCode);
+                    putText(zos, controllerPath, controllerCode);
+                }
+            }
 
             zos.finish();
             return baos.toByteArray();

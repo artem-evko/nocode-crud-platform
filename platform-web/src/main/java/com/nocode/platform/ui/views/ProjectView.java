@@ -7,11 +7,14 @@ import com.nocode.platform.ui.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.nocode.platform.ui.views.EntityModelerView;
 
 import java.util.UUID;
 
@@ -25,31 +28,25 @@ public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
 
     private final H2 title = new H2("Project");
     private final Paragraph meta = new Paragraph();
-    private final TextArea spec = new TextArea("Spec (YAML)");
-    private final Button save = new Button("Save");
+    private final EntityModelerView entityModelerView;
 
     public ProjectView(ProjectService projectService, GeneratorFacade generatorFacade) {
         this.projectService = projectService;
 
         setPadding(true);
         setSpacing(true);
+        setSizeFull();
 
-        spec.setWidthFull();
-        spec.setHeight("60vh");
-
-        save.addClickListener(e -> {
-            if (projectId == null) return;
-            projectService.updateSpec(projectId, spec.getValue());
-            Notification.show("Saved");
-        });
+        entityModelerView = new EntityModelerView(projectService);
 
         Button generate = new Button("Generate ZIP");
+        generate.addThemeVariants(com.vaadin.flow.component.button.ButtonVariant.LUMO_PRIMARY, com.vaadin.flow.component.button.ButtonVariant.LUMO_SUCCESS);
         generate.addClickListener(e -> {
             if (projectId == null) return;
             getUI().ifPresent(ui -> ui.getPage().open("/api/projects/" + projectId + "/download"));
         });
 
-        add(title, meta, spec, save, generate);
+        add(title, meta, generate, entityModelerView);
     }
 
     @Override
@@ -77,6 +74,6 @@ public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
         meta.setText(p.getGroupId() + ":" + p.getArtifactId() + ":" + p.getVersion()
                 + " | basePackage=" + p.getBasePackage());
 
-        spec.setValue(p.getSpecText() == null ? "" : p.getSpecText());
+        entityModelerView.setProject(p);
     }
 }
