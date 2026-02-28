@@ -1,0 +1,85 @@
+/* Landing Page Glassmorphism Theme */
+
+.landing-background {
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.blur-circle-1 {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: #ff9a9e;
+    border-radius: 50%;
+    filter: blur(120px);
+    top: -150px;
+    left: -100px;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.blur-circle-2 {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: #fecfef;
+    border-radius: 50%;
+    filter: blur(150px);
+    bottom: -200px;
+    right: -150px;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.glass-panel {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 24px;
+    padding: 60px 50px;
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.05);
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    text-align: center;
+}
+
+.landing-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    background: none;
+    -webkit-text-fill-color: initial;
+}
+
+.landing-subtitle {
+    color: #555;
+    font-size: 1.3rem;
+    margin-bottom: 40px;
+    line-height: 1.6;
+    max-width: 600px;
+}
+
+.landing-cta {
+    background-color: #111;
+    color: white;
+    border-radius: 12px;
+    padding: 16px 40px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px 0 rgba(0,0,0,0.15);
+}
+
+.landing-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(0,0,0,0.2);
+}
