@@ -1,7 +1,9 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
+  application:
+    name: platform-web
   datasource:
     url: jdbc:postgresql://localhost:5433/nocode_platform
     username: nocode
