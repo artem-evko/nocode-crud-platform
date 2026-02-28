@@ -17,11 +17,13 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
-@Route(value = "", layout = MainLayout.class)
+@Route(value = "projects", layout = MainLayout.class)
 @PageTitle("Projects | No-code CRUD Platform")
+@PermitAll
 public class ProjectsView extends VerticalLayout {
 
     private final ProjectService projectService;
