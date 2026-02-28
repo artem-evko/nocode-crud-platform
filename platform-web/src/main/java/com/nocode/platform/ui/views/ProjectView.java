@@ -14,12 +14,14 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import com.nocode.platform.ui.views.EntityModelerView;
 
 import java.util.UUID;
 
 @Route(value = "projects/:id", layout = MainLayout.class)
 @PageTitle("Project | No-code CRUD Platform")
+@PermitAll
 public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
 
     private final ProjectService projectService;
@@ -53,13 +55,13 @@ public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
     public void beforeEnter(BeforeEnterEvent event) {
         String idStr = event.getRouteParameters().get("id").orElse(null);
         if (idStr == null) {
-            event.rerouteTo("");
+            event.rerouteTo("projects");
             return;
         }
         try {
             projectId = UUID.fromString(idStr);
         } catch (Exception ex) {
-            event.rerouteTo("");
+            event.rerouteTo("projects");
         }
     }
 
