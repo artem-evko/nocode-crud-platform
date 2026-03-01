@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { apiClient } from '../api/client';
+import { apiClient, downloadProjectCode } from '../api/client';
 import {
     ReactFlow,
     Controls,
@@ -10,12 +10,13 @@ import {
     useEdgesState,
     addEdge
 } from '@xyflow/react';
-import type { Connection, Edge, Node } from '@xyflow/react';
+import type { Connection, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Save, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Save, PlusCircle, Download } from 'lucide-react';
 import type { ProjectFormData } from '../components/ProjectModal';
+import { compileToSpec } from '../lib/compiler';
 import EntityNode from '../components/EntityNode';
-import type { EntityNodeData, AppNode } from '../components/EntityNode';
+import type { AppNode } from '../components/EntityNode';
 
 const nodeTypes = {
     entity: EntityNode,
@@ -159,23 +160,52 @@ export default function ModelerPage() {
 
     const handleSave = async () => {
         if (!project || !project.id) return;
-
-        // Strip out functions from the nodes before saving
-        const dataToSave = nodes.map(n => {
-            const { onNameChange, onAddField, onRemoveField, onFieldChange, ...safeData } = n.data;
-            return { ...n, data: safeData };
-        });
-
-        const specText = JSON.stringify({ nodes: dataToSave, edges });
-        const updatedProject = { ...project, specText };
-
         try {
-            await apiClient.put(`/projects/${project.id}`, updatedProject);
-            alert('Model saved successfully!');
-            setProject(updatedProject);
+            // Validate nodes: remove cyclic relations or add validations if needed
+            // Currently using the new compiler to convert UI flow into Spring Boot Generator Spec
+            const specText = compileToSpec(project, nodes, edges);
+
+            await apiClient.put(`/projects/${project.id}`, {
+                ...project,
+                specText
+            });
+            alert('Model saved and compiled effectively!');
         } catch (error) {
             console.error('Failed to save model', error);
             alert('Error saving model');
+        }
+    };
+
+    const handleGenerate = async () => {
+        if (!project || !project.id) return;
+
+        try {
+            // Make sure the user saves first, but we will just attempt to download
+            const response = await downloadProjectCode(project.id);
+
+            // Extract filename from header if possible, else default 
+            let filename = `${project.artifactId || 'project'} -${project.version || '1.0.0'}.zip`;
+            const contentDisposition = response.headers['content-disposition'];
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                if (filenameMatch != null && filenameMatch[1]) {
+                    filename = filenameMatch[1].replace(/['"]/g, '');
+                }
+            }
+
+            // Create a pseudo-link to initiate the browser download
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error('Failed to generate project codebase', error);
+            alert('Error generating project codebase. Have you saved your model first?');
         }
     };
 
@@ -199,6 +229,13 @@ export default function ModelerPage() {
                     </div>
                 </div>
                 <div className="flex gap-3">
+                    <button
+                        onClick={handleGenerate}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 hover:text-emerald-300 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-emerald-600/30"
+                    >
+                        <Download size={16} />
+                        Generate Code
+                    </button>
                     <button
                         onClick={addNewEntity}
                         className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
