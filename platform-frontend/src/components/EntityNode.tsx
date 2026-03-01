@@ -95,17 +95,17 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
                             <select
                                 value={field.type}
                                 onChange={(e) => data.onFieldChange?.(id, field.id, { type: e.target.value as EntityFieldType })}
-                                className="bg-transparent text-[10px] text-zinc-500 hover:text-zinc-300 font-mono outline-none cursor-pointer appearance-none outline-none"
+                                className="bg-transparent text-[10px] text-zinc-500 hover:text-zinc-300 focus:text-zinc-200 font-mono outline-none cursor-pointer"
                             >
-                                <option value="String">String</option>
-                                <option value="Integer">Integer</option>
-                                <option value="Long">Long</option>
-                                <option value="Boolean">Boolean</option>
-                                <option value="LocalDate">LocalDate</option>
-                                <option value="OffsetDateTime">OffsetDateTime</option>
-                                <option value="UUID">UUID</option>
-                                <option value="Double">Double</option>
-                                <option value="BigDecimal">BigDecimal</option>
+                                <option value="String" className="bg-zinc-800 text-zinc-200">String</option>
+                                <option value="Integer" className="bg-zinc-800 text-zinc-200">Integer</option>
+                                <option value="Long" className="bg-zinc-800 text-zinc-200">Long</option>
+                                <option value="Boolean" className="bg-zinc-800 text-zinc-200">Boolean</option>
+                                <option value="LocalDate" className="bg-zinc-800 text-zinc-200">LocalDate</option>
+                                <option value="OffsetDateTime" className="bg-zinc-800 text-zinc-200">OffsetDateTime</option>
+                                <option value="UUID" className="bg-zinc-800 text-zinc-200">UUID</option>
+                                <option value="Double" className="bg-zinc-800 text-zinc-200">Double</option>
+                                <option value="BigDecimal" className="bg-zinc-800 text-zinc-200">BigDecimal</option>
                             </select>
                         </div>
 
