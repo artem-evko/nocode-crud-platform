@@ -21,8 +21,14 @@ export default function LoginPage() {
             await apiClient.post('/auth/login', { username, password });
             setUser(username); // simplified for this demo, would normally get user profile
             navigate('/projects');
-        } catch (err) {
-            setError('Invalid credentials');
+        } catch (err: any) {
+            if (!err.response) {
+                setError('Cannot connect to server (backend is offline)');
+            } else if (err.response.status === 401 || err.response.status === 403) {
+                setError('Invalid credentials');
+            } else {
+                setError('Login failed due to a server error');
+            }
         } finally {
             setLoading(false);
         }
