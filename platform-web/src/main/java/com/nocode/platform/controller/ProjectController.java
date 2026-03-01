@@ -32,7 +32,7 @@ public class ProjectController {
     @PostMapping
     public ProjectDto createProject(@RequestBody ProjectDto dto) {
         ProjectEntity project = new ProjectEntity();
-        project.setId(dto.getId() != null ? dto.getId() : UUID.randomUUID());
+        project.setId(UUID.randomUUID());
         project.setName(dto.getName());
         project.setGroupId(dto.getGroupId() != null ? dto.getGroupId() : "com.example");
         project.setArtifactId(dto.getArtifactId() != null ? dto.getArtifactId() : "demo");
@@ -42,6 +42,24 @@ public class ProjectController {
         project.setCreatedAt(OffsetDateTime.now());
         project.setUpdatedAt(OffsetDateTime.now());
         return convertToDto(projectRepository.save(project));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProjectDto> updateProject(@PathVariable UUID id, @RequestBody ProjectDto dto) {
+        return projectRepository.findById(id)
+                .map(project -> {
+                    project.setName(dto.getName());
+                    project.setGroupId(dto.getGroupId());
+                    project.setArtifactId(dto.getArtifactId());
+                    project.setVersion(dto.getVersion());
+                    project.setBasePackage(dto.getBasePackage());
+                    if (dto.getSpecText() != null) {
+                        project.setSpecText(dto.getSpecText());
+                    }
+                    project.setUpdatedAt(OffsetDateTime.now());
+                    return ResponseEntity.ok(convertToDto(projectRepository.save(project)));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
