@@ -133,7 +133,11 @@ export default function ProjectsPage() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {projects.map((project) => (
-                            <div key={project.id} className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 hover:shadow-lg hover:-translate-y-1 transition-all group">
+                            <div
+                                key={project.id}
+                                onClick={() => navigate(`/projects/${project.id}/modeler`)}
+                                className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 hover:shadow-lg hover:-translate-y-1 transition-all group cursor-pointer"
+                            >
                                 <div className="absolute top-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity gap-2">
                                     <button
                                         onClick={(e) => openEditModal(e, project)}
