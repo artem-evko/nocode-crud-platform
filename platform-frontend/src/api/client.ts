@@ -19,3 +19,9 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+export const downloadProjectCode = async (projectId: string) => {
+    return apiClient.get(`/projects/${projectId}/download`, {
+        responseType: 'blob'
+    });
+};
