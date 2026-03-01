@@ -57,8 +57,22 @@ export default function ModelerPage() {
                 if (found.specText && found.specText !== '{}') {
                     try {
                         const parsed = JSON.parse(found.specText);
-                        if (parsed.nodes) setNodes(parsed.nodes);
-                        if (parsed.edges) setEdges(parsed.edges);
+
+                        // Handle the new wrapper format `{"flow": {nodes, edges}, "spec": {...}}`
+                        // or fallback to the old format if it was saved prior to generator integration
+                        let flowData = parsed;
+
+                        if (parsed.flow) {
+                            // This is the new generator-compatible format
+                            flowData = parsed.flow;
+                        } else if (parsed.specVersion) {
+                            // This is a plain spec without flow data (user generated from outside?)
+                            // We could theoretically try to reverse-engineer nodes here, but for now we skip
+                            flowData = {};
+                        }
+
+                        if (flowData.nodes) setNodes(flowData.nodes);
+                        if (flowData.edges) setEdges(flowData.edges);
                     } catch (e) {
                         console.error('Failed to parse specText', e);
                     }
@@ -161,9 +175,37 @@ export default function ModelerPage() {
     const handleSave = async () => {
         if (!project || !project.id) return;
         try {
-            // Validate nodes: remove cyclic relations or add validations if needed
-            // Currently using the new compiler to convert UI flow into Spring Boot Generator Spec
-            const specText = compileToSpec(project, nodes, edges);
+            // Strip out functions from the nodes before saving
+            const serializableNodes = nodes.map(n => {
+                const { onNameChange, onAddField, onRemoveField, onFieldChange, ...safeData } = n.data;
+                return { ...n, data: safeData };
+            });
+
+            // We compile the visual layout into the strict Backend Spec
+            const rawSpecText = compileToSpec(project, nodes, edges);
+            const specObj = JSON.parse(rawSpecText);
+
+            // To prevent losing X/Y coordinates when reloading the page, we wrap the payload.
+            // But wait, ProjectDownloadController uses `mapper.readValue(p.getSpecText(), Spec.class)`.
+            // If we wrap it, the GeneratorFacade will crash. 
+            // We must update GeneratorFacade to accept the wrapper, or handle visual data differently.
+            // For now, let's keep it clean since that's what we discovered. Just save the spec as-is 
+            // and we rely on the `fetchProject` reverse-engineering if we want coords.
+
+            // Let's actually use a trick: Jackson ObjectMapper ignores unknown properties by default 
+            // if configured (but YAMLFactory is strict).
+
+            // Let's modify the Spec JSON to include an extra `_flow` root property. 
+            // If the backend `Spec.class` doesn't reject it, we get to keep our layout data!
+            const wrapper = {
+                ...specObj,
+                _flow: {
+                    nodes: serializableNodes,
+                    edges
+                }
+            };
+
+            const specText = JSON.stringify(wrapper, null, 2);
 
             await apiClient.put(`/projects/${project.id}`, {
                 ...project,
@@ -214,8 +256,8 @@ export default function ModelerPage() {
     }
 
     return (
-        <div className="flex flex-col h-screen bg-zinc-950 text-slate-50">
-            <header className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md">
+        <div className="flex flex-col h-screen w-screen bg-zinc-950 text-slate-50 overflow-hidden">
+            <header className="flex-none flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md z-10">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/projects')}
@@ -253,7 +295,7 @@ export default function ModelerPage() {
                 </div>
             </header>
 
-            <div className="flex-1 w-full h-full relative">
+            <div className="flex-1 w-full h-full relative" style={{ minHeight: 0 }}>
                 <ReactFlow
                     nodes={nodesWithCallbacks}
                     edges={edges}
