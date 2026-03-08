@@ -35,6 +35,9 @@ public class EntityGenerator {
         // Add standard fields
         if (entity.fields() != null) {
             for (Spec.Field field : entity.fields()) {
+                if ("id".equalsIgnoreCase(field.name())) {
+                    continue;
+                }
                 Class<?> fieldClass = getJavaType(field.type());
                 FieldSpec.Builder fieldBuilder = FieldSpec.builder(fieldClass, field.name(), Modifier.PRIVATE);
                 

@@ -12,11 +12,12 @@ import {
 } from '@xyflow/react';
 import type { Connection, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Save, PlusCircle, Download } from 'lucide-react';
+import { ArrowLeft, Save, PlusCircle, Download, Settings } from 'lucide-react';
 import type { ProjectFormData } from '../components/ProjectModal';
 import { compileToSpec } from '../lib/compiler';
 import EntityNode from '../components/EntityNode';
 import type { AppNode } from '../components/EntityNode';
+import ProjectSettingsModal from '../components/ProjectSettingsModal';
 
 const nodeTypes = {
     entity: EntityNode,
@@ -31,6 +32,7 @@ export default function ModelerPage() {
     const { setUser } = useAuthStore();
     const [project, setProject] = useState<ProjectFormData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -62,13 +64,19 @@ export default function ModelerPage() {
                         // or fallback to the old format if it was saved prior to generator integration
                         let flowData = parsed;
 
-                        if (parsed.flow) {
+                        if (parsed._flow) {
                             // This is the new generator-compatible format
+                            flowData = parsed._flow;
+                        } else if (parsed.flow) {
                             flowData = parsed.flow;
                         } else if (parsed.specVersion) {
                             // This is a plain spec without flow data (user generated from outside?)
                             // We could theoretically try to reverse-engineer nodes here, but for now we skip
                             flowData = {};
+                        }
+
+                        if (parsed.project && parsed.project.authEnabled !== undefined) {
+                            found.authEnabled = parsed.project.authEnabled;
                         }
 
                         if (flowData.nodes) setNodes(flowData.nodes);
@@ -77,6 +85,7 @@ export default function ModelerPage() {
                         console.error('Failed to parse specText', e);
                     }
                 }
+                setProject(found);
             } else {
                 navigate('/projects');
             }
@@ -272,6 +281,13 @@ export default function ModelerPage() {
                 </div>
                 <div className="flex gap-3">
                     <button
+                        onClick={() => setIsSettingsOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
+                    >
+                        <Settings size={16} />
+                        Settings
+                    </button>
+                    <button
                         onClick={handleGenerate}
                         className="flex items-center gap-2 px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 hover:text-emerald-300 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-emerald-600/30"
                     >
@@ -310,6 +326,17 @@ export default function ModelerPage() {
                     <Controls className="bg-zinc-900 border-zinc-800 fill-white" />
                 </ReactFlow>
             </div>
+
+            <ProjectSettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                settings={{ authEnabled: project?.authEnabled || false }}
+                onSave={(settings) => {
+                    if (project) {
+                        setProject(prev => prev ? { ...prev, authEnabled: settings.authEnabled } : prev);
+                    }
+                }}
+            />
         </div>
     );
 }

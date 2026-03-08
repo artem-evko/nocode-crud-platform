@@ -44,9 +44,9 @@ public class ControllerGenerator {
                         .addAnnotation(ClassName.get("org.springframework.web.bind.annotation", "PathVariable"))
                         .build())
                 .returns(entityClass)
-                .addStatement("return repository.findById(id).orElseThrow(() -> new $T($S))",
+                .addStatement("return repository.findById(id).orElseThrow(() -> new $T($T.NOT_FOUND))",
                         ClassName.get("org.springframework.web.server", "ResponseStatusException"),
-                        "org.springframework.http.HttpStatus.NOT_FOUND")
+                        ClassName.get("org.springframework.http", "HttpStatus"))
                 .build();
 
         // POST (Create)

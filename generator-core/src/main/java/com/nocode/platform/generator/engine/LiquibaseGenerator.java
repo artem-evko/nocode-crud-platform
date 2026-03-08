@@ -6,12 +6,59 @@ import java.util.List;
 
 public class LiquibaseGenerator {
 
-    public String generateChangelog(List<Spec.Entity> entities) {
+    public String generateChangelog(List<Spec.Entity> entities, boolean authEnabled) {
         StringBuilder sb = new StringBuilder();
         sb.append("databaseChangeLog:\n");
         int authorId = 1;
 
-        for (Spec.Entity entity : entities) {
+        if (authEnabled) {
+            sb.append("  - changeSet:\n");
+            sb.append("      id: ").append(authorId++).append("\n");
+            sb.append("      author: nocode-generator\n");
+            sb.append("      changes:\n");
+            sb.append("        - createTable:\n");
+            sb.append("            tableName: users\n");
+            sb.append("            columns:\n");
+            sb.append("              - column:\n");
+            sb.append("                  name: id\n");
+            sb.append("                  type: BIGINT\n");
+            sb.append("                  autoIncrement: true\n");
+            sb.append("                  constraints:\n");
+            sb.append("                    primaryKey: true\n");
+            sb.append("                    nullable: false\n");
+            sb.append("              - column:\n");
+            sb.append("                  name: username\n");
+            sb.append("                  type: VARCHAR(255)\n");
+            sb.append("                  constraints:\n");
+            sb.append("                    nullable: false\n");
+            sb.append("                    unique: true\n");
+            sb.append("              - column:\n");
+            sb.append("                  name: password\n");
+            sb.append("                  type: VARCHAR(255)\n");
+            sb.append("                  constraints:\n");
+            sb.append("                    nullable: false\n");
+            sb.append("              - column:\n");
+            sb.append("                  name: role\n");
+            sb.append("                  type: VARCHAR(255)\n");
+            sb.append("                  constraints:\n");
+            sb.append("                    nullable: false\n");
+            sb.append("        - insert:\n");
+            sb.append("            tableName: users\n");
+            sb.append("            columns:\n");
+            sb.append("              - column:\n");
+            sb.append("                  name: username\n");
+            sb.append("                  value: admin\n");
+            sb.append("              - column:\n");
+            sb.append("                  name: password\n");
+            // BCrypt hash for "admin"
+            sb.append("                  value: $2a$10$wT0l0jL/qF1pT3.a6h/7XOH6.p/B8qA15sV.0p/o9aP/W3YdG/P6.\n");
+            sb.append("              - column:\n");
+            sb.append("                  name: role\n");
+            sb.append("                  value: ROLE_ADMIN\n");
+        }
+
+        if (entities != null) {
+            for (Spec.Entity entity : entities) {
             sb.append("  - changeSet:\n");
             sb.append("      id: ").append(authorId++).append("\n");
             sb.append("      author: nocode-generator\n");
@@ -32,6 +79,9 @@ public class LiquibaseGenerator {
             // Other fields
             if (entity.fields() != null) {
                 for (Spec.Field field : entity.fields()) {
+                    if ("id".equalsIgnoreCase(field.name())) {
+                        continue;
+                    }
                     sb.append("              - column:\n");
                     sb.append("                  name: ").append(toSnakeCase(field.name())).append("\n");
                     sb.append("                  type: ").append(getDbDataType(field.type())).append("\n");
@@ -54,10 +104,12 @@ public class LiquibaseGenerator {
                 }
             }
         }
+        }
 
         // Add Foreign Key Constraints
-        for (Spec.Entity entity : entities) {
-            if (entity.relations() != null) {
+        if (entities != null) {
+            for (Spec.Entity entity : entities) {
+                if (entity.relations() != null) {
                 for (Spec.Relation rel : entity.relations()) {
                     if (rel.type() == Spec.RelationType.MANY_TO_ONE) {
                         String targetTable = getTargetTable(entities, rel.targetEntity());
@@ -75,8 +127,9 @@ public class LiquibaseGenerator {
                 }
             }
         }
+    }
 
-        return sb.toString();
+    return sb.toString();
     }
 
     private String getDbDataType(Spec.FieldType type) {

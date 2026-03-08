@@ -21,7 +21,7 @@ public class GeneratorFacade {
             if (p.getSpecText() != null && !p.getSpecText().isBlank()) {
                spec = mapper.readValue(p.getSpecText(), Spec.class);
             } else {
-               Spec.Project sp = new Spec.Project(p.getGroupId(), p.getArtifactId(), p.getName(), p.getBasePackage(), p.getVersion());
+               Spec.Project sp = new Spec.Project(p.getGroupId(), p.getArtifactId(), p.getName(), p.getBasePackage(), p.getVersion(), false);
                spec = new Spec(1, sp, new ArrayList<>());
             }
             return projectGenerator.generate(spec);

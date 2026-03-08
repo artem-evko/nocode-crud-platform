@@ -38,12 +38,12 @@ public class ProjectGenerator {
         model.put("version", version);
         model.put("basePackage", basePackage);
         model.put("appName", appName);
+        model.put("authEnabled", spec.project().authEnabled());
 
         String pomXml = renderer.render("pom.ftl", model);
         String appJava = renderer.render("Application.java.ftl", model);
-        String mainViewJava = renderer.render("MainView.java.ftl", model);
         String applicationYml = renderer.render("application.yml.ftl", model);
-        String changelogYaml = liquibaseGenerator.generateChangelog(spec.entities());
+        String changelogYaml = liquibaseGenerator.generateChangelog(spec.entities(), spec.project().authEnabled());
 
         // путь пакета в файловой системе (com.a.b -> com/a/b)
         String pkgPath = basePackage.replace('.', '/');
@@ -59,7 +59,11 @@ public class ProjectGenerator {
             putText(zos, root + "src/main/resources/db/changelog/db.changelog-master.yaml", changelogYaml);
             
             putText(zos, root + "src/main/java/" + pkgPath + "/Application.java", appJava);
-            putText(zos, root + "src/main/java/" + pkgPath + "/ui/MainView.java", mainViewJava);
+
+            if (spec.project().authEnabled()) {
+                SecurityGenerator secGen = new SecurityGenerator();
+                secGen.generate(zos, root, pkgPath, basePackage);
+            }
 
             if (spec.entities() != null) {
                 for (Spec.Entity entity : spec.entities()) {

@@ -9,6 +9,7 @@ export interface ProjectFormData {
     version: string;
     basePackage: string;
     specText?: string;
+    authEnabled?: boolean;
 }
 
 interface ProjectModalProps {
@@ -31,11 +32,23 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
     const [formData, setFormData] = useState<ProjectFormData>(defaultData);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isBasePackagePristine, setIsBasePackagePristine] = useState(true);
+
+    useEffect(() => {
+        if (isBasePackagePristine && formData.groupId && formData.artifactId) {
+            const sanitizedArtifactId = formData.artifactId.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+            const generatedPackage = `${formData.groupId}.${sanitizedArtifactId}`.replace(/\.+/g, '.').replace(/^\.|\.$/g, '');
+            if (generatedPackage && formData.basePackage !== generatedPackage) {
+                setFormData(prev => ({ ...prev, basePackage: generatedPackage }));
+            }
+        }
+    }, [formData.groupId, formData.artifactId, isBasePackagePristine]);
 
     useEffect(() => {
         if (isOpen) {
             setFormData(initialData || defaultData);
             setError('');
+            setIsBasePackagePristine(!initialData);
         }
     }, [isOpen, initialData]);
 
@@ -120,7 +133,10 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                                     type="text"
                                     required
                                     value={formData.basePackage}
-                                    onChange={(e) => setFormData({ ...formData, basePackage: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, basePackage: e.target.value });
+                                        setIsBasePackagePristine(false);
+                                    }}
                                     className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-colors"
                                 />
                             </div>

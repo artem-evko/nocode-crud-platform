@@ -14,7 +14,8 @@ public record Spec(
             String artifactId,
             String name,
             String basePackage,
-            String version
+            String version,
+            boolean authEnabled
     ) {}
 
     public record Entity(

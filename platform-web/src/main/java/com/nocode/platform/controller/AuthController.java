@@ -5,8 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,10 +19,10 @@ import static org.springframework.security.web.context.HttpSessionSecurityContex
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AuthController {
 
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final AuthenticationManager authenticationManager;
 
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder) {
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
+    public AuthController(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
     @PostMapping("/login")
@@ -31,7 +31,7 @@ public class AuthController {
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
 
-            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
             SecurityContext sc = SecurityContextHolder.getContext();
             sc.setAuthentication(authentication);
             

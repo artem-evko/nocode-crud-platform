@@ -10,6 +10,7 @@ export interface BackendSpec {
         name: string;
         basePackage: string;
         version: string;
+        authEnabled: boolean;
     };
     entities: {
         name: string;
@@ -59,7 +60,8 @@ export const compileToSpec = (project: ProjectFormData, nodes: AppNode[], edges:
             artifactId: project.artifactId || 'demo',
             name: project.name || 'Demo',
             basePackage: project.basePackage || 'com.example.demo',
-            version: project.version || '0.0.1-SNAPSHOT'
+            version: project.version || '0.0.1-SNAPSHOT',
+            authEnabled: project.authEnabled || false
         },
         entities: nodes.map(node => {
             // Find relations stemming from this entity
