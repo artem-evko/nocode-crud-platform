@@ -15,10 +15,15 @@ export interface EntityField {
 export type EntityNodeData = {
     name: string;
     fields: EntityField[];
+    readRoles?: string;
+    createRoles?: string;
+    updateRoles?: string;
+    deleteRoles?: string;
     onNameChange?: (id: string, newName: string) => void;
     onAddField?: (id: string) => void;
     onRemoveField?: (nodeId: string, fieldId: string) => void;
     onFieldChange?: (nodeId: string, fieldId: string, updates: Partial<EntityField>) => void;
+    onRolesChange?: (nodeId: string, updates: Partial<{ readRoles: string, createRoles: string, updateRoles: string, deleteRoles: string }>) => void;
 } & Record<string, unknown>;
 
 export type AppNode = Node<EntityNodeData, 'entity'>;
@@ -38,6 +43,7 @@ const TYPE_ICONS: Record<string, any> = {
 export default function EntityNode({ id, data }: NodeProps<AppNode>) {
     const [isEditingName, setIsEditingName] = useState(false);
     const [editNameValue, setEditNameValue] = useState(data.name || 'NewEntity');
+    const [showPermissions, setShowPermissions] = useState(false);
 
     const handleNameSubmit = () => {
         setIsEditingName(false);
@@ -125,6 +131,62 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
                     <Plus size={12} />
                     Add Field
                 </button>
+            </div>
+
+            {/* Permissions Section */}
+            <div className="p-2 border-t border-zinc-800/80">
+                <button
+                    onClick={() => setShowPermissions(!showPermissions)}
+                    className="w-full flex justify-between items-center px-2 py-1 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
+                >
+                    <span>Permissions (RBAC)</span>
+                    <span className="text-[10px]">{showPermissions ? '▲' : '▼'}</span>
+                </button>
+
+                {showPermissions && (
+                    <div className="mt-2 space-y-2 px-1">
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Read Roles</label>
+                            <input
+                                type="text"
+                                value={data.readRoles || ''}
+                                onChange={e => data.onRolesChange?.(id, { readRoles: e.target.value })}
+                                placeholder="ROLE_USER, ROLE_ADMIN"
+                                className="bg-zinc-900 border border-zinc-800 text-xs text-white rounded px-2 py-1 w-full focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Create Roles</label>
+                            <input
+                                type="text"
+                                value={data.createRoles || ''}
+                                onChange={e => data.onRolesChange?.(id, { createRoles: e.target.value })}
+                                placeholder="ROLE_ADMIN"
+                                className="bg-zinc-900 border border-zinc-800 text-xs text-white rounded px-2 py-1 w-full focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Update Roles</label>
+                            <input
+                                type="text"
+                                value={data.updateRoles || ''}
+                                onChange={e => data.onRolesChange?.(id, { updateRoles: e.target.value })}
+                                placeholder="ROLE_ADMIN"
+                                className="bg-zinc-900 border border-zinc-800 text-xs text-white rounded px-2 py-1 w-full focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Delete Roles</label>
+                            <input
+                                type="text"
+                                value={data.deleteRoles || ''}
+                                onChange={e => data.onRolesChange?.(id, { deleteRoles: e.target.value })}
+                                placeholder="ROLE_ADMIN"
+                                className="bg-zinc-900 border border-zinc-800 text-xs text-white rounded px-2 py-1 w-full focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

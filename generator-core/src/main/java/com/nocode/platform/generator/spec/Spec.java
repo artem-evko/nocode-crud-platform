@@ -22,7 +22,11 @@ public record Spec(
             String name,
             String table,
             List<Field> fields,
-            List<Relation> relations
+            List<Relation> relations,
+            String readRoles,
+            String createRoles,
+            String updateRoles,
+            String deleteRoles
     ) {}
 
     public enum FieldType {

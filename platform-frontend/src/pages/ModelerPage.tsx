@@ -147,6 +147,23 @@ export default function ModelerPage() {
         );
     }, [setNodes]);
 
+    const handleRolesChange = useCallback((nodeId: string, updates: any) => {
+        setNodes((nds) =>
+            nds.map((node) => {
+                if (node.id === nodeId) {
+                    return {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            ...updates
+                        }
+                    };
+                }
+                return node;
+            })
+        );
+    }, [setNodes]);
+
     // Attach callbacks to nodes whenever they change or initially render
     const nodesWithCallbacks = useMemo(() => {
         return nodes.map((node) => ({
@@ -157,9 +174,10 @@ export default function ModelerPage() {
                 onAddField: handleAddField,
                 onRemoveField: handleRemoveField,
                 onFieldChange: handleFieldChange,
+                onRolesChange: handleRolesChange,
             },
         }));
-    }, [nodes, handleNameChange, handleAddField, handleRemoveField, handleFieldChange]);
+    }, [nodes, handleNameChange, handleAddField, handleRemoveField, handleFieldChange, handleRolesChange]);
 
     const onConnect = useCallback(
         (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
@@ -186,7 +204,7 @@ export default function ModelerPage() {
         try {
             // Strip out functions from the nodes before saving
             const serializableNodes = nodes.map(n => {
-                const { onNameChange, onAddField, onRemoveField, onFieldChange, ...safeData } = n.data;
+                const { onNameChange, onAddField, onRemoveField, onFieldChange, onRolesChange, ...safeData } = n.data;
                 return { ...n, data: safeData };
             });
 

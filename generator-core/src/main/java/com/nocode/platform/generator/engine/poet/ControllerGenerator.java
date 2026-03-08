@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ControllerGenerator {
 
-    public String generate(Spec.Entity entity, String basePackage) {
+    public String generate(Spec.Entity entity, String basePackage, boolean authEnabled) {
         String controllerPackage = basePackage + ".controller";
         String repoPackage = basePackage + ".repository";
         String entityPackage = basePackage + ".domain";
@@ -26,16 +26,16 @@ public class ControllerGenerator {
                 .addStatement("this.repository = repository")
                 .build();
 
-        // GET all
-        MethodSpec getAllMethod = MethodSpec.methodBuilder("getAll")
+        MethodSpec.Builder getAllMethodBuilder = MethodSpec.methodBuilder("getAll")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ClassName.get("org.springframework.web.bind.annotation", "GetMapping"))
                 .returns(ParameterizedTypeName.get(ClassName.get(List.class), entityClass))
-                .addStatement("return repository.findAll()")
-                .build();
+                .addStatement("return repository.findAll()");
+        if (authEnabled) addPreAuthorize(getAllMethodBuilder, entity.readRoles());
+        MethodSpec getAllMethod = getAllMethodBuilder.build();
 
         // GET by ID
-        MethodSpec getByIdMethod = MethodSpec.methodBuilder("getById")
+        MethodSpec.Builder getByIdMethodBuilder = MethodSpec.methodBuilder("getById")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("org.springframework.web.bind.annotation", "GetMapping"))
                         .addMember("value", "$S", "/{id}")
@@ -46,11 +46,12 @@ public class ControllerGenerator {
                 .returns(entityClass)
                 .addStatement("return repository.findById(id).orElseThrow(() -> new $T($T.NOT_FOUND))",
                         ClassName.get("org.springframework.web.server", "ResponseStatusException"),
-                        ClassName.get("org.springframework.http", "HttpStatus"))
-                .build();
+                        ClassName.get("org.springframework.http", "HttpStatus"));
+        if (authEnabled) addPreAuthorize(getByIdMethodBuilder, entity.readRoles());
+        MethodSpec getByIdMethod = getByIdMethodBuilder.build();
 
         // POST (Create)
-        MethodSpec createMethod = MethodSpec.methodBuilder("create")
+        MethodSpec.Builder createMethodBuilder = MethodSpec.methodBuilder("create")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ClassName.get("org.springframework.web.bind.annotation", "PostMapping"))
                 .addParameter(ParameterSpec.builder(entityClass, "entity")
@@ -58,11 +59,12 @@ public class ControllerGenerator {
                         .addAnnotation(ClassName.get("jakarta.validation", "Valid"))
                         .build())
                 .returns(entityClass)
-                .addStatement("return repository.save(entity)")
-                .build();
+                .addStatement("return repository.save(entity)");
+        if (authEnabled) addPreAuthorize(createMethodBuilder, entity.createRoles());
+        MethodSpec createMethod = createMethodBuilder.build();
 
         // PUT (Update)
-        MethodSpec updateMethod = MethodSpec.methodBuilder("update")
+        MethodSpec.Builder updateMethodBuilder = MethodSpec.methodBuilder("update")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("org.springframework.web.bind.annotation", "PutMapping"))
                         .addMember("value", "$S", "/{id}")
@@ -81,11 +83,12 @@ public class ControllerGenerator {
                         ClassName.get("org.springframework.http", "HttpStatus"))
                 .endControlFlow()
                 .addStatement("entity.setId(id)")
-                .addStatement("return repository.save(entity)")
-                .build();
+                .addStatement("return repository.save(entity)");
+        if (authEnabled) addPreAuthorize(updateMethodBuilder, entity.updateRoles());
+        MethodSpec updateMethod = updateMethodBuilder.build();
 
         // DELETE
-        MethodSpec deleteMethod = MethodSpec.methodBuilder("delete")
+        MethodSpec.Builder deleteMethodBuilder = MethodSpec.methodBuilder("delete")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("org.springframework.web.bind.annotation", "DeleteMapping"))
                         .addMember("value", "$S", "/{id}")
@@ -94,8 +97,9 @@ public class ControllerGenerator {
                         .addAnnotation(ClassName.get("org.springframework.web.bind.annotation", "PathVariable"))
                         .build())
                 .returns(void.class)
-                .addStatement("repository.deleteById(id)")
-                .build();
+                .addStatement("repository.deleteById(id)");
+        if (authEnabled) addPreAuthorize(deleteMethodBuilder, entity.deleteRoles());
+        MethodSpec deleteMethod = deleteMethodBuilder.build();
 
         TypeSpec typeSpec = TypeSpec.classBuilder(entity.name() + "Controller")
                 .addModifiers(Modifier.PUBLIC)
@@ -117,6 +121,23 @@ public class ControllerGenerator {
                 .build();
 
         return javaFile.toString();
+    }
+
+    private void addPreAuthorize(MethodSpec.Builder builder, String rolesStr) {
+        if (rolesStr == null || rolesStr.trim().isEmpty()) {
+            return;
+        }
+        String[] roles = rolesStr.split(",");
+        StringBuilder expr = new StringBuilder("hasAnyRole(");
+        for (int i = 0; i < roles.length; i++) {
+            expr.append("'").append(roles[i].trim()).append("'");
+            if (i < roles.length - 1) expr.append(", ");
+        }
+        expr.append(")");
+        
+        builder.addAnnotation(AnnotationSpec.builder(ClassName.get("org.springframework.security.access.prepost", "PreAuthorize"))
+                .addMember("value", "$S", expr.toString())
+                .build());
     }
 
     private String toSnakeCase(String str) {

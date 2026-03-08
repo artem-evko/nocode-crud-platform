@@ -87,7 +87,11 @@ export const compileToSpec = (project: ProjectFormData, nodes: AppNode[], edges:
                     type: mapType(f.type),
                     required: f.required
                 })),
-                relations
+                relations,
+                readRoles: node.data.readRoles,
+                createRoles: node.data.createRoles,
+                updateRoles: node.data.updateRoles,
+                deleteRoles: node.data.deleteRoles
             };
         })
     };

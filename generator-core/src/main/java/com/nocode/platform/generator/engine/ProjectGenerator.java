@@ -69,7 +69,7 @@ public class ProjectGenerator {
                 for (Spec.Entity entity : spec.entities()) {
                     String entityCode = entityGenerator.generate(entity, basePackage);
                     String repoCode = repoGenerator.generate(entity, basePackage);
-                    String controllerCode = controllerGenerator.generate(entity, basePackage);
+                    String controllerCode = controllerGenerator.generate(entity, basePackage, spec.project().authEnabled());
 
                     String entityPath = root + "src/main/java/" + pkgPath + "/domain/" + entity.name() + ".java";
                     String repoPath = root + "src/main/java/" + pkgPath + "/repository/" + entity.name() + "Repository.java";
