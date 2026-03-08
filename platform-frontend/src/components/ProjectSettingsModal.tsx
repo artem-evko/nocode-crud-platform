@@ -10,6 +10,7 @@ export interface ProjectSettingsProps {
 
 export interface ProjectSettings {
     authEnabled: boolean;
+    generateFrontend: boolean;
 }
 
 export default function ProjectSettingsModal({ isOpen, onClose, settings, onSave }: ProjectSettingsProps) {
@@ -51,6 +52,19 @@ export default function ProjectSettingsModal({ isOpen, onClose, settings, onSave
                             <div>
                                 <div className="text-sm font-medium text-slate-50">Enable Authentication (JWT)</div>
                                 <div className="text-xs text-zinc-400 mt-1">Generates Spring Security, JWT utilities, and an AuthController for secure API access.</div>
+                            </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-4 border border-zinc-800 rounded-xl bg-zinc-950/50 cursor-pointer hover:border-zinc-700 transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={localSettings.generateFrontend}
+                                onChange={(e) => setLocalSettings({ ...localSettings, generateFrontend: e.target.checked })}
+                                className="w-5 h-5 rounded border-zinc-700 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-zinc-950 bg-zinc-900"
+                            />
+                            <div>
+                                <div className="text-sm font-medium text-slate-50">Generate Frontend (React + Vite)</div>
+                                <div className="text-xs text-zinc-400 mt-1">Automatically generates a full React admin dashboard alongside the backend API.</div>
                             </div>
                         </label>
                     </div>

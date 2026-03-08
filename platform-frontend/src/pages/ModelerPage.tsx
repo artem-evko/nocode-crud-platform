@@ -75,8 +75,13 @@ export default function ModelerPage() {
                             flowData = {};
                         }
 
-                        if (parsed.project && parsed.project.authEnabled !== undefined) {
-                            found.authEnabled = parsed.project.authEnabled;
+                        if (parsed.project) {
+                            if (parsed.project.authEnabled !== undefined) {
+                                found.authEnabled = parsed.project.authEnabled;
+                            }
+                            if (parsed.project.generateFrontend !== undefined) {
+                                found.generateFrontend = parsed.project.generateFrontend;
+                            }
                         }
 
                         if (flowData.nodes) setNodes(flowData.nodes);
@@ -348,10 +353,17 @@ export default function ModelerPage() {
             <ProjectSettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
-                settings={{ authEnabled: project?.authEnabled || false }}
+                settings={{
+                    authEnabled: project?.authEnabled || false,
+                    generateFrontend: project?.generateFrontend || false
+                }}
                 onSave={(settings) => {
                     if (project) {
-                        setProject(prev => prev ? { ...prev, authEnabled: settings.authEnabled } : prev);
+                        setProject(prev => prev ? {
+                            ...prev,
+                            authEnabled: settings.authEnabled,
+                            generateFrontend: settings.generateFrontend
+                        } : prev);
                     }
                 }}
             />

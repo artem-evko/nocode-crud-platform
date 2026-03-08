@@ -15,7 +15,8 @@ public record Spec(
             String name,
             String basePackage,
             String version,
-            boolean authEnabled
+            boolean authEnabled,
+            boolean generateFrontend
     ) {}
 
     public record Entity(

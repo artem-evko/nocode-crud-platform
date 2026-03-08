@@ -14,6 +14,8 @@ public class ProjectDto {
     private String version;
     private String basePackage;
     private String specText;
+    private boolean authEnabled;
+    private boolean generateFrontend;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }

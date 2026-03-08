@@ -39,6 +39,8 @@ public class ProjectController {
         project.setVersion(dto.getVersion() != null ? dto.getVersion() : "1.0.0");
         project.setBasePackage(dto.getBasePackage() != null ? dto.getBasePackage() : "com.example.demo");
         project.setSpecText(dto.getSpecText() != null ? dto.getSpecText() : "{}");
+        project.setAuthEnabled(dto.isAuthEnabled());
+        project.setGenerateFrontend(dto.isGenerateFrontend());
         project.setCreatedAt(OffsetDateTime.now());
         project.setUpdatedAt(OffsetDateTime.now());
         return convertToDto(projectRepository.save(project));
@@ -53,6 +55,8 @@ public class ProjectController {
                     project.setArtifactId(dto.getArtifactId());
                     project.setVersion(dto.getVersion());
                     project.setBasePackage(dto.getBasePackage());
+                    project.setAuthEnabled(dto.isAuthEnabled());
+                    project.setGenerateFrontend(dto.isGenerateFrontend());
                     if (dto.getSpecText() != null) {
                         project.setSpecText(dto.getSpecText());
                     }
@@ -77,6 +81,8 @@ public class ProjectController {
         dto.setVersion(project.getVersion());
         dto.setBasePackage(project.getBasePackage());
         dto.setSpecText(project.getSpecText());
+        dto.setAuthEnabled(project.isAuthEnabled());
+        dto.setGenerateFrontend(project.isGenerateFrontend());
         dto.setCreatedAt(project.getCreatedAt());
         dto.setUpdatedAt(project.getUpdatedAt());
         return dto;

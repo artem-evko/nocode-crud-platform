@@ -37,6 +37,12 @@ public class ProjectEntity {
     @Column(name = "spec_text", nullable = false, columnDefinition = "text")
     private String specText;
 
+    @Column(name = "auth_enabled", nullable = false)
+    private boolean authEnabled;
+
+    @Column(name = "generate_frontend", nullable = false)
+    private boolean generateFrontend;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 

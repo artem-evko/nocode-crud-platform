@@ -10,6 +10,7 @@ export interface ProjectFormData {
     basePackage: string;
     specText?: string;
     authEnabled?: boolean;
+    generateFrontend?: boolean;
 }
 
 interface ProjectModalProps {
@@ -125,6 +126,31 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                                 />
                             </div>
                         </div>
+
+                        <label className="flex items-center gap-3 p-4 border border-zinc-800 rounded-xl bg-zinc-950/50 cursor-pointer hover:border-zinc-700 transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={formData.authEnabled || false}
+                                onChange={(e) => setFormData({ ...formData, authEnabled: e.target.checked })}
+                                className="w-5 h-5 rounded border-zinc-700 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-zinc-950 bg-zinc-900"
+                            />
+                            <div>
+                                <div className="text-sm font-medium text-slate-50">Enable Authentication (JWT)</div>
+                                <div className="text-xs text-zinc-400 mt-1">Automatically generates a secure login flow and protects your REST API.</div>
+                            </div>
+                        </label>
+                        <label className="flex items-center gap-3 p-4 border border-zinc-800 rounded-xl bg-zinc-950/50 cursor-pointer hover:border-zinc-700 transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={formData.generateFrontend || false}
+                                onChange={(e) => setFormData({ ...formData, generateFrontend: e.target.checked })}
+                                className="w-5 h-5 rounded border-zinc-700 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-zinc-950 bg-zinc-900"
+                            />
+                            <div>
+                                <div className="text-sm font-medium text-slate-50">Generate Frontend (React + Vite)</div>
+                                <div className="text-xs text-zinc-400 mt-1">Scaffolds an out-of-the-box frontend admin dashboard wired to your API.</div>
+                            </div>
+                        </label>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>

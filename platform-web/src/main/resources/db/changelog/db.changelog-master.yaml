@@ -60,3 +60,22 @@ databaseChangeLog:
             columns:
               - column:
                   name: artifact_id
+  - changeSet:
+      id: 2
+      author: nocode
+      changes:
+        - addColumn:
+            tableName: projects
+            columns:
+              - column:
+                  name: auth_enabled
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: generate_frontend
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false

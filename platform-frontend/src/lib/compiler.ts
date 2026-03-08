@@ -11,6 +11,7 @@ export interface BackendSpec {
         basePackage: string;
         version: string;
         authEnabled: boolean;
+        generateFrontend: boolean;
     };
     entities: {
         name: string;
@@ -61,7 +62,8 @@ export const compileToSpec = (project: ProjectFormData, nodes: AppNode[], edges:
             name: project.name || 'Demo',
             basePackage: project.basePackage || 'com.example.demo',
             version: project.version || '0.0.1-SNAPSHOT',
-            authEnabled: project.authEnabled || false
+            authEnabled: project.authEnabled || false,
+            generateFrontend: project.generateFrontend || false
         },
         entities: nodes.map(node => {
             // Find relations stemming from this entity

@@ -21,7 +21,15 @@ public class GeneratorFacade {
             if (p.getSpecText() != null && !p.getSpecText().isBlank()) {
                spec = mapper.readValue(p.getSpecText(), Spec.class);
             } else {
-               Spec.Project sp = new Spec.Project(p.getGroupId(), p.getArtifactId(), p.getName(), p.getBasePackage(), p.getVersion(), false);
+               Spec.Project sp = new Spec.Project(
+                   p.getGroupId(),
+                   p.getArtifactId(),
+                   p.getName(),
+                   p.getBasePackage(),
+                   p.getVersion(),
+                   false, // authEnabled defaults to false if specText missing
+                   p.isGenerateFrontend()
+               );
                spec = new Spec(1, sp, new ArrayList<>());
             }
             return projectGenerator.generate(spec);
