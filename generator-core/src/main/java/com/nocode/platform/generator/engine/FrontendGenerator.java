@@ -18,6 +18,10 @@ public class FrontendGenerator {
         model.put("appName", spec.project().name() != null ? spec.project().name() : "admin-ui");
         model.put("authEnabled", spec.project().authEnabled());
         model.put("entities", spec.entities());
+        
+        if (spec.uiSpec() != null) {
+            model.put("uiSpec", spec.uiSpec());
+        }
 
         // Basic Scaffolding
         putText(zos, root + "package.json", renderer.render("frontend/package.json.ftl", model));
@@ -38,6 +42,10 @@ public class FrontendGenerator {
         if (spec.project().authEnabled()) {
             putText(zos, root + "src/store/authStore.ts", renderer.render("frontend/src/store/authStore.ts.ftl", model));
             putText(zos, root + "src/pages/LoginPage.tsx", renderer.render("frontend/src/pages/LoginPage.tsx.ftl", model));
+        }
+
+        if (spec.uiSpec() != null && spec.uiSpec().components() != null && !spec.uiSpec().components().isEmpty()) {
+            putText(zos, root + "src/pages/Dashboard.tsx", renderer.render("frontend/src/pages/Dashboard.tsx.ftl", model));
         }
 
         if (spec.entities() != null) {

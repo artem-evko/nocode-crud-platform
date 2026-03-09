@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ModelerPage from './pages/ModelerPage';
+import UIBuilderPage from './pages/UIBuilderPage';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/:projectId/modeler" element={<ModelerPage />} />
+        <Route path="/projects/:projectId/builder" element={<UIBuilderPage />} />
         <Route path="/" element={<Navigate to="/projects" replace />} />
       </Routes>
     </BrowserRouter>

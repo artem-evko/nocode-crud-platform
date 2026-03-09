@@ -30,7 +30,7 @@ public class GeneratorFacade {
                    false, // authEnabled defaults to false if specText missing
                    p.isGenerateFrontend()
                );
-               spec = new Spec(1, sp, new ArrayList<>());
+               spec = new Spec(1, sp, new ArrayList<>(), null);
             }
             return projectGenerator.generate(spec);
         } catch (Exception e) {

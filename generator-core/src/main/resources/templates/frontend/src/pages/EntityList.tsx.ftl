@@ -4,8 +4,9 @@ import { api } from '../lib/api';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 
 interface ${entity.name()} {
-  id: number;
+  id: string | number;
 <#list entity.fields() as field>
+<#if field.name()?lower_case != "id">
 <#if field.type() == "STRING">
   ${field.name()}: string;
 <#elseif field.type() == "INTEGER" || field.type() == "DECIMAL">
@@ -14,6 +15,7 @@ interface ${entity.name()} {
   ${field.name()}: boolean;
 <#elseif field.type() == "DATE">
   ${field.name()}: string;
+</#if>
 </#if>
 </#list>
 }
@@ -37,7 +39,7 @@ export default function ${entity.name()}List() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string | number) => {
     if (!confirm('Are you sure you want to delete this record?')) return;
     try {
       await api.delete(`/${entity.table()}/r${r"${id}"}`);
@@ -70,7 +72,9 @@ export default function ${entity.name()}List() {
               <tr>
                 <th className="px-6 py-4">ID</th>
 <#list entity.fields() as field>
+<#if field.name()?lower_case != "id">
                 <th className="px-6 py-4 capitalize">${field.name()}</th>
+</#if>
 </#list>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -97,7 +101,9 @@ export default function ${entity.name()}List() {
                   <tr key={item.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
                     <td className="px-6 py-4 font-medium">{item.id}</td>
 <#list entity.fields() as field>
+<#if field.name()?lower_case != "id">
                     <td className="px-6 py-4">{String(item.${field.name()})}</td>
+</#if>
 </#list>
                     <td className="px-6 py-4 text-right space-x-2">
                       <Link 

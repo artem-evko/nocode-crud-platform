@@ -1,6 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+<#assign usesNavigate = authEnabled || !(uiSpec?? && uiSpec.components()?? && uiSpec.components()?size &gt; 0)>
+<#if usesNavigate>
+import { Navigate } from 'react-router-dom';
+</#if>
 <#if authEnabled>import { useAuthStore } from './store/authStore';
 import LoginPage from './pages/LoginPage';
+</#if>
+<#if uiSpec?? && uiSpec.components()?? && uiSpec.components()?size &gt; 0>
+import Dashboard from './pages/Dashboard';
 </#if>
 <#if entities??>
 <#list entities as entity>
@@ -26,10 +33,15 @@ function App() {
             ${appName} Admin
           </div>
           <nav className="flex-1 p-4 space-y-1">
+          <#if uiSpec?? && uiSpec.components()?? && uiSpec.components()?size &gt; 0>
+            <Link to="/" className="block px-4 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+              Dashboard
+            </Link>
+          </#if>
           <#if entities??>
           <#list entities as entity>
             <Link to="/${entity.name()?lower_case}" className="block px-4 py-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-              ${entity.name()}
+              ${entity.name()} Data
             </Link>
           </#list>
           </#if>
@@ -60,7 +72,11 @@ function App() {
           </#list>
           </#if>
             
+          <#if uiSpec?? && uiSpec.components()?? && uiSpec.components()?size &gt; 0>
+            <Route path="/" element={<#if authEnabled>token ? <Dashboard /> : <Navigate to="/login" replace /><#else><Dashboard /></#if>} />
+          <#else>
             <Route path="/" element={<Navigate to="<#if entities?? && entities?size &gt; 0>/${entities[0].name()?lower_case}<#else>/</#if>" replace />} />
+          </#if>
           </Routes>
         </main>
       </div>

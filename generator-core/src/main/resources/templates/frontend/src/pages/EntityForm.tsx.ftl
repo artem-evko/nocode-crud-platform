@@ -12,6 +12,7 @@ export default function ${entity.name()}Form() {
 
   // Form State
   <#list entity.fields() as field>
+  <#if field.name()?lower_case != "id">
   <#if field.type() == "STRING">
   const [${field.name()}, set${field.name()?cap_first}] = useState('');
   <#elseif field.type() == "INTEGER" || field.type() == "DECIMAL">
@@ -20,6 +21,7 @@ export default function ${entity.name()}Form() {
   const [${field.name()}, set${field.name()?cap_first}] = useState(false);
   <#elseif field.type() == "DATE">
   const [${field.name()}, set${field.name()?cap_first}] = useState('');
+  </#if>
   </#if>
   </#list>
 
@@ -31,11 +33,24 @@ export default function ${entity.name()}Form() {
 
   const fetchData = async () => {
     try {
+      <#assign hasFieldsToSet = false>
+      <#list entity.fields() as field>
+      <#if field.name()?lower_case != "id">
+        <#assign hasFieldsToSet = true>
+      </#if>
+      </#list>
+      <#if hasFieldsToSet>
       const response = await api.get(`/${entity.table()}/r${r"${id}"}`);
       const data = response.data;
       <#list entity.fields() as field>
+      <#if field.name()?lower_case != "id">
       set${field.name()?cap_first}(data.${field.name()});
+      </#if>
       </#list>
+      <#else>
+      await api.get(`/${entity.table()}/r${r"${id}"}`);
+      // No non-id fields to map from response
+      </#if>
     } catch (error) {
       console.error('Failed to fetch ${entity.name()}', error);
       alert('Record not found');
@@ -51,7 +66,9 @@ export default function ${entity.name()}Form() {
     
     const payload = {
       <#list entity.fields() as field>
+      <#if field.name()?lower_case != "id">
       ${field.name()},
+      </#if>
       </#list>
     };
 
@@ -91,6 +108,7 @@ export default function ${entity.name()}Form() {
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <#list entity.fields() as field>
+          <#if field.name()?lower_case != "id">
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 capitalize">
               ${field.name()} <#if field.required()><span className="text-red-500">*</span></#if>
@@ -131,6 +149,7 @@ export default function ${entity.name()}Form() {
             />
             </#if>
           </div>
+          </#if>
           </#list>
 
           <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 flex justify-end gap-3">

@@ -12,7 +12,7 @@ import {
 } from '@xyflow/react';
 import type { Connection, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Save, PlusCircle, Download, Settings } from 'lucide-react';
+import { ArrowLeft, Save, PlusCircle, Download, Settings, LayoutTemplate } from 'lucide-react';
 import type { ProjectFormData } from '../components/ProjectModal';
 import { compileToSpec } from '../lib/compiler';
 import EntityNode from '../components/EntityNode';
@@ -309,6 +309,13 @@ export default function ModelerPage() {
                     >
                         <Settings size={16} />
                         Settings
+                    </button>
+                    <button
+                        onClick={() => navigate(`/projects/${projectId}/builder`)}
+                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
+                    >
+                        <LayoutTemplate size={16} />
+                        UI Builder
                     </button>
                     <button
                         onClick={handleGenerate}

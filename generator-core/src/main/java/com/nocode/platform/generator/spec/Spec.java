@@ -2,13 +2,24 @@ package com.nocode.platform.generator.spec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Spec(
         int specVersion,
         Project project,
-        List<Entity> entities
+        List<Entity> entities,
+        UiSpec uiSpec
 ) {
+    public record UiSpec(List<Component> components) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Component(
+            String id,
+            String type,
+            Map<String, Object> props,
+            List<Component> children
+    ) {}
     public record Project(
             String groupId,
             String artifactId,

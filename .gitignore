@@ -45,3 +45,7 @@ gigaide.properties
 
 # Vaadin frontend (не коммитим для Flow-only проекта)
 platform-web/src/main/frontend/
+
+# Local generate test artifacts
+generated.zip
+test-generated/

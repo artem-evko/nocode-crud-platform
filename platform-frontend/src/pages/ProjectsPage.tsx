@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { apiClient } from '../api/client';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, LayoutTemplate } from 'lucide-react';
 import ProjectModal from '../components/ProjectModal';
 import type { ProjectFormData } from '../components/ProjectModal';
 
@@ -139,6 +139,16 @@ export default function ProjectsPage() {
                                 className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 hover:shadow-lg hover:-translate-y-1 transition-all group cursor-pointer"
                             >
                                 <div className="absolute top-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity gap-2">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/projects/${project.id}/builder`);
+                                        }}
+                                        className="p-1.5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 rounded-md transition-colors"
+                                        title="UI Builder"
+                                    >
+                                        <LayoutTemplate size={16} />
+                                    </button>
                                     <button
                                         onClick={(e) => openEditModal(e, project)}
                                         className="p-1.5 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-md transition-colors"
