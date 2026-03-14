@@ -34,7 +34,7 @@ export default function SortableComponent({ component }: SortableComponentProps)
 
     const isSelected = selectedComponentId === component.id;
 
-    const isDataComponent = component.type === 'DataTable' || component.type === 'FormModule';
+    const isDataComponent = component.type === 'DataTable' || component.type === 'FormModule' || component.type === 'BarChart' || component.type === 'LineChart';
     const isMissingDataSource = isDataComponent && !component.props.entityName;
 
     const handleSelect = (e: MouseEvent) => {
@@ -66,7 +66,6 @@ export default function SortableComponent({ component }: SortableComponentProps)
                         </span>
                     </div>
                 );
-            case 'FormModule':
                 return (
                     <div className={`w-full h-48 border-2 border-dashed rounded flex items-center justify-center flex-col 
                         ${isMissingDataSource ? 'border-red-500/50 bg-red-900/10' : 'border-emerald-700/50 bg-emerald-900/10'}`}>
@@ -74,6 +73,32 @@ export default function SortableComponent({ component }: SortableComponentProps)
                         <span className={`text-xs mt-1 ${isMissingDataSource ? 'text-red-400 font-semibold' : 'text-emerald-500/50'}`}>
                             {isMissingDataSource ? 'Error: Missing Entity Binding' : `Bound to: ${component.props.entityName}`}
                         </span>
+                    </div>
+                );
+            case 'BarChart':
+                return (
+                    <div className={`w-full h-48 border-2 border-dashed rounded flex flex-col items-center justify-center
+                        ${isMissingDataSource ? 'border-red-500/50 bg-red-900/10' : 'border-violet-700/50 bg-violet-900/10'}`}>
+                        <span className="font-mono text-violet-500/70">{'<BarChart />'}</span>
+                        <span className={`text-xs mt-1 ${isMissingDataSource ? 'text-red-400 font-semibold' : 'text-violet-500/50'}`}>
+                            {isMissingDataSource ? 'Error: Missing Entity Binding' : `Bound to: ${component.props.entityName}`}
+                        </span>
+                    </div>
+                );
+            case 'LineChart':
+                return (
+                    <div className={`w-full h-48 border-2 border-dashed rounded flex flex-col items-center justify-center
+                        ${isMissingDataSource ? 'border-red-500/50 bg-red-900/10' : 'border-cyan-700/50 bg-cyan-900/10'}`}>
+                        <span className="font-mono text-cyan-500/70">{'<LineChart />'}</span>
+                        <span className={`text-xs mt-1 ${isMissingDataSource ? 'text-red-400 font-semibold' : 'text-cyan-500/50'}`}>
+                            {isMissingDataSource ? 'Error: Missing Entity Binding' : `Bound to: ${component.props.entityName}`}
+                        </span>
+                    </div>
+                );
+            case 'Container':
+                return (
+                    <div className="w-full min-h-32 border-2 border-dashed border-amber-700/50 bg-amber-900/5 rounded flex items-center justify-center p-4">
+                        <span className="font-mono text-amber-500/40 text-sm">{'<Layout Container />'}</span>
                     </div>
                 );
             default:

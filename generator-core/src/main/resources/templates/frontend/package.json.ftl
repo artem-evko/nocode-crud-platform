@@ -19,6 +19,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.0",
+    "recharts": "^2.12.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7"<#if authEnabled>,
     "zustand": "^4.5.0"</#if>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { apiClient } from '../api/client';
-import { ArrowLeft, Save, LayoutTemplate, Settings, Monitor, Smartphone, Tablet, Type, Heading } from 'lucide-react';
+import { ArrowLeft, Save, LayoutTemplate, Settings, Monitor, Smartphone, Tablet, Type, Heading, Box, BarChart3, LineChart as LineChartIcon } from 'lucide-react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { toast } from 'sonner';
 import type { DragEndEvent } from '@dnd-kit/core';
@@ -187,6 +187,9 @@ export default function UIBuilderPage() {
                             <SidebarItem id="s-text" type="Text" label="Text Block" icon={Type} iconColor="text-zinc-300" />
                             <SidebarItem id="s-datatable" type="DataTable" label="Data Table" icon={LayoutTemplate} iconColor="text-blue-400" />
                             <SidebarItem id="s-form" type="FormModule" label="Form Module" icon={Settings} iconColor="text-emerald-400" />
+                            <SidebarItem id="s-barchart" type="BarChart" label="Bar Chart" icon={BarChart3} iconColor="text-violet-400" />
+                            <SidebarItem id="s-linechart" type="LineChart" label="Line Chart" icon={LineChartIcon} iconColor="text-cyan-400" />
+                            <SidebarItem id="s-container" type="Container" label="Layout Container" icon={Box} iconColor="text-amber-400" />
                         </div>
                     </aside>
 

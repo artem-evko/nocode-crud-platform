@@ -76,7 +76,7 @@ export default function PropertiesPanel() {
                 )}
 
                 {/* Data Binding Properties */}
-                {(selectedComponent.type === 'DataTable' || selectedComponent.type === 'FormModule') && (
+                {(selectedComponent.type === 'DataTable' || selectedComponent.type === 'FormModule' || selectedComponent.type === 'BarChart' || selectedComponent.type === 'LineChart') && (
                     <div className="space-y-2">
                         <label className="text-xs font-semibold text-zinc-400 block">Bind to Entity</label>
                         <select
