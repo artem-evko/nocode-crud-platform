@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import LoginPage from './pages/LoginPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ModelerPage from './pages/ModelerPage';
@@ -7,6 +8,7 @@ import UIBuilderPage from './pages/UIBuilderPage';
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="bottom-right" theme="dark" richColors />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/projects" element={<ProjectsPage />} />

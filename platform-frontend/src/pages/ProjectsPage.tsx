@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/authStore';
 import { apiClient } from '../api/client';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit2, Trash2, LayoutTemplate } from 'lucide-react';
+import { toast } from 'sonner';
 import ProjectModal from '../components/ProjectModal';
 import type { ProjectFormData } from '../components/ProjectModal';
 
@@ -74,7 +75,7 @@ export default function ProjectsPage() {
                 await fetchProjects();
             } catch (err) {
                 console.error("Failed to delete", err);
-                alert("Failed to delete project");
+                toast.error("Failed to delete project");
             }
         }
     };

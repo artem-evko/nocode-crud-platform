@@ -13,6 +13,7 @@ import {
 import type { Connection, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { ArrowLeft, Save, PlusCircle, Download, Settings, LayoutTemplate } from 'lucide-react';
+import { toast } from 'sonner';
 import type { ProjectFormData } from '../components/ProjectModal';
 import { compileToSpec } from '../lib/compiler';
 import EntityNode from '../components/EntityNode';
@@ -243,10 +244,10 @@ export default function ModelerPage() {
                 ...project,
                 specText
             });
-            alert('Model saved and compiled effectively!');
+            toast.success('Model saved successfully!');
         } catch (error) {
             console.error('Failed to save model', error);
-            alert('Error saving model');
+            toast.error('Error saving model');
         }
     };
 
@@ -277,9 +278,11 @@ export default function ModelerPage() {
             link.parentNode?.removeChild(link);
             window.URL.revokeObjectURL(url);
 
+            toast.success("Code generated and downloaded successfully!");
+
         } catch (error) {
             console.error('Failed to generate project codebase', error);
-            alert('Error generating project codebase. Have you saved your model first?');
+            toast.error('Error generating project codebase. Have you saved your model first?');
         }
     };
 

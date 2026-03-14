@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { apiClient } from '../api/client';
 import { ArrowLeft, Save, LayoutTemplate, Settings, Monitor, Smartphone, Tablet, Type, Heading } from 'lucide-react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
+import { toast } from 'sonner';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { useUIBuilderStore } from '../store/uiBuilderStore';
 import type { ComponentType } from '../store/uiBuilderStore';
@@ -83,10 +84,10 @@ export default function UIBuilderPage() {
                 ...project,
                 specText
             });
-            alert("UI Builder layout saved successfully!");
+            toast.success("UI Builder layout saved successfully!");
         } catch (error) {
             console.error("Failed to save UI layout", error);
-            alert("Error saving UI layout.");
+            toast.error("Error saving UI layout.");
         }
     };
 
