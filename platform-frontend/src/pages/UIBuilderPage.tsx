@@ -62,6 +62,17 @@ export default function UIBuilderPage() {
 
     const handleSave = async () => {
         if (!project || !project.id) return;
+
+        // Validation: Block saving if there are unconfigured data components
+        const invalidComponents = components.filter(
+            c => (c.type === 'DataTable' || c.type === 'FormModule') && !c.props.entityName
+        );
+
+        if (invalidComponents.length > 0) {
+            toast.error("Validation Error: Cannot save layout. Please select a Data Source (Entity) for all DataTables and FormModules.");
+            return;
+        }
+
         try {
             let specObj = {};
             if (project.specText && project.specText !== '{}') {
