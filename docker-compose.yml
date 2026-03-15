@@ -1,15 +1,53 @@
+version: '3.8'
+
 services:
-  postgres:
-    image: postgres:16
-    container_name: nocode_platform_pg
+  database:
+    image: postgres:16-alpine
+    container_name: nocode-db
     environment:
-      POSTGRES_DB: nocode_platform
       POSTGRES_USER: nocode
-      POSTGRES_PASSWORD: nocode
+      POSTGRES_PASSWORD: nocode_password
+      POSTGRES_DB: nocode_platform
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
-      - nocode_platform_pg_data:/var/lib/postgresql/data
+      - nocode-db-data:/var/lib/postgresql/data
+    networks:
+      - nocode-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: platform-web/Dockerfile
+    container_name: nocode-backend
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/nocode_platform
+      - SPRING_DATASOURCE_USERNAME=nocode
+      - SPRING_DATASOURCE_PASSWORD=nocode_password
+      - SPRING_PROFILES_ACTIVE=prod
+      - SERVER_PORT=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - nocode-network
+
+  frontend:
+    build:
+      context: ./platform-frontend
+      dockerfile: Dockerfile
+    container_name: nocode-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - nocode-network
 
 volumes:
-  nocode_platform_pg_data:
+  nocode-db-data:
+
+networks:
+  nocode-network:
+    driver: bridge
