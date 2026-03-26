@@ -79,3 +79,16 @@ databaseChangeLog:
                   defaultValueBoolean: false
                   constraints:
                     nullable: false
+  - changeSet:
+      id: 3
+      author: nocode
+      changes:
+        - addColumn:
+            tableName: projects
+            columns:
+              - column:
+                  name: deployment_status
+                  type: varchar(50)
+              - column:
+                  name: deployment_url
+                  type: varchar(300)

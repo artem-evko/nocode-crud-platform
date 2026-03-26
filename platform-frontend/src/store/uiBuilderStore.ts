@@ -6,6 +6,7 @@ export interface UIComponent {
     id: string;
     type: ComponentType;
     props: Record<string, any>;
+    layout?: { x: number, y: number, w: number, h: number };
     children?: UIComponent[]; // For nested containers later
 }
 
@@ -17,6 +18,7 @@ export interface UIBuilderState {
     addComponent: (component: UIComponent, index?: number) => void;
     removeComponent: (id: string) => void;
     updateComponentProps: (id: string, props: Record<string, any>) => void;
+    updateComponentLayout: (id: string, layout: { x: number, y: number, w: number, h: number }) => void;
     selectComponent: (id: string | null) => void;
     moveComponent: (oldIndex: number, newIndex: number) => void;
 }
@@ -45,6 +47,12 @@ export const useUIBuilderStore = create<UIBuilderState>((set) => ({
     updateComponentProps: (id, props) => set((state) => ({
         components: state.components.map(c =>
             c.id === id ? { ...c, props: { ...c.props, ...props } } : c
+        )
+    })),
+
+    updateComponentLayout: (id, layout) => set((state) => ({
+        components: state.components.map(c =>
+            c.id === id ? { ...c, layout } : c
         )
     })),
 

@@ -12,13 +12,14 @@ import {
 } from '@xyflow/react';
 import type { Connection, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Save, PlusCircle, Download, Settings, LayoutTemplate } from 'lucide-react';
+import { ArrowLeft, Save, PlusCircle, Download, Settings, LayoutTemplate, Rocket } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ProjectFormData } from '../components/ProjectModal';
 import { compileToSpec } from '../lib/compiler';
 import EntityNode from '../components/EntityNode';
 import type { AppNode } from '../components/EntityNode';
 import ProjectSettingsModal from '../components/ProjectSettingsModal';
+import DeploymentModal from '../components/DeploymentModal';
 
 const nodeTypes = {
     entity: EntityNode,
@@ -34,6 +35,7 @@ export default function ModelerPage() {
     const [project, setProject] = useState<ProjectFormData | null>(null);
     const [loading, setLoading] = useState(true);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isDeployOpen, setIsDeployOpen] = useState(false);
 
     const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -244,10 +246,10 @@ export default function ModelerPage() {
                 ...project,
                 specText
             });
-            toast.success('Model saved successfully!');
+            toast.success('Модель успешно сохранена!');
         } catch (error) {
             console.error('Failed to save model', error);
-            toast.error('Error saving model');
+            toast.error('Ошибка при сохранении модели');
         }
     };
 
@@ -278,16 +280,16 @@ export default function ModelerPage() {
             link.parentNode?.removeChild(link);
             window.URL.revokeObjectURL(url);
 
-            toast.success("Code generated and downloaded successfully!");
+            toast.success("Код успешно сгенерирован и скачан!");
 
         } catch (error) {
             console.error('Failed to generate project codebase', error);
-            toast.error('Error generating project codebase. Have you saved your model first?');
+            toast.error('Ошибка при генерации кода. Вы сохранили модель?');
         }
     };
 
     if (loading) {
-        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Loading...</div>;
+        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Загрузка...</div>;
     }
 
     return (
@@ -297,12 +299,12 @@ export default function ModelerPage() {
                     <button
                         onClick={() => navigate('/projects')}
                         className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
-                        title="Back to Projects"
+                        title="Назад к проектам"
                     >
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <h1 className="text-xl font-bold">{project?.name} <span className="text-sm font-normal text-zinc-400">Modeler</span></h1>
+                        <h1 className="text-xl font-bold">{project?.name} <span className="text-sm font-normal text-zinc-400">Моделирование БД</span></h1>
                     </div>
                 </div>
                 <div className="flex gap-3">
@@ -311,7 +313,7 @@ export default function ModelerPage() {
                         className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
                     >
                         <Settings size={16} />
-                        Settings
+                        Настройки
                     </button>
                     <button
                         onClick={() => navigate(`/projects/${projectId}/builder`)}
@@ -325,21 +327,28 @@ export default function ModelerPage() {
                         className="flex items-center gap-2 px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 hover:text-emerald-300 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-emerald-600/30"
                     >
                         <Download size={16} />
-                        Generate Code
+                        Скачать код
+                    </button>
+                    <button
+                        onClick={() => setIsDeployOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 hover:text-indigo-300 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-indigo-600/30"
+                    >
+                        <Rocket size={16} />
+                        Развернуть
                     </button>
                     <button
                         onClick={addNewEntity}
                         className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
                     >
                         <PlusCircle size={16} />
-                        Add Entity
+                        Добавить сущность
                     </button>
                     <button
                         onClick={handleSave}
                         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
                     >
                         <Save size={16} />
-                        Save Model
+                        Сохранить модель
                     </button>
                 </div>
             </header>
@@ -369,13 +378,19 @@ export default function ModelerPage() {
                 }}
                 onSave={(settings) => {
                     if (project) {
-                        setProject(prev => prev ? {
+                        setProject((prev: ProjectFormData | null) => prev ? {
                             ...prev,
                             authEnabled: settings.authEnabled,
                             generateFrontend: settings.generateFrontend
                         } : prev);
                     }
                 }}
+            />
+
+            <DeploymentModal
+                isOpen={isDeployOpen}
+                onClose={() => setIsDeployOpen(false)}
+                projectId={project?.id || ''}
             />
         </div>
     );

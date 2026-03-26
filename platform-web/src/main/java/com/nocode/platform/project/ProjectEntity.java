@@ -43,6 +43,12 @@ public class ProjectEntity {
     @Column(name = "generate_frontend", nullable = false)
     private boolean generateFrontend;
 
+    @Column(name = "deployment_status", length = 50)
+    private String deploymentStatus;
+
+    @Column(name = "deployment_url", length = 300)
+    private String deploymentUrl;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 

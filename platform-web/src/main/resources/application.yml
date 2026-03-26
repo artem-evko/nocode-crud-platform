@@ -5,14 +5,14 @@ spring:
   application:
     name: platform-web
   datasource:
-    url: jdbc:postgresql://localhost:5433/nocode_platform
+    url: jdbc:postgresql://127.0.0.1:5434/nocode_platform
     username: nocode
-    password: nocode
+    password: nocode_password
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     open-in-view: false
 
   # чтобы НЕ было двойного запуска (мы запускаем Liquibase через LiquibaseConfig)

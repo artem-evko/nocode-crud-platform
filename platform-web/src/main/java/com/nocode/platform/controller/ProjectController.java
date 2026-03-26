@@ -83,6 +83,8 @@ public class ProjectController {
         dto.setSpecText(project.getSpecText());
         dto.setAuthEnabled(project.isAuthEnabled());
         dto.setGenerateFrontend(project.isGenerateFrontend());
+        dto.setDeploymentStatus(project.getDeploymentStatus());
+        dto.setDeploymentUrl(project.getDeploymentUrl());
         dto.setCreatedAt(project.getCreatedAt());
         dto.setUpdatedAt(project.getUpdatedAt());
         return dto;

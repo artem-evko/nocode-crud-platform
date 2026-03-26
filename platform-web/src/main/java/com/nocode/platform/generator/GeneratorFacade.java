@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class GeneratorFacade {
 
     private final ProjectGenerator projectGenerator = new ProjectGenerator();
-    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public byte[] generateReal(ProjectEntity p) {
         try {

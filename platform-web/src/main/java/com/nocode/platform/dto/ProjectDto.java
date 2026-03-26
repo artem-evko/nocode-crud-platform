@@ -16,6 +16,8 @@ public class ProjectDto {
     private String specText;
     private boolean authEnabled;
     private boolean generateFrontend;
+    private String deploymentStatus;
+    private String deploymentUrl;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }

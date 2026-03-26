@@ -77,7 +77,7 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
                         className="text-slate-50 font-bold text-sm truncate flex-1 hover:text-indigo-400 transition-colors cursor-text"
                         onClick={() => setIsEditingName(true)}
                     >
-                        {data.name || 'NewEntity'}
+                        {data.name || 'НоваяСущность'}
                     </h3>
                 )}
             </div>
@@ -129,7 +129,7 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
                     className="w-full flex items-center justify-center gap-1.5 p-1.5 mt-2 text-xs font-medium text-zinc-500 hover:text-indigo-400 hover:bg-indigo-500/10 border border-dashed border-zinc-700 hover:border-indigo-500/50 rounded-lg transition-all"
                 >
                     <Plus size={12} />
-                    Add Field
+                    Добавить поле
                 </button>
             </div>
 
@@ -139,14 +139,14 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
                     onClick={() => setShowPermissions(!showPermissions)}
                     className="w-full flex justify-between items-center px-2 py-1 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
                 >
-                    <span>Permissions (RBAC)</span>
+                    <span>Права доступа (RBAC)</span>
                     <span className="text-[10px]">{showPermissions ? '▲' : '▼'}</span>
                 </button>
 
                 {showPermissions && (
                     <div className="mt-2 space-y-2 px-1">
                         <div className="flex flex-col gap-1">
-                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Read Roles</label>
+                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Чтение (Роли)</label>
                             <input
                                 type="text"
                                 value={data.readRoles || ''}
@@ -156,7 +156,7 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
                             />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Create Roles</label>
+                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Создание (Роли)</label>
                             <input
                                 type="text"
                                 value={data.createRoles || ''}
@@ -166,7 +166,7 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
                             />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Update Roles</label>
+                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Обновление (Роли)</label>
                             <input
                                 type="text"
                                 value={data.updateRoles || ''}
@@ -176,7 +176,7 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
                             />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Delete Roles</label>
+                            <label className="text-[10px] text-zinc-500 uppercase font-bold">Удаление (Роли)</label>
                             <input
                                 type="text"
                                 value={data.deleteRoles || ''}

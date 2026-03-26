@@ -63,7 +63,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
             await onSave(formData);
             onClose();
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to save project. Please check the inputs.');
+            setError(err.response?.data?.message || 'Не удалось сохранить проект. Пожалуйста, проверьте введенные данные.');
         } finally {
             setLoading(false);
         }
@@ -74,7 +74,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex justify-between items-center p-6 border-b border-zinc-800/60">
                     <h2 className="text-xl font-bold text-white tracking-tight">
-                        {initialData ? 'Edit Project' : 'New Project'}
+                        {initialData ? 'Редактировать проект' : 'Новый проект'}
                     </h2>
                     <button
                         onClick={onClose}
@@ -93,7 +93,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-zinc-300 mb-1">Project Name</label>
+                            <label className="block text-sm font-medium text-zinc-300 mb-1">Название проекта</label>
                             <input
                                 type="text"
                                 required
@@ -135,8 +135,8 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                                 className="w-5 h-5 rounded border-zinc-700 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-zinc-950 bg-zinc-900"
                             />
                             <div>
-                                <div className="text-sm font-medium text-slate-50">Enable Authentication (JWT)</div>
-                                <div className="text-xs text-zinc-400 mt-1">Automatically generates a secure login flow and protects your REST API.</div>
+                                <div className="text-sm font-medium text-slate-50">Включить Авторизацию (JWT)</div>
+                                <div className="text-xs text-zinc-400 mt-1">Автоматически генерирует безопасную систему входа и защищает ваш REST API.</div>
                             </div>
                         </label>
                         <label className="flex items-center gap-3 p-4 border border-zinc-800 rounded-xl bg-zinc-950/50 cursor-pointer hover:border-zinc-700 transition-colors">
@@ -147,14 +147,14 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                                 className="w-5 h-5 rounded border-zinc-700 text-indigo-600 focus:ring-indigo-600 focus:ring-offset-zinc-950 bg-zinc-900"
                             />
                             <div>
-                                <div className="text-sm font-medium text-slate-50">Generate Frontend (React + Vite)</div>
-                                <div className="text-xs text-zinc-400 mt-1">Scaffolds an out-of-the-box frontend admin dashboard wired to your API.</div>
+                                <div className="text-sm font-medium text-slate-50">Сгенерировать Фронтенд (React + Vite)</div>
+                                <div className="text-xs text-zinc-400 mt-1">Создает готовый к использованию дашборд администратора, подключенный к вашему API.</div>
                             </div>
                         </label>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-zinc-300 mb-1">Base Package</label>
+                                <label className="block text-sm font-medium text-zinc-300 mb-1">Базовый пакет</label>
                                 <input
                                     type="text"
                                     required
@@ -167,7 +167,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-zinc-300 mb-1">Version</label>
+                                <label className="block text-sm font-medium text-zinc-300 mb-1">Версия</label>
                                 <input
                                     type="text"
                                     required
@@ -185,7 +185,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                             onClick={onClose}
                             className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white bg-transparent hover:bg-zinc-800 border border-transparent hover:border-zinc-700 rounded-lg transition-colors"
                         >
-                            Cancel
+                            Отмена
                         </button>
                         <button
                             type="submit"
@@ -195,7 +195,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                             {loading ? (
                                 <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
                             ) : null}
-                            {initialData ? 'Save Changes' : 'Create Project'}
+                            {initialData ? 'Сохранить изменения' : 'Создать проект'}
                         </button>
                     </div>
                 </form>

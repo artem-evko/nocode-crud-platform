@@ -38,8 +38,8 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-slate-50">
             <div className="w-full max-w-md p-8 space-y-8 bg-zinc-900 rounded-xl shadow-2xl border border-zinc-800">
                 <div className="text-center">
-                    <h2 className="text-3xl font-extrabold tracking-tight">Welcome Back</h2>
-                    <p className="mt-2 text-sm text-zinc-400">Sign in to your account</p>
+                    <h2 className="text-3xl font-extrabold tracking-tight">С возвращением</h2>
+                    <p className="mt-2 text-sm text-zinc-400">Войдите в свой аккаунт</p>
                 </div>
 
                 <form className="mt-8 space-y-6" onSubmit={handleLogin}>
@@ -51,7 +51,7 @@ export default function LoginPage() {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-zinc-300">Username</label>
+                            <label className="block text-sm font-medium text-zinc-300">Имя пользователя</label>
                             <input
                                 type="text"
                                 required
@@ -62,7 +62,7 @@ export default function LoginPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-zinc-300">Password</label>
+                            <label className="block text-sm font-medium text-zinc-300">Пароль</label>
                             <input
                                 type="password"
                                 required
@@ -79,7 +79,7 @@ export default function LoginPage() {
                         disabled={loading}
                         className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 focus:ring-offset-zinc-900 disabled:opacity-50 transition-colors"
                     >
-                        {loading ? 'Signing in...' : 'Sign in'}
+                        {loading ? 'Вход...' : 'Войти'}
                     </button>
                 </form>
             </div>

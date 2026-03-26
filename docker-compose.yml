@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: nocode_password
       POSTGRES_DB: nocode_platform
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - nocode-db-data:/var/lib/postgresql/data
     networks:
@@ -28,6 +28,8 @@ services:
       - SERVER_PORT=8080
     ports:
       - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - database
     networks:

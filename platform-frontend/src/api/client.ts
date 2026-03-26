@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const apiClient = axios.create({
-    baseURL: 'http://localhost:8082/api',
+    baseURL: '/api',
     withCredentials: true, // Important for session cookies
     headers: {
         'Content-Type': 'application/json',

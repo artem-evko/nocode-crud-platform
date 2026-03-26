@@ -69,13 +69,13 @@ export default function ProjectsPage() {
 
     const handleDeleteProject = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
-        if (window.confirm('Are you sure you want to delete this project?')) {
+        if (window.confirm('Вы уверены, что хотите удалить этот проект?')) {
             try {
                 await apiClient.delete(`/projects/${id}`);
                 await fetchProjects();
             } catch (err) {
                 console.error("Failed to delete", err);
-                toast.error("Failed to delete project");
+                toast.error("Не удалось удалить проект");
             }
         }
     };
@@ -92,43 +92,43 @@ export default function ProjectsPage() {
     };
 
     if (loading) {
-        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Loading...</div>;
+        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Загрузка...</div>;
     }
 
     return (
         <div className="min-h-screen bg-zinc-950 text-slate-50 p-8">
             <div className="max-w-6xl mx-auto space-y-8">
                 <div className="flex justify-between items-center border-b border-zinc-800 pb-4">
-                    <h1 className="text-3xl font-bold tracking-tight">My Projects</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Мои Проекты</h1>
                     <div className="flex items-center gap-4">
                         <button
                             onClick={openCreateModal}
                             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors shadow-sm"
                         >
                             <Plus size={16} />
-                            New Project
+                            Новый Проект
                         </button>
                         <div className="h-6 w-px bg-zinc-800 mx-2"></div>
-                        <span className="text-sm text-zinc-400">User: <strong className="text-white font-medium">{user}</strong></span>
+                        <span className="text-sm text-zinc-400">Пользователь: <strong className="text-white font-medium">{user}</strong></span>
                         <button
                             onClick={handleLogout}
                             className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-lg text-sm font-medium transition-colors border border-zinc-800"
                         >
-                            Logout
+                            Выйти
                         </button>
                     </div>
                 </div>
 
                 {projects.length === 0 ? (
                     <div className="text-center py-24 bg-zinc-900/50 rounded-2xl border border-zinc-800 border-dashed">
-                        <h3 className="text-xl font-medium text-white mb-2">No projects yet</h3>
-                        <p className="text-zinc-400 mb-6">Create your first project to start modeling your architecture.</p>
+                        <h3 className="text-xl font-medium text-white mb-2">Проектов пока нет</h3>
+                        <p className="text-zinc-400 mb-6">Создайте свой первый проект, чтобы начать моделирование.</p>
                         <button
                             onClick={openCreateModal}
                             className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-950 focus:ring-indigo-500"
                         >
                             <Plus size={18} />
-                            Create Project
+                            Создать Проект
                         </button>
                     </div>
                 ) : (
@@ -146,21 +146,21 @@ export default function ProjectsPage() {
                                             navigate(`/projects/${project.id}/builder`);
                                         }}
                                         className="p-1.5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 rounded-md transition-colors"
-                                        title="UI Builder"
+                                        title="Конструктор интерфейса (UI Builder)"
                                     >
                                         <LayoutTemplate size={16} />
                                     </button>
                                     <button
                                         onClick={(e) => openEditModal(e, project)}
                                         className="p-1.5 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-md transition-colors"
-                                        title="Edit Project"
+                                        title="Изменить проект"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={(e) => handleDeleteProject(e, project.id)}
                                         className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
-                                        title="Delete Project"
+                                        title="Удалить проект"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -177,7 +177,7 @@ export default function ProjectsPage() {
                                         <span className="text-zinc-300 font-mono text-xs">{project.artifactId}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-zinc-500">Version</span>
+                                        <span className="text-zinc-500">Версия</span>
                                         <span className="text-zinc-300 font-mono text-xs">{project.version}</span>
                                     </div>
                                 </div>

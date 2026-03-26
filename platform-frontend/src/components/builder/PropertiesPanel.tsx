@@ -19,9 +19,15 @@ export default function PropertiesPanel() {
                     if (proj && proj.specText && proj.specText !== '{}') {
                         try {
                             const parsed = JSON.parse(proj.specText);
-                            const flowData = parsed._flow || parsed.flow;
-                            if (flowData && flowData.nodes) {
-                                setEntities(flowData.nodes.map((n: any) => ({
+                            
+                            // Extract nodes from _flow (new format) or flow (old) or root
+                            let nodes = [];
+                            if (parsed._flow && parsed._flow.nodes) nodes = parsed._flow.nodes;
+                            else if (parsed.flow && parsed.flow.nodes) nodes = parsed.flow.nodes;
+                            else if (parsed.nodes) nodes = parsed.nodes;
+
+                            if (nodes.length > 0) {
+                                setEntities(nodes.filter((n: any) => n.type === 'entity').map((n: any) => ({
                                     id: n.id,
                                     name: n.data.name
                                 })));
@@ -38,7 +44,7 @@ export default function PropertiesPanel() {
     if (!selectedComponent) {
         return (
             <div className="text-sm text-zinc-400 text-center py-10">
-                Select a component on the canvas to configure its settings and data bindings.
+                Выберите компонент на холсте, чтобы настроить его свойства и связи с данными.
             </div>
         );
     }
@@ -56,7 +62,7 @@ export default function PropertiesPanel() {
         <div className="space-y-6">
             <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                    <span className="text-sm font-semibold text-zinc-300">Type</span>
+                    <span className="text-sm font-semibold text-zinc-300">Тип</span>
                     <span className="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded font-mono">
                         {selectedComponent.type}
                     </span>
@@ -65,7 +71,7 @@ export default function PropertiesPanel() {
                 {/* General Text Property */}
                 {(selectedComponent.type === 'Heading' || selectedComponent.type === 'Text' || selectedComponent.type === 'Button') && (
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-zinc-400 block">Text Content</label>
+                        <label className="text-xs font-semibold text-zinc-400 block">Текстовое содержимое</label>
                         <input
                             type="text"
                             className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
@@ -78,19 +84,19 @@ export default function PropertiesPanel() {
                 {/* Data Binding Properties */}
                 {(selectedComponent.type === 'DataTable' || selectedComponent.type === 'FormModule' || selectedComponent.type === 'BarChart' || selectedComponent.type === 'LineChart') && (
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-zinc-400 block">Bind to Entity</label>
+                        <label className="text-xs font-semibold text-zinc-400 block">Привязать к сущности</label>
                         <select
                             className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
                             value={selectedComponent.props.entityName || "none"}
                             onChange={handleEntityBindingChange}
                         >
-                            <option value="none">-- Select Entity --</option>
+                            <option value="none">-- Выберите сущность --</option>
                             {entities.map(e => (
                                 <option key={e.id} value={e.name}>{e.name}</option>
                             ))}
                         </select>
                         <p className="text-xs text-zinc-500 mt-1">
-                            Link this component to an existing data model entity to auto-generate API calls.
+                            Свяжите этот компонент с сущностью модели данных для автогенерации API-вызовов.
                         </p>
                     </div>
                 )}
