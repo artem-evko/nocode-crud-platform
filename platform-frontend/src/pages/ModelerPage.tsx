@@ -12,7 +12,7 @@ import {
 } from '@xyflow/react';
 import type { Connection, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { ArrowLeft, Save, PlusCircle, Download, Settings, LayoutTemplate, Rocket } from 'lucide-react';
+import { ArrowLeft, Save, PlusCircle, Download, Settings, LayoutTemplate, Rocket, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ProjectFormData } from '../components/ProjectModal';
 import { compileToSpec } from '../lib/compiler';
@@ -218,22 +218,19 @@ export default function ModelerPage() {
 
             // We compile the visual layout into the strict Backend Spec
             const rawSpecText = compileToSpec(project, nodes, edges);
-            const specObj = JSON.parse(rawSpecText);
+            const newBackendSpec = JSON.parse(rawSpecText);
 
-            // To prevent losing X/Y coordinates when reloading the page, we wrap the payload.
-            // But wait, ProjectDownloadController uses `mapper.readValue(p.getSpecText(), Spec.class)`.
-            // If we wrap it, the GeneratorFacade will crash. 
-            // We must update GeneratorFacade to accept the wrapper, or handle visual data differently.
-            // For now, let's keep it clean since that's what we discovered. Just save the spec as-is 
-            // and we rely on the `fetchProject` reverse-engineering if we want coords.
+            let oldSpecObj = {};
+            if (project.specText && project.specText !== '{}') {
+                try {
+                    oldSpecObj = JSON.parse(project.specText);
+                } catch (e) { }
+            }
 
-            // Let's actually use a trick: Jackson ObjectMapper ignores unknown properties by default 
-            // if configured (but YAMLFactory is strict).
-
-            // Let's modify the Spec JSON to include an extra `_flow` root property. 
-            // If the backend `Spec.class` doesn't reject it, we get to keep our layout data!
+            // Preserve existing uiSpec and actionFlows from the database
             const wrapper = {
-                ...specObj,
+                ...oldSpecObj,
+                ...newBackendSpec,
                 _flow: {
                     nodes: serializableNodes,
                     edges
@@ -321,6 +318,13 @@ export default function ModelerPage() {
                     >
                         <LayoutTemplate size={16} />
                         UI Builder
+                    </button>
+                    <button
+                        onClick={() => navigate(`/projects/${projectId}/flows`)}
+                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
+                    >
+                        <Zap size={16} />
+                        Логика (Flows)
                     </button>
                     <button
                         onClick={handleGenerate}

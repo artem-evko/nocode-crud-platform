@@ -9,8 +9,32 @@ public record Spec(
         int specVersion,
         Project project,
         List<Entity> entities,
-        UiSpec uiSpec
+        UiSpec uiSpec,
+        List<ActionFlow> actionFlows
 ) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record ActionFlow(
+            String id,
+            String name,
+            List<FlowNode> nodes,
+            List<FlowEdge> edges
+    ) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record FlowNode(
+            String id,
+            String type,
+            String action,
+            Map<String, Object> config
+    ) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record FlowEdge(
+            String id,
+            String source,
+            String target
+    ) {}
+
     public record UiSpec(List<Component> components) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)

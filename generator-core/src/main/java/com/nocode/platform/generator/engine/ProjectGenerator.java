@@ -21,6 +21,8 @@ public class ProjectGenerator {
     private final ControllerGenerator controllerGenerator = new ControllerGenerator();
     private final LiquibaseGenerator liquibaseGenerator = new LiquibaseGenerator();
     private final FrontendGenerator frontendGenerator = new FrontendGenerator();
+    private final com.nocode.platform.generator.engine.poet.ServiceGenerator actionFlowServiceGenerator = new com.nocode.platform.generator.engine.poet.ServiceGenerator();
+    private final com.nocode.platform.generator.engine.poet.ActionFlowControllerGenerator actionFlowControllerGenerator = new com.nocode.platform.generator.engine.poet.ActionFlowControllerGenerator();
 
     public byte[] generate(Spec spec) {
         String artifactId = spec.project().artifactId();
@@ -80,6 +82,16 @@ public class ProjectGenerator {
                     putText(zos, repoPath, repoCode);
                     putText(zos, controllerPath, controllerCode);
                 }
+            }
+
+            if (spec.actionFlows() != null && !spec.actionFlows().isEmpty()) {
+                String serviceCode = actionFlowServiceGenerator.generate(spec, basePackage);
+                String servicePath = root + "backend/src/main/java/" + pkgPath + "/service/ActionFlowService.java";
+                putText(zos, servicePath, serviceCode);
+
+                String controllerCode = actionFlowControllerGenerator.generate(spec, basePackage);
+                String controllerPath = root + "backend/src/main/java/" + pkgPath + "/controller/ActionFlowController.java";
+                putText(zos, controllerPath, controllerCode);
             }
 
             if (spec.project().generateFrontend()) {

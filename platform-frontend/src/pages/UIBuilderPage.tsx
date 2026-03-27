@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { apiClient } from '../api/client';
-import { ArrowLeft, Save, LayoutTemplate, Settings, Monitor, Smartphone, Tablet, Type, Heading, Box, BarChart3, LineChart as LineChartIcon, Play, Rocket } from 'lucide-react';
+import { ArrowLeft, Save, LayoutTemplate, Settings, Monitor, Smartphone, Tablet, Type, Heading, Box, BarChart3, LineChart as LineChartIcon, Play, Rocket, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUIBuilderStore } from '../store/uiBuilderStore';
 import SidebarItem from '../components/builder/SidebarItem';
@@ -137,6 +137,13 @@ export default function UIBuilderPage() {
                         >
                             <Settings size={16} />
                             Модель данных
+                        </button>
+                        <button
+                            onClick={() => navigate(`/projects/${projectId}/flows`)}
+                            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700"
+                        >
+                            <Zap size={16} />
+                            Логика (Flows)
                         </button>
                         <button
                             onClick={() => window.open(`/projects/${projectId}/preview`, '_blank')}

@@ -7,12 +7,12 @@ export default function PropertiesPanel() {
     const { projectId } = useParams();
     const { components, selectedComponentId, updateComponentProps } = useUIBuilderStore();
     const [entities, setEntities] = useState<{ id: string, name: string }[]>([]);
+    const [actionFlows, setActionFlows] = useState<{ id: string, name: string }[]>([]);
 
     const selectedComponent = components.find(c => c.id === selectedComponentId);
 
     useEffect(() => {
         if (projectId) {
-            // Load project to glean entity names for the data binding dropdown
             apiClient.get(`/projects`)
                 .then(res => {
                     const proj = res.data.find((p: any) => p.id === projectId);
@@ -20,7 +20,6 @@ export default function PropertiesPanel() {
                         try {
                             const parsed = JSON.parse(proj.specText);
                             
-                            // Extract nodes from _flow (new format) or flow (old) or root
                             let nodes = [];
                             if (parsed._flow && parsed._flow.nodes) nodes = parsed._flow.nodes;
                             else if (parsed.flow && parsed.flow.nodes) nodes = parsed.flow.nodes;
@@ -30,6 +29,13 @@ export default function PropertiesPanel() {
                                 setEntities(nodes.filter((n: any) => n.type === 'entity').map((n: any) => ({
                                     id: n.id,
                                     name: n.data.name
+                                })));
+                            }
+
+                            if (parsed.actionFlows) {
+                                setActionFlows(parsed.actionFlows.map((f: any) => ({
+                                    id: f.id,
+                                    name: f.name
                                 })));
                             }
                         } catch (e) {
@@ -78,6 +84,26 @@ export default function PropertiesPanel() {
                             value={selectedComponent.props.text || ''}
                             onChange={handleTextChange}
                         />
+                    </div>
+                )}
+
+                {/* Logic Binding Property */}
+                {selectedComponent.type === 'Button' && (
+                    <div className="space-y-2 pt-2 border-t border-zinc-800">
+                        <label className="text-xs font-semibold text-zinc-400 block">Выполнить логику (Action Flow)</label>
+                        <select
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                            value={selectedComponent.props.actionFlowId || "none"}
+                            onChange={(e) => updateComponentProps(selectedComponent.id, { actionFlowId: e.target.value === "none" ? null : e.target.value })}
+                        >
+                            <option value="none">-- Без действия --</option>
+                            {actionFlows.map(f => (
+                                <option key={f.id} value={f.id}>{f.name}</option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-zinc-500 mt-1">
+                            Выберите поток логики, который будет выполняться при клике на кнопку.
+                        </p>
                     </div>
                 )}
 

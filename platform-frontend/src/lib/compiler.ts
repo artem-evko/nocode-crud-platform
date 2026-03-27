@@ -27,6 +27,21 @@ export interface BackendSpec {
             type: string;
         }[];
     }[];
+    actionFlows?: {
+        id: string;
+        name: string;
+        nodes: {
+            id: string;
+            type: string;
+            action: string;
+            config: Record<string, any>;
+        }[];
+        edges: {
+            id: string;
+            source: string;
+            target: string;
+        }[];
+    }[];
 }
 
 const mapType = (type: EntityFieldType): string => {

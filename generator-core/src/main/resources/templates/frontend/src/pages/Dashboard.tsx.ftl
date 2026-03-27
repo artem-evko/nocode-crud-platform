@@ -9,6 +9,7 @@ const _${entity.name()}FormRef = ${entity.name()}Form;
 </#list>
 </#if>
 </#if>
+import { apiClient } from '../lib/api';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const mockChartData = [
@@ -29,7 +30,25 @@ export default function Dashboard() {
 <#elseif component.type() == "Text">
             <p className="text-zinc-500 max-w-2xl">${component.props()['text']!'Text block'}</p>
 <#elseif component.type() == "Button">
-            <button className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors shadow-sm text-white">
+            <button 
+                <#if component.props()['actionFlowId']??>
+                onClick={() => {
+                    apiClient.post('/actions/${component.props()['actionFlowId']}', {})
+                        .then(res => {
+                            if (res.data.toast) {
+                                alert(res.data.toast);
+                            } else {
+                                alert("Экшен успешно выполнен");
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert("Ошибка выполнения экшена");
+                        });
+                }}
+                </#if>
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors shadow-sm text-white"
+            >
                 ${component.props()['text']!'Button'}
             </button>
 <#elseif component.type() == "DataTable">
