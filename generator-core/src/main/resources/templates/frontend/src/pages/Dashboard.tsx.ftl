@@ -10,6 +10,7 @@ const _${entity.name()}FormRef = ${entity.name()}Form;
 </#if>
 </#if>
 import { apiClient } from '../lib/api';
+import { useAuthStore } from '../store/authStore';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const mockChartData = [
@@ -22,6 +23,8 @@ const mockChartData = [
 ];
 
 export default function Dashboard() {
+    const { user, isAuthenticated } = useAuthStore();
+
     return (
         <div className="p-8 space-y-8 max-w-7xl mx-auto">
 <#macro renderComponent component>

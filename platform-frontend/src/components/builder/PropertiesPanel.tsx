@@ -77,13 +77,32 @@ export default function PropertiesPanel() {
                 {/* General Text Property */}
                 {(selectedComponent.type === 'Heading' || selectedComponent.type === 'Text' || selectedComponent.type === 'Button') && (
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-zinc-400 block">Текстовое содержимое</label>
+                        <div className="flex items-center justify-between">
+                            <label className="text-xs font-semibold text-zinc-400 block">Текстовое содержимое</label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <span className={`text-[10px] ${!selectedComponent.props.isDynamicText ? 'text-zinc-300' : 'text-zinc-600'}`}>Static</span>
+                                <input 
+                                    type="checkbox" 
+                                    checked={selectedComponent.props.isDynamicText || false}
+                                    onChange={(e) => updateComponentProps(selectedComponent.id, { isDynamicText: e.target.checked })}
+                                    className="hidden" 
+                                />
+                                <div className={`w-7 h-4 rounded-full relative transition-colors ${selectedComponent.props.isDynamicText ? 'bg-indigo-500' : 'bg-zinc-700'}`}>
+                                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${selectedComponent.props.isDynamicText ? 'translate-x-3' : ''}`}></div>
+                                </div>
+                                <span className={`text-[10px] ${selectedComponent.props.isDynamicText ? 'text-indigo-400 font-semibold' : 'text-zinc-600'}`}>Dynamic</span>
+                            </label>
+                        </div>
                         <input
                             type="text"
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                            placeholder={selectedComponent.props.isDynamicText ? "{item.title}" : "Текст компонента"}
+                            className={`w-full bg-zinc-900 border rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors ${selectedComponent.props.isDynamicText ? 'border-indigo-600/50 font-mono text-indigo-300' : 'border-zinc-800'}`}
                             value={selectedComponent.props.text || ''}
                             onChange={handleTextChange}
                         />
+                        {selectedComponent.props.isDynamicText && (
+                            <p className="text-[10px] text-zinc-500">Укажите JS выражение в фигурных скобках (например, {'{item.name}'}).</p>
+                        )}
                     </div>
                 )}
 

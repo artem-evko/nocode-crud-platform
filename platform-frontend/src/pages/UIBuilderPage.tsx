@@ -176,6 +176,7 @@ export default function UIBuilderPage() {
                         <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Компоненты</h2>
                         <div className="space-y-3">
                             {/* Draggable items */}
+                            <SidebarItem type="Button" label="Кнопка" icon={Play} iconColor="text-indigo-400" />
                             <SidebarItem type="Heading" label="Заголовок" icon={Heading} iconColor="text-pink-400" />
                             <SidebarItem type="Text" label="Текст" icon={Type} iconColor="text-zinc-300" />
                             <SidebarItem type="DataTable" label="Таблица данных" icon={LayoutTemplate} iconColor="text-blue-400" />

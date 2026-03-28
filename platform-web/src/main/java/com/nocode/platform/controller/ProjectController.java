@@ -29,6 +29,14 @@ public class ProjectController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ProjectDto> getProjectById(@PathVariable UUID id) {
+        return projectRepository.findById(id)
+                .map(this::convertToDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public ProjectDto createProject(@RequestBody ProjectDto dto) {
         ProjectEntity project = new ProjectEntity();

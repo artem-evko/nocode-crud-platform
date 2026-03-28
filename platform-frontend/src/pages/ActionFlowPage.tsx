@@ -13,7 +13,8 @@ import {
     useEdgesState,
     addEdge,
     ReactFlowProvider,
-    useReactFlow
+    useReactFlow,
+    useOnSelectionChange
 } from '@xyflow/react';
 import type { Connection, Edge, Node } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -29,6 +30,28 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
     const { screenToFlowPosition } = useReactFlow();
+    const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+    useOnSelectionChange({
+        onChange: ({ nodes }) => {
+            if (nodes.length > 0) {
+                setSelectedNodeId(nodes[0].id);
+            } else {
+                setSelectedNodeId(null);
+            }
+        },
+    });
+
+    const updateNodeData = (id: string, newData: any) => {
+        setNodes((nds) =>
+            nds.map((node) => {
+                if (node.id === id) {
+                    return { ...node, data: { ...node.data, ...newData } };
+                }
+                return node;
+            })
+        );
+    };
 
     useEffect(() => {
         if (project?.specText && project.specText !== '{}') {
@@ -251,12 +274,90 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                     </ReactFlow>
                 </main>
                 
-                <aside className="w-72 border-l border-zinc-800 bg-zinc-900/40 p-4 flex flex-col">
+                <aside className="w-72 border-l border-zinc-800 bg-zinc-900/40 p-4 flex flex-col overflow-y-auto">
                     <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Настройки Ноды</h2>
-                    <div className="text-sm text-zinc-400 p-4 bg-zinc-800/30 rounded-lg border border-zinc-800 border-dashed text-center">
-                        Свойства пока недоступны. <br/><br/>
-                        Главное — выстроить граф логики. Маппинг полей будет добавлен на следующем этапе!
-                    </div>
+                    
+                    {(() => {
+                        const selectedNode = nodes.find(n => n.id === selectedNodeId);
+                        
+                        let parsedSpec: any = {};
+                        if (project?.specText && project.specText !== '{}') {
+                            try { parsedSpec = JSON.parse(project.specText); } catch(e){}
+                        }
+                        const entities = parsedSpec.entities || [];
+
+                        if (!selectedNode) {
+                            return (
+                                <div className="text-sm text-zinc-400 p-4 bg-zinc-800/30 rounded-lg border border-zinc-800 border-dashed text-center">
+                                    Выберите узел на холсте для редактирования свойств.
+                                </div>
+                            );
+                        }
+
+                        return (
+                            <div className="flex flex-col gap-5">
+                                <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800">
+                                    <div className="text-xs text-zinc-500 mb-1">Тип узла</div>
+                                    <div className="font-medium text-white flex items-center gap-2">
+                                        {String(selectedNode.data.action)}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-zinc-400 mb-1">Название (Label)</label>
+                                    <input 
+                                        type="text"
+                                        value={selectedNode.data.label as string || ''}
+                                        onChange={(e) => updateNodeData(selectedNode.id, { label: e.target.value })}
+                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                    />
+                                </div>
+
+                                {selectedNode.data.action === 'DB_CREATE_RECORD' && (
+                                    <div className="flex flex-col gap-4">
+                                        <div>
+                                            <label className="block text-xs font-medium text-zinc-400 mb-1">Сущность (Entity)</label>
+                                            <select 
+                                                value={(selectedNode.data.config as any)?.entityName || ''}
+                                                onChange={(e) => updateNodeData(selectedNode.id, { config: { ...(selectedNode.data.config as any), entityName: e.target.value } })}
+                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                            >
+                                                <option value="">-- Выберите сущность --</option>
+                                                {entities.map((ent: any) => (
+                                                    <option key={ent.name} value={ent.name}>{ent.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-zinc-400 mb-1">Маппинг полей (JSON)</label>
+                                            <div className="text-xs text-zinc-500 mb-2">Настройте, откуда брать поля. Используйте {'{{payload.field}}'} для связи с триггером.</div>
+                                            <textarea 
+                                                value={(selectedNode.data.config as any)?.mapping ?? '{\n  "title": "{{payload.title}}"\n}'}
+                                                onChange={(e) => updateNodeData(selectedNode.id, { config: { ...(selectedNode.data.config as any), mapping: e.target.value } })}
+                                                rows={5}
+                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors font-mono resize-y"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedNode.data.action === 'UI_SHOW_TOAST' && (
+                                    <div className="flex flex-col gap-4">
+                                        <div>
+                                            <label className="block text-xs font-medium text-zinc-400 mb-1">Сообщение (Toast)</label>
+                                            <input 
+                                                type="text"
+                                                value={(selectedNode.data.config as any)?.message || ''}
+                                                onChange={(e) => updateNodeData(selectedNode.id, { config: { ...(selectedNode.data.config as any), message: e.target.value } })}
+                                                placeholder="{{payload.message}} или Статичный текст"
+                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </aside>
             </div>
         </div>
