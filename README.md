@@ -1,80 +1,81 @@
-# My Application README
+# 🪄 No-Code App Platform
 
-- [ ] TODO Replace or update this README with instructions relevant to your application
+**No-Code App Platform** — это мощная и современная платформа для визуального программирования, позволяющая генерировать полноценные Full-Stack приложения (Web + API + База Данных) без написания кода. Платформа собирает ваш визуальный дизайн в реальный исходный код на Java (Spring Boot) и TypeScript (React), который можно мгновенно развернуть в облаке одним кликом.
 
-## Project Structure
+---
 
-This project has the following structure:
+## 🌟 Ключевые возможности
 
-```
-src
-├── main/java
-│   └── [application package]
-│       ├── base
-│       │   └── ui
-│       │       ├── ViewToolbar.java
-│       │       └── MainLayout.java
-│       ├── examplefeature
-│       │   ├── ui
-│       │   │   └── TaskListView.java
-│       │   ├── Task.java
-│       │   ├── TaskRepository.java
-│       │   └── TaskService.java                
-│       └── Application.java     
-├── main/resources
-│   ├── META-INF
-│   │   └── resources
-│   │       └── styles.css
-│   └── application.properties 
-└── test/java
-    └── [application package]
-        └── examplefeature
-           └── TaskServiceTest.java                 
-```
+*   🏗️ **Визуальный дизайнер схем данных (Data Modeler):** Рисуйте сущности, настраивайте типы полей, связи и ограничения бизнес-логики в удобном визуальном графе (React Flow).
+*   🎨 **Конструктор интерфейсов (UI Builder):** Полностью 2D Drag-and-Drop редактор экранов, таблиц, форм и графиков. Поддержка вложенности и адаптивности. Гибкая привязка UI-элементов к сущностям БД и динамическим переменным.
+*   ⚡ **Бизнес-логика (Action Flows):** Визуальный редактор логики. Создавайте кастомные обработчики кликов: запись в базу, обновление данных, навигация, отображение всплывающих окон и сложное ветвление — всё это автоматически транслируется в слой `@Service` на бэкенде.
+*   🚀 **Мгновенный деплой (One-Click Cloud Deployment):** Встроенная поддержка Docker-in-Docker позволяет собрать сгенерированное приложение (Vite + Maven) и развернуть его на выделенном порту прямо из интерфейса конструктора.
+*   📦 **Генерация чистого кода:** Никаких закрытых "черных ящиков" (vendor lock-in). Вы получаете ZIP-архив с чистым, поддерживаемым и компилируемым Spring Boot 3 + React проектом.
 
-The main entry point into the application is `Application.java`. This class contains the `main()` method that starts up 
-the Spring Boot application.
+---
 
-The project follows a *feature-based package structure*, organizing code by *functional units* rather than traditional 
-architectural layers. It includes two feature packages: `base` and `examplefeature`.
+## 🛠 Технологический стек приложения
 
-* The `base` package contains classes meant for reuse across different features, either through composition or 
-  inheritance. You can use them as-is, tweak them to your needs, or remove them.
-* The `examplefeature` package is an example feature package that demonstrates the structure. It represents a 
-  *self-contained unit of functionality*, including UI components, business logic, data access, and an integration test.
-  Once you create your own features, *you'll remove this package*.
+Сама платформа и генерируемый ею код базируются на передовом и надежном стеке:
 
+### Платформа (Конструктор)
+*   **Backend:** Java 21, Spring Boot 3, Spring Data JPA, JavaPoet, FreeMarker, JWT (Security)
+*   **Frontend:** React 18, TypeScript, Vite, React Flow (ноды), Zustand (стейт), TailwindCSS, Shadcn/ui
+*   **Инфраструктура:** PostgreSQL 16, Docker, Docker Compose (DinD)
 
-## Starting in Development Mode
+### Генерируемый код (Результат)
+*   **Backend:** Spring Boot 3, REST API, Liquibase (миграции БД), Hibernate
+*   **Frontend:** React, React Router, TailwindCSS, Axios
+*   **Упаковка:** Готовый `docker-compose.yml` и Dockerfiles под Nginx + JDK 21.
 
-To start the application in development mode, import it into your IDE and run the `Application` class. 
-You can also start the application from the command line by running: 
+---
 
-```bash
-./mvnw
-```
+## 🚀 Быстрый старт (Запуск локально)
 
-## Building for Production
+Для запуска всей платформы на вашей машине вам понадобятся установленные **Docker** и **Docker Compose**.
 
-To build the application in production mode, run:
+1.  Клонируйте репозиторий:
+    ```bash
+    git clone https://github.com/artem-evko/nocode-crud-platform.git
+    cd nocode-crud-platform
+    ```
 
-```bash
-./mvnw package
-```
+2.  Запустите платформу в контейнерах:
+    ```bash
+    docker compose up -d --build
+    ```
 
-To build a Docker image, run:
+3.  Откройте платформу в браузере:
+    *   **UI:** `http://localhost`
+    *   **Swagger API:** `http://localhost:8080/swagger-ui/index.html`
 
-```bash
-docker build -t my-application:latest .
-```
+4.  Авторизуйтесь в системе со стандартными данными администратора (или зарегистрируйтесь). Создайте свой первый проект!
 
-If you use commercial components, pass the license key as a build secret:
+---
 
-```bash
-docker build --secret id=proKey,src=$HOME/.vaadin/proKey .
-```
+## 🏗 Архитектура решения
 
-## Next Steps
+Платформа состоит из трёх основных модулей:
+1.  **`platform-frontend`**: SPA-приложение конструктора (UI Builder, Entity Modeler, Action Flows).
+2.  **`platform-web`**: Основной бэкенд платформы. Управляет проектами, пользователями, сохраняет JSON-спецификации моделей логики и UI. Запускает Docker-контейнеры для предпросмотра сгенерированных приложений (Cloud Deploy).
+3.  **`generator-core`**: Ядро кодогенерации. Принимает JSON-спецификацию от `platform-web` и с помощью **JavaPoet** строит AST-деревья Java-классов (`Controller`, `Service`, `Entity`, `Repository`), а с помощью **FreeMarker** генерирует React-компоненты. Возвращает готовый ZIP-архив проекта.
 
-The [Building Apps](https://vaadin.com/docs/v25/building-apps) guides contain hands-on advice for adding features to 
-your application.
+---
+
+## 🗺 Roadmap (План развития)
+
+Платформа регулярно обновляется. Ниже представлен список выполненных и запланированных фаз:
+
+- [x] **Фаза 1-3:** Базовый REST API + React UI, управление проектами.
+- [x] **Фаза 4-5:** Визуальный конструктор сущностей (Entity Modeler) и архитектура кодогенератора.
+- [x] **Фаза 6-8:** Аутентификация из коробки, полная Full-Stack трансляция (API + Frontend клиент).
+- [x] **Фаза 9-11:** 2D UI Builder (Grid-based Layouts), живой предпросмотр, Mock-данные и **Автоматический Docker Cloud Deploy**.
+- [x] **Фаза 12-13:** Визуальное реактивное программирование (Action Flows), динамический маппинг данных из UI в БД.
+- [ ] **Фаза 14:** Row-Level Security (RLS) - ролевая модель и политики доступа к строкам в генерируемом коде.
+- [ ] **Фаза 15:** Продвинутые ветвления логики (If/Else, Loops), внешние API Webhooks.
+
+---
+
+## ⚖️ Лицензия
+
+MIT License. Свободно для использования, модификации и распространения.
