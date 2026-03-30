@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { useUIBuilderStore } from '../../store/uiBuilderStore';
 import SortableComponent from './SortableComponent';
@@ -14,6 +14,10 @@ export default function CanvasArea() {
     const { components, addComponent, updateComponentLayout, selectComponent } = useUIBuilderStore();
     const [isDragOver, setIsDragOver] = useState(false);
     const [resizing, setResizing] = useState(null); // { id, startX, startY, startW, startH }
+
+    // dynamically resize background to furthest component
+    const maxRow = components.reduce((max, c) => Math.max(max, (c.layout?.y || 0) + (c.layout?.h || 0)), 0);
+    const canvasHeight = Math.max(800, (maxRow + 3) * ROW_HEIGHT);
 
     const handleDrop = useCallback((e) => {
         e.preventDefault();
@@ -51,8 +55,8 @@ export default function CanvasArea() {
 
     return (
         <div
-            className={`w-full min-h-[800px] bg-zinc-950 border shadow-2xl rounded-lg relative transition-colors ${isDragOver ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-zinc-800 ring-1 ring-white/5'}`}
-            style={{ position: 'relative' }}
+            className={`w-full bg-zinc-950 border shadow-2xl rounded-lg relative transition-colors ${isDragOver ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-zinc-800 ring-1 ring-white/5'}`}
+            style={{ position: 'relative', minHeight: `${canvasHeight}px` }}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
             onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsDragOver(false); }}
             onDrop={handleDrop}
@@ -74,7 +78,7 @@ export default function CanvasArea() {
             }} />
 
             {/* Canvas area for components - use CSS absolute positioning */}
-            <div className="relative" style={{ minHeight: '800px' }} data-canvas="true">
+            <div className="relative" style={{ minHeight: `${canvasHeight}px` }} data-canvas="true">
                 {components.map((comp) => {
                     const layout = comp.layout || { x: 0, y: 0, w: 4, h: 4 };
                     return (
@@ -95,8 +99,11 @@ export default function CanvasArea() {
 
 function ComponentBlock({ comp, layout, onLayoutChange, onSelect, containerRef }) {
     const [dragging, setDragging] = useState(false);
-    const [dragStart, setDragStart] = useState(null);
     const [localLayout, setLocalLayout] = useState(layout);
+
+    useEffect(() => {
+        setLocalLayout(layout);
+    }, [layout]);
 
     // Use localLayout for smooth drag, then sync to store on drop
     const { x, y, w, h } = localLayout;

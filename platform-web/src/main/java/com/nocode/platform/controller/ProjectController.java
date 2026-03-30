@@ -17,9 +17,11 @@ import java.util.stream.Collectors;
 public class ProjectController {
 
     private final ProjectRepository projectRepository;
+    private final com.nocode.platform.project.DeploymentService deploymentService;
 
-    public ProjectController(ProjectRepository projectRepository) {
+    public ProjectController(ProjectRepository projectRepository, com.nocode.platform.project.DeploymentService deploymentService) {
         this.projectRepository = projectRepository;
+        this.deploymentService = deploymentService;
     }
 
     @GetMapping
@@ -76,7 +78,21 @@ public class ProjectController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
-        projectRepository.deleteById(id);
+        if (!projectRepository.existsById(id)) {
+            return ResponseEntity.ok().build();
+        }
+        try {
+            deploymentService.stopDeployment(id);
+        } catch (Exception e) {
+            // Ignore if deployment wasn't actively running
+        }
+        if (projectRepository.existsById(id)) {
+            try {
+                projectRepository.deleteById(id);
+            } catch (Exception e) {
+                // Ignore if it was somehow deleted concurrently
+            }
+        }
         return ResponseEntity.ok().build();
     }
 

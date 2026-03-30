@@ -30,7 +30,7 @@ public class DeploymentService {
     }
 
     @Async
-    public void deployProject(UUID projectId) {
+    public void deployProject(UUID projectId, Integer customPort) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow();
         try {
             updateStatus(project, "DEPLOYING", null);
@@ -63,7 +63,7 @@ public class DeploymentService {
                     && Files.exists(projectRoot.resolve("frontend/package.json"));
 
             // 6. Find free port for frontend or backend
-            int frontendPort = hasFrontend ? findFreePort() : -1;
+            int frontendPort = hasFrontend ? (customPort != null ? customPort : findFreePort()) : -1;
             int backendPort = findFreePort();
             int dbPort = findFreePort();
 
@@ -81,6 +81,13 @@ public class DeploymentService {
 
             int upExitCode = runCommand(projectRoot.toFile(), "docker", "compose", "-p", projectName, "up", "-d");
             if (upExitCode != 0) {
+                File logFile = projectRoot.resolve("deploy.log").toFile();
+                if (logFile.exists()) {
+                    String logText = Files.readString(logFile.toPath());
+                    if (logText.contains("address already in use") || logText.contains("port is already allocated")) {
+                        throw new RuntimeException("PORT_IN_USE");
+                    }
+                }
                 throw new RuntimeException("Docker up failed with exit code " + upExitCode);
             }
 
@@ -90,7 +97,11 @@ public class DeploymentService {
 
         } catch (Exception e) {
             log.error("Deployment failed for project {}", projectId, e);
-            updateStatus(project, "FAILED", null);
+            if ("PORT_IN_USE".equals(e.getMessage())) {
+                updateStatus(project, "PORT_OCCUPIED", null);
+            } else {
+                updateStatus(project, "FAILED", null);
+            }
         }
     }
 
@@ -162,7 +173,7 @@ public class DeploymentService {
     private void generateDockerCompose(Path root, ProjectEntity project, boolean hasFrontend, int frontendPort, int backendPort, int dbPort) throws IOException {
         String dbUser = "user";
         String dbPass = "password";
-        String dbName = "nocode_db";
+        String dbName = "app";
         
         // If hasFrontend, configure nginx to proxy /api to the backend
         if (hasFrontend) {
@@ -188,7 +199,7 @@ public class DeploymentService {
             Files.writeString(nginxConfPath, nginxConf);
             
             // Overwrite API BASE URL in api.ts to be relative /api
-            Path apiTsPath = frontendDir.resolve("src/api/client.ts");
+            Path apiTsPath = frontendDir.resolve("src/lib/api.ts");
             if (Files.exists(apiTsPath)) {
                 String apiTs = Files.readString(apiTsPath);
                 apiTs = apiTs.replace("http://localhost:8080/api", "/api");

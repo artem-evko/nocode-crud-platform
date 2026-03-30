@@ -14,15 +14,42 @@ import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
+import com.nocode.platform.domain.PlatformUser;
+import com.nocode.platform.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(AuthenticationManager authenticationManager) {
+    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody LoginRequest loginRequest) {
+        if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Username and password required"));
+        }
+        if (userRepository.findByUsername(loginRequest.getUsername()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Username is already taken"));
+        }
+        
+        PlatformUser newUser = new PlatformUser();
+        newUser.setUsername(loginRequest.getUsername());
+        newUser.setPassword(passwordEncoder.encode(loginRequest.getPassword()));
+        newUser.setRole("USER"); // Default role
+        
+        userRepository.save(newUser);
+        return ResponseEntity.ok(Map.of("message", "User registered successfully"));
     }
 
     @PostMapping("/login")

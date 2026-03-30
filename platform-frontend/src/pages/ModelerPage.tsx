@@ -18,6 +18,7 @@ import type { ProjectFormData } from '../components/ProjectModal';
 import { compileToSpec } from '../lib/compiler';
 import EntityNode from '../components/EntityNode';
 import type { AppNode } from '../components/EntityNode';
+import ModelerPropertiesPanel from '../components/ModelerPropertiesPanel';
 import ProjectSettingsModal from '../components/ProjectSettingsModal';
 import DeploymentModal from '../components/DeploymentModal';
 
@@ -357,20 +358,29 @@ export default function ModelerPage() {
                 </div>
             </header>
 
-            <div className="flex-1 w-full h-full relative" style={{ minHeight: 0 }}>
-                <ReactFlow
-                    nodes={nodesWithCallbacks}
+            <div className="flex-1 w-full h-full relative flex flex-row" style={{ minHeight: 0 }}>
+                <div className="flex-1 h-full relative">
+                    <ReactFlow
+                        nodes={nodesWithCallbacks}
+                        edges={edges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                        nodeTypes={nodeTypes}
+                        colorMode="dark"
+                        fitView
+                    >
+                        <Background color="#52525b" gap={16} size={1} />
+                        <Controls className="bg-zinc-900 border-zinc-800 fill-white" />
+                    </ReactFlow>
+                </div>
+                <ModelerPropertiesPanel 
+                    selectedNode={nodes.find(n => n.selected) || null}
+                    nodes={nodes}
                     edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                    nodeTypes={nodeTypes}
-                    colorMode="dark"
-                    fitView
-                >
-                    <Background color="#52525b" gap={16} size={1} />
-                    <Controls className="bg-zinc-900 border-zinc-800 fill-white" />
-                </ReactFlow>
+                    setNodes={setNodes}
+                    setEdges={setEdges}
+                />
             </div>
 
             <ProjectSettingsModal

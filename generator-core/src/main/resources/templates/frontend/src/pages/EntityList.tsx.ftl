@@ -42,7 +42,7 @@ export default function ${entity.name()}List() {
   const handleDelete = async (id: string | number) => {
     if (!confirm('Are you sure you want to delete this record?')) return;
     try {
-      await api.delete(`/${entity.table()}/r${r"${id}"}`);
+      await api.delete(`/${entity.table()}/${r"${id}"}`);
       fetchData();
     } catch (error) {
       console.error('Failed to delete ${entity.name()}', error);
@@ -107,7 +107,7 @@ export default function ${entity.name()}List() {
 </#list>
                     <td className="px-6 py-4 text-right space-x-2">
                       <Link 
-                        to={`/${entity.name()?lower_case}/r${r"${item.id}"}`}
+                        to={`/${entity.name()?lower_case}/${r"${item.id}"}`}
                         className="inline-flex p-2 text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors"
                       >
                         <Pencil size={16} />

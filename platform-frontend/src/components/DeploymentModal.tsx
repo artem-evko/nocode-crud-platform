@@ -6,12 +6,15 @@ interface DeploymentModalProps {
     isOpen: boolean;
     onClose: () => void;
     projectId: string;
+    currentUIComponents?: any[]; // optional prop to validate unsaved state
 }
 
-export default function DeploymentModal({ isOpen, onClose, projectId }: DeploymentModalProps) {
-    const [status, setStatus] = useState<string>('NONE'); // NONE, DEPLOYING, RUNNING, FAILED, STOPPING
+export default function DeploymentModal({ isOpen, onClose, projectId, currentUIComponents }: DeploymentModalProps) {
+    const [status, setStatus] = useState<string>('NONE'); // NONE, DEPLOYING, RUNNING, FAILED, STOPPING, PORT_OCCUPIED
     const [liveUrl, setLiveUrl] = useState<string | null>(null);
     const [isTriggering, setIsTriggering] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [port, setPort] = useState<string>('');
 
     useEffect(() => {
         if (!isOpen || !projectId) return;
@@ -42,11 +45,40 @@ export default function DeploymentModal({ isOpen, onClose, projectId }: Deployme
 
     const handleDeploy = async () => {
         try {
+            setError(null);
+            
+            // Validate the UI components before deployment
+            let compsToValidate = currentUIComponents;
+            
+            // If we are deploying via Dashboard, fetch DB spec
+            if (!compsToValidate) {
+                const res = await apiClient.get('/projects');
+                const proj = res.data.find((p: any) => p.id === projectId);
+                if (proj && proj.specText) {
+                    try {
+                        const spec = JSON.parse(proj.specText);
+                        compsToValidate = spec?.uiSpec?.components || [];
+                    } catch (e) {}
+                }
+            }
+
+            if (compsToValidate && compsToValidate.length > 0) {
+                const invalid = compsToValidate.filter((c: any) => 
+                    (c.type === 'DataTable' || c.type === 'FormModule') && !c.props.entityName
+                );
+                if (invalid.length > 0) {
+                    setError("В проекте есть компоненты (Таблица данных или Форма), у которых не выбрана Сущность данных. Пожалуйста, закройте это окно, выберите элемент на холсте и привяжите Сущность в правой панели свойств.");
+                    return;
+                }
+            }
+
             setIsTriggering(true);
-            await apiClient.post(`/projects/${projectId}/deploy`);
+            const queryPort = port.trim() ? `?port=${port.trim()}` : '';
+            await apiClient.post(`/projects/${projectId}/deploy${queryPort}`);
             setStatus('DEPLOYING');
-        } catch (error) {
-            console.error("Deploy trigger failed", error);
+        } catch (e: any) {
+            console.error("Deploy trigger failed", e);
+            setError("Произошла ошибка при отправке запроса на развертывание.");
         } finally {
             setIsTriggering(false);
         }
@@ -76,10 +108,37 @@ export default function DeploymentModal({ isOpen, onClose, projectId }: Deployme
                     </button>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-5">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/40 rounded-lg p-3 text-sm text-red-400 flex items-start gap-2 animate-in fade-in">
+                            <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    {status === 'PORT_OCCUPIED' && (
+                        <div className="bg-amber-500/10 border border-amber-500/40 rounded-lg p-3 text-sm text-amber-400 flex items-start gap-2 animate-in fade-in">
+                            <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+                            <span>Этот порт уже занят другим приложением. Укажите вручную другой свободный порт или оставьте поле пустым для автоматического выбора.</span>
+                        </div>
+                    )}
+
                     <p className="text-zinc-400 text-sm">
                         Разверните ваше приложение в облаке в один клик. Платформа автоматически настроит инфраструктуру, соберёт docker-контейнеры и опубликует ваше приложение.
                     </p>
+
+                    {(status === 'NONE' || status === 'FAILED' || status === 'PORT_OCCUPIED') && (
+                        <div className="space-y-1">
+                            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Развернуть на порту</label>
+                            <input
+                                type="number"
+                                placeholder="Автоматически (оставьте пустым)"
+                                value={port}
+                                onChange={(e) => setPort(e.target.value)}
+                                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-white"
+                            />
+                        </div>
+                    )}
 
                     <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
                         <div className="flex items-center justify-between mb-4">
@@ -128,7 +187,7 @@ export default function DeploymentModal({ isOpen, onClose, projectId }: Deployme
                         Закрыть
                     </button>
 
-                    {(status === 'NONE' || status === 'FAILED') && (
+                    {(status === 'NONE' || status === 'FAILED' || status === 'PORT_OCCUPIED') && (
                         <button
                             onClick={handleDeploy}
                             disabled={isTriggering}

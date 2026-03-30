@@ -92,3 +92,58 @@ databaseChangeLog:
               - column:
                   name: deployment_url
                   type: varchar(300)
+  - changeSet:
+      id: 4
+      author: nocode
+      changes:
+        - createTable:
+            tableName: platform_users
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(50)
+                  defaultValue: 'USER'
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: platform_users
+            indexName: idx_platform_users_username
+            columns:
+              - column:
+                  name: username
+  - changeSet:
+      id: 5
+      author: nocode
+      changes:
+        - addColumn:
+            tableName: projects
+            columns:
+              - column:
+                  name: owner_username
+                  type: varchar(100)
+                  defaultValue: 'admin'
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: projects
+            indexName: idx_projects_owner
+            columns:
+              - column:
+                  name: owner_username

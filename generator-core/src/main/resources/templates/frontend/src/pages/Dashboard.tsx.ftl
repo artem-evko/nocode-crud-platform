@@ -1,42 +1,64 @@
+// @ts-nocheck
+import React, { useState, useEffect } from 'react';
 <#if entities??>
 <#list entities as entity>
 import ${entity.name()}List from './${entity.name()}List';
 import ${entity.name()}Form from './${entity.name()}Form';
-// @ts-ignore - may be unused depending on uiSpec
-const _${entity.name()}ListRef = ${entity.name()}List;
-// @ts-ignore - may be unused depending on uiSpec
-const _${entity.name()}FormRef = ${entity.name()}Form;
 </#list>
 </#if>
-</#if>
-import { apiClient } from '../lib/api';
+import { api } from '../lib/api';
+<#if authEnabled?? && authEnabled>
 import { useAuthStore } from '../store/authStore';
+</#if>
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const mockChartData = [
-  { name: 'Jan', value: 400 },
-  { name: 'Feb', value: 300 },
-  { name: 'Mar', value: 600 },
-  { name: 'Apr', value: 800 },
-  { name: 'May', value: 500 },
-  { name: 'Jun', value: 750 },
-];
+const DynamicChart = ({ type, entityName, xAxisKey, yAxisKey, className }) => {
+    const [data, setData] = useState([]);
+    useEffect(() => {
+        if (!entityName) return;
+        api.get(`/${entityName.toLowerCase()}`).then(res => setData(res.data)).catch(console.error);
+    }, [entityName]);
+
+    if (!entityName) return <div className="p-4 border border-red-500/50 bg-red-500/10 text-red-500 rounded my-4">Chart component missing 'entityName' binding.</div>;
+
+    const RealChart = type === 'BarChart' ? BarChart : LineChart;
+    const RealElement = type === 'BarChart' ? Bar : Line;
+
+    return (
+        <div className={`bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mt-6 mb-6 shadow-md p-6 ${className || ''}`}>
+            <h3 className="font-semibold text-white tracking-wide mb-4">{entityName} Chart</h3>
+            <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <RealChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                        <XAxis dataKey={xAxisKey || 'id'} stroke="#a1a1aa" />
+                        <YAxis stroke="#a1a1aa" />
+                        <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#3f3f46', borderRadius: '8px' }} itemStyle={{ color: '#fff' }} />
+                        <RealElement type="monotone" dataKey={yAxisKey || 'value'} fill={type === 'BarChart' ? '#8b5cf6' : undefined} stroke={type === 'LineChart' ? '#06b6d4' : undefined} strokeWidth={type === 'LineChart' ? 3 : undefined} dot={type === 'LineChart' ? { r: 4, fill: '#06b6d4' } : undefined} radius={type === 'BarChart' ? [4, 4, 0, 0] : undefined} />
+                    </RealChart>
+                </ResponsiveContainer>
+            </div>
+        </div>
+    );
+};
 
 export default function Dashboard() {
+    <#if authEnabled?? && authEnabled>
     const { user, isAuthenticated } = useAuthStore();
+    </#if>
 
     return (
         <div className="p-8 space-y-8 max-w-7xl mx-auto">
 <#macro renderComponent component>
 <#if component.type() == "Heading">
-            <h2 className="text-3xl font-bold tracking-tight text-white dark:text-zinc-50 mb-2">${component.props()['text']!'Heading'}</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-white dark:text-zinc-50 mb-2 ${component.props()['className']!''}">${component.props()['text']!'Heading'}</h2>
 <#elseif component.type() == "Text">
-            <p className="text-zinc-500 max-w-2xl">${component.props()['text']!'Text block'}</p>
+            <p className="text-zinc-500 max-w-2xl ${component.props()['className']!''}">${component.props()['text']!'Text block'}</p>
 <#elseif component.type() == "Button">
             <button 
                 <#if component.props()['actionFlowId']??>
                 onClick={() => {
-                    apiClient.post('/actions/${component.props()['actionFlowId']}', {})
+                    api.post('/actions/${component.props()['actionFlowId']}', {})
                         .then(res => {
                             if (res.data.toast) {
                                 alert(res.data.toast);
@@ -50,13 +72,13 @@ export default function Dashboard() {
                         });
                 }}
                 </#if>
-                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors shadow-sm text-white"
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors shadow-sm text-white ${component.props()['className']!''}"
             >
                 ${component.props()['text']!'Button'}
             </button>
 <#elseif component.type() == "DataTable">
     <#if component.props()['entityName']??>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mt-6 mb-6 shadow-xl">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mt-6 mb-6 shadow-xl ${component.props()['className']!''}">
                  <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
                      <h3 className="font-semibold text-white tracking-wide">${component.props()['entityName']} Table</h3>
                  </div>
@@ -71,7 +93,7 @@ export default function Dashboard() {
     </#if>
 <#elseif component.type() == "FormModule">
     <#if component.props()['entityName']??>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mt-6 mb-6 max-w-2xl shadow-xl">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mt-6 mb-6 max-w-2xl shadow-xl ${component.props()['className']!''}">
                  <div className="p-4 border-b border-zinc-800 bg-zinc-900/50">
                      <h3 className="font-semibold text-white tracking-wide">${component.props()['entityName']} Form</h3>
                  </div>
@@ -84,50 +106,24 @@ export default function Dashboard() {
                 FormModule component missing 'entityName' binding.
             </div>
     </#if>
-<#elseif component.type() == "BarChart">
-    <#if component.props()['entityName']??>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mt-6 mb-6 shadow-md p-6">
-                <h3 className="font-semibold text-white tracking-wide mb-4">${component.props()['entityName']} Activity (Mock Data)</h3>
-                <div className="h-64 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={mockChartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
-                            <XAxis dataKey="name" stroke="#a1a1aa" />
-                            <YAxis stroke="#a1a1aa" />
-                            <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#3f3f46', borderRadius: '8px' }} itemStyle={{ color: '#fff' }} />
-                            <Bar dataKey="value" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-    <#else>
-            <div className="p-4 border border-red-500/50 bg-red-500/10 text-red-500 rounded my-4">
-                BarChart component missing 'entityName' binding.
-            </div>
-    </#if>
-<#elseif component.type() == "LineChart">
-    <#if component.props()['entityName']??>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mt-6 mb-6 shadow-md p-6">
-                <h3 className="font-semibold text-white tracking-wide mb-4">${component.props()['entityName']} Trend (Mock Data)</h3>
-                <div className="h-64 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={mockChartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
-                            <XAxis dataKey="name" stroke="#a1a1aa" />
-                            <YAxis stroke="#a1a1aa" />
-                            <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#3f3f46', borderRadius: '8px' }} itemStyle={{ color: '#fff' }} />
-                            <Line type="monotone" dataKey="value" stroke="#06b6d4" strokeWidth={3} dot={{ r: 4, fill: '#06b6d4' }} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-    <#else>
-            <div className="p-4 border border-red-500/50 bg-red-500/10 text-red-500 rounded my-4">
-                LineChart component missing 'entityName' binding.
-            </div>
-    </#if>
+<#elseif component.type() == "BarChart" || component.type() == "LineChart">
+            <DynamicChart 
+                type="${component.type()}" 
+                entityName="${component.props()['entityName']!''}" 
+                xAxisKey="${component.props()['xAxisKey']!''}" 
+                yAxisKey="${component.props()['yAxisKey']!''}" 
+                className="${component.props()['className']!''}" 
+            />
+<#elseif component.type() == "Image">
+            <img 
+                src="${component.props()['url']!'https://via.placeholder.com/400x200?text=Image+Placeholder'}" 
+                alt="Image" 
+                className="rounded-lg object-cover max-w-full ${component.props()['className']!''}" 
+            />
+<#elseif component.type() == "Divider">
+            <hr className="w-full border-zinc-800 ${component.props()['className']!''}" />
 <#elseif component.type() == "Container">
-            <div className="flex flex-col gap-4 p-6 border border-zinc-800 rounded-xl bg-zinc-900/30 w-full mb-4">
+            <div className="flex flex-col gap-4 p-6 border border-zinc-800 rounded-xl bg-zinc-900/30 w-full mb-4 ${component.props()['className']!''}">
     <#if component.children()?? && component.children()?size \gt 0>
         <#list component.children() as child>
                 <@renderComponent component=child />

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ComponentType = 'Heading' | 'Text' | 'Button' | 'DataTable' | 'FormModule' | 'Container' | 'BarChart' | 'LineChart';
+export type ComponentType = 'Heading' | 'Text' | 'Button' | 'DataTable' | 'FormModule' | 'Container' | 'BarChart' | 'LineChart' | 'Image' | 'Divider';
 
 export interface UIComponent {
     id: string;

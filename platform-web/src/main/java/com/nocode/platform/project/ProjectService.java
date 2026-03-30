@@ -1,6 +1,7 @@
 package com.nocode.platform.project;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,15 +15,20 @@ public class ProjectService {
 
     private final ProjectRepository repo;
 
+    private String getCurrentUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
     @Transactional(readOnly = true)
     public List<ProjectEntity> list() {
-        return repo.findAll();
+        return repo.findAllByOwnerUsername(getCurrentUsername());
     }
 
     @Transactional
     public ProjectEntity create(CreateProjectRequest req) {
         ProjectEntity p = new ProjectEntity();
         p.setId(UUID.randomUUID());
+        p.setOwnerUsername(getCurrentUsername());
         p.setName(req.name().trim());
         p.setGroupId(req.groupId().trim());
         p.setArtifactId(req.artifactId().trim());
@@ -39,8 +45,12 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public ProjectEntity get(UUID id) {
-        return repo.findById(id)
+        ProjectEntity p = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found: " + id));
+        if (!p.getOwnerUsername().equals(getCurrentUsername())) {
+            throw new IllegalArgumentException("Access Denied to Project: " + id);
+        }
+        return p;
     }
 
     @Transactional

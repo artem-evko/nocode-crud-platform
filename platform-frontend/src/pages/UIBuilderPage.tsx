@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { apiClient } from '../api/client';
-import { ArrowLeft, Save, LayoutTemplate, Settings, Monitor, Smartphone, Tablet, Type, Heading, Box, BarChart3, LineChart as LineChartIcon, Play, Rocket, Zap } from 'lucide-react';
+import { ArrowLeft, Save, LayoutTemplate, Settings, Monitor, Smartphone, Tablet, Type, Heading, Box, BarChart3, LineChart as LineChartIcon, Play, Rocket, Zap, Image as ImageIcon, Minus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUIBuilderStore } from '../store/uiBuilderStore';
 import SidebarItem from '../components/builder/SidebarItem';
@@ -33,6 +33,9 @@ export default function UIBuilderPage() {
 
     const fetchProject = async () => {
         try {
+            // Reset components state immediately when loading a new project
+            setComponents([]);
+            
             const response = await apiClient.get<any[]>('/projects');
             const found = response.data.find(p => p.id === projectId);
             if (found) {
@@ -42,7 +45,7 @@ export default function UIBuilderPage() {
                 if (found.specText && found.specText !== '{}') {
                     try {
                         const parsed = JSON.parse(found.specText);
-                        if (parsed.uiSpec && parsed.uiSpec.components) {
+                        if (parsed.uiSpec && parsed.uiSpec.components && parsed.uiSpec.components.length > 0) {
                             setComponents(parsed.uiSpec.components);
                         }
                     } catch (e) {
@@ -153,7 +156,11 @@ export default function UIBuilderPage() {
                             Предпросмотр
                         </button>
                         <button
-                            onClick={() => setIsDeployOpen(true)}
+                            onClick={async () => {
+                                // Auto-save UI before opening deployment to ensure DB receives current components
+                                await handleSave();
+                                setIsDeployOpen(true);
+                            }}
                             className="flex items-center gap-2 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 hover:text-indigo-300 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-indigo-600/30"
                         >
                             <Rocket size={16} />
@@ -183,6 +190,8 @@ export default function UIBuilderPage() {
                             <SidebarItem type="FormModule" label="Модуль формы" icon={Settings} iconColor="text-emerald-400" />
                             <SidebarItem type="BarChart" label="Столбчатая диаграмма" icon={BarChart3} iconColor="text-violet-400" />
                             <SidebarItem type="LineChart" label="Линейный график" icon={LineChartIcon} iconColor="text-cyan-400" />
+                            <SidebarItem type="Image" label="Изображение" icon={ImageIcon} iconColor="text-rose-400" />
+                            <SidebarItem type="Divider" label="Разделитель" icon={Minus} iconColor="text-zinc-500" />
                             <SidebarItem type="Container" label="Контейнер Layout" icon={Box} iconColor="text-amber-400" />
                         </div>
 
@@ -204,6 +213,7 @@ export default function UIBuilderPage() {
                 isOpen={isDeployOpen}
                 onClose={() => setIsDeployOpen(false)}
                 projectId={project?.id || ''}
+                currentUIComponents={components}
             />
         </div>
     );

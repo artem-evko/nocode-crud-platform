@@ -18,9 +18,9 @@ public class DeploymentController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> deployProject(@PathVariable UUID id) {
+    public ResponseEntity<Void> deployProject(@PathVariable UUID id, @RequestParam(required = false) Integer port) {
         // Run deployment asynchronously
-        deploymentService.deployProject(id);
+        deploymentService.deployProject(id, port);
         return ResponseEntity.accepted().build();
     }
 

@@ -53,6 +53,23 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
         );
     };
 
+    const updateNodePosition = (id: string, x?: number, y?: number) => {
+        setNodes((nds) =>
+            nds.map((node) => {
+                if (node.id === id) {
+                    return {
+                        ...node,
+                        position: {
+                            x: x !== undefined ? x : node.position.x,
+                            y: y !== undefined ? y : node.position.y,
+                        }
+                    };
+                }
+                return node;
+            })
+        );
+    };
+
     useEffect(() => {
         if (project?.specText && project.specText !== '{}') {
             try {
@@ -95,6 +112,20 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
     const onDragStart = (event: React.DragEvent, nodeType: string, actionName: string, label: string) => {
         event.dataTransfer.setData('application/reactflow', JSON.stringify({ type: nodeType, action: actionName, label }));
         event.dataTransfer.effectAllowed = 'move';
+    };
+
+    const onAddNodeClick = (nodeType: string, actionName: string, label: string) => {
+        const position = {
+            x: 100 + nodes.length * 20,
+            y: 100 + nodes.length * 20,
+        };
+        const newNode: Node = {
+            id: `node_${crypto.randomUUID()}`,
+            type: 'logic',
+            position,
+            data: { label, type: nodeType, action: actionName, config: { position } },
+        };
+        setNodes((nds) => nds.concat(newNode));
     };
 
     const onDragOver = useCallback((event: React.DragEvent) => {
@@ -219,6 +250,7 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                         <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Состояния (Triggers)</h2>
                         <div className="space-y-2">
                             <div 
+                                onClick={() => onAddNodeClick('trigger', 'UI_CLICK', 'On Element Click')}
                                 onDragStart={(e) => onDragStart(e, 'trigger', 'UI_CLICK', 'On Element Click')} draggable
                                 className="flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
                             >
@@ -232,6 +264,7 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                         <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Действия (Actions)</h2>
                         <div className="space-y-2">
                             <div 
+                                onClick={() => onAddNodeClick('action', 'DB_CREATE_RECORD', 'Create Record')}
                                 onDragStart={(e) => onDragStart(e, 'action', 'DB_CREATE_RECORD', 'Create Record')} draggable
                                 className="flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
                             >
@@ -239,6 +272,7 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                                 <span className="text-sm font-medium">Создать запись</span>
                             </div>
                             <div 
+                                onClick={() => onAddNodeClick('action', 'DB_UPDATE_RECORD', 'Update Record')}
                                 onDragStart={(e) => onDragStart(e, 'action', 'DB_UPDATE_RECORD', 'Update Record')} draggable
                                 className="flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
                             >
@@ -246,6 +280,7 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                                 <span className="text-sm font-medium">Обновить запись</span>
                             </div>
                             <div 
+                                onClick={() => onAddNodeClick('action', 'UI_SHOW_TOAST', 'Show Notification')}
                                 onDragStart={(e) => onDragStart(e, 'action', 'UI_SHOW_TOAST', 'Show Notification')} draggable
                                 className="flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
                             >
@@ -300,6 +335,27 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                                     <div className="text-xs text-zinc-500 mb-1">Тип узла</div>
                                     <div className="font-medium text-white flex items-center gap-2">
                                         {String(selectedNode.data.action)}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 mb-2">
+                                    <div>
+                                        <label className="block text-xs font-medium text-zinc-400 mb-1">Позиция X</label>
+                                        <input 
+                                            type="number"
+                                            value={Math.round(selectedNode.position.x)}
+                                            onChange={(e) => updateNodePosition(selectedNode.id, parseInt(e.target.value) || 0, undefined)}
+                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-zinc-400 mb-1">Позиция Y</label>
+                                        <input 
+                                            type="number"
+                                            value={Math.round(selectedNode.position.y)}
+                                            onChange={(e) => updateNodePosition(selectedNode.id, undefined, parseInt(e.target.value) || 0)}
+                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                        />
                                     </div>
                                 </div>
 

@@ -1,0 +1,14 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: e2e-flow
+  datasource:
+    url: jdbc:postgresql://localhost:5432/e2e-flow
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true

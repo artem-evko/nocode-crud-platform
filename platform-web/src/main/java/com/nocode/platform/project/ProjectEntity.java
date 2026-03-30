@@ -19,6 +19,9 @@ public class ProjectEntity {
     @Id
     private UUID id;
 
+    @Column(name = "owner_username", nullable = false, length = 100)
+    private String ownerUsername;
+
     @Column(nullable = false, length = 200)
     private String name;
 

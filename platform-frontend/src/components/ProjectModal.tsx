@@ -22,10 +22,10 @@ interface ProjectModalProps {
 
 const defaultData: ProjectFormData = {
     name: '',
-    groupId: 'com.example',
-    artifactId: 'demo',
+    groupId: '',
+    artifactId: '',
     version: '1.0.0',
-    basePackage: 'com.example.demo',
+    basePackage: '',
     specText: '{}'
 };
 
@@ -111,6 +111,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                                     type="text"
                                     required
                                     value={formData.groupId}
+                                    placeholder="com.example"
                                     onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
                                     className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-colors"
                                 />
@@ -121,6 +122,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                                     type="text"
                                     required
                                     value={formData.artifactId}
+                                    placeholder="demo-api"
                                     onChange={(e) => setFormData({ ...formData, artifactId: e.target.value })}
                                     className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-colors"
                                 />
@@ -159,6 +161,7 @@ export default function ProjectModal({ isOpen, onClose, onSave, initialData }: P
                                     type="text"
                                     required
                                     value={formData.basePackage}
+                                    placeholder="com.example.demo"
                                     onChange={(e) => {
                                         setFormData({ ...formData, basePackage: e.target.value });
                                         setIsBasePackagePristine(false);

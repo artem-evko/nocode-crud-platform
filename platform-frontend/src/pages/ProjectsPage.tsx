@@ -26,6 +26,7 @@ export default function ProjectsPage() {
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProject, setEditingProject] = useState<ProjectFormData | null>(null);
+    const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         apiClient.get('/auth/me')
@@ -60,23 +61,32 @@ export default function ProjectsPage() {
         if (data.id) {
             // Update using PUT
             await apiClient.put(`/projects/${data.id}`, data);
+            await fetchProjects();
         } else {
             // Create using POST
-            await apiClient.post('/projects', data);
+            const res = await apiClient.post<Project>('/projects', data);
+            await fetchProjects();
+            navigate(`/projects/${res.data.id}/modeler`);
         }
-        await fetchProjects();
     };
 
-    const handleDeleteProject = async (e: React.MouseEvent, id: string) => {
-        e.stopPropagation();
-        if (window.confirm('Вы уверены, что хотите удалить этот проект?')) {
-            try {
-                await apiClient.delete(`/projects/${id}`);
-                await fetchProjects();
-            } catch (err) {
-                console.error("Failed to delete", err);
-                toast.error("Не удалось удалить проект");
-            }
+    const handleDeleteConfirm = async () => {
+        if (!projectToDelete) return;
+        const id = projectToDelete;
+        setProjectToDelete(null); // Optimistic close of the dialog
+        
+        const deletePromise = apiClient.delete(`/projects/${id}`).then(() => fetchProjects());
+        
+        toast.promise(deletePromise, {
+            loading: 'Остановка контейнеров и удаление проекта...',
+            success: 'Проект успешно удален',
+            error: 'Не удалось удалить проект'
+        });
+        
+        try {
+            await deletePromise;
+        } catch (err) {
+            console.error("Failed to delete", err);
         }
     };
 
@@ -158,7 +168,10 @@ export default function ProjectsPage() {
                                         <Edit2 size={16} />
                                     </button>
                                     <button
-                                        onClick={(e) => handleDeleteProject(e, project.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setProjectToDelete(project.id);
+                                        }}
                                         className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
                                         title="Удалить проект"
                                     >
@@ -193,6 +206,35 @@ export default function ProjectsPage() {
                 onSave={handleSaveProject}
                 initialData={editingProject}
             />
+
+            {/* Custom Confirm Modal */}
+            {projectToDelete && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+                        <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mb-4">
+                            <Trash2 size={24} />
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-2">Удалить проект?</h3>
+                        <p className="text-sm text-zinc-400 mb-6">
+                            Вы уверены, что хотите безвозвратно удалить этот проект? Это также остановит все запущенные серверы и контейнеры, связанные с ним.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => setProjectToDelete(null)}
+                                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition-colors border border-zinc-700"
+                            >
+                                Отмена
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirm}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                            >
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -5,8 +5,8 @@ import { useParams } from 'react-router-dom';
 
 export default function PropertiesPanel() {
     const { projectId } = useParams();
-    const { components, selectedComponentId, updateComponentProps } = useUIBuilderStore();
-    const [entities, setEntities] = useState<{ id: string, name: string }[]>([]);
+    const { components, selectedComponentId, updateComponentProps, updateComponentLayout } = useUIBuilderStore();
+    const [entities, setEntities] = useState<{ id: string, name: string, fields: any[] }[]>([]);
     const [actionFlows, setActionFlows] = useState<{ id: string, name: string }[]>([]);
 
     const selectedComponent = components.find(c => c.id === selectedComponentId);
@@ -28,7 +28,8 @@ export default function PropertiesPanel() {
                             if (nodes.length > 0) {
                                 setEntities(nodes.filter((n: any) => n.type === 'entity').map((n: any) => ({
                                     id: n.id,
-                                    name: n.data.name
+                                    name: n.data.name,
+                                    fields: n.data.fields || []
                                 })));
                             }
 
@@ -63,6 +64,22 @@ export default function PropertiesPanel() {
         const val = e.target.value;
         updateComponentProps(selectedComponent.id, { entityName: val === "none" ? null : val });
     };
+
+    const toggleClass = (prefix: string, newValue: string) => {
+        const currentClass = selectedComponent.props.className || '';
+        const classes = currentClass.split(' ').filter((c: string) => !c.startsWith(prefix) && c.trim() !== '');
+        if (newValue) classes.push(newValue);
+        updateComponentProps(selectedComponent.id, { className: classes.join(' ').trim() });
+    };
+
+    const currentClasses = selectedComponent.props.className || '';
+    
+    // Find active configured styles
+    const activeBgColor = ['bg-zinc-900', 'bg-red-500', 'bg-blue-500', 'bg-emerald-500', 'bg-indigo-500', 'bg-purple-500', 'bg-yellow-500', 'bg-transparent'].find(c => currentClasses.includes(c)) || 'bg-transparent';
+    const activeRadius = ['rounded-none', 'rounded-md', 'rounded-xl', 'rounded-2xl', 'rounded-full'].find(c => currentClasses.includes(c)) || 'rounded-none';
+    const activePadding = ['p-0', 'p-2', 'p-4', 'p-6', 'p-8'].find(c => currentClasses.includes(c)) || 'p-0';
+    
+    const selectedEntityDef = entities.find(e => e.name === selectedComponent.props.entityName);
 
     return (
         <div className="space-y-6">
@@ -145,6 +162,174 @@ export default function PropertiesPanel() {
                         </p>
                     </div>
                 )}
+
+                {/* Chart Axis Configuration */}
+                {(selectedComponent.type === 'BarChart' || selectedComponent.type === 'LineChart') && selectedComponent.props.entityName && (
+                    <div className="space-y-3 pt-2 border-t border-zinc-800 focus-within:ring-0">
+                        <div>
+                            <label className="text-xs font-semibold text-zinc-400 block mb-1">Поле для Оси X (Dimension)</label>
+                            <select
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                value={selectedComponent.props.xAxisKey || "id"}
+                                onChange={(e) => updateComponentProps(selectedComponent.id, { xAxisKey: e.target.value })}
+                            >
+                                <option value="id">id (По умолчанию)</option>
+                                {selectedEntityDef?.fields?.map((f: any) => (
+                                    <option key={f.name} value={f.name}>{f.name} ({f.type})</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-xs font-semibold text-zinc-400 block mb-1">Поле для Оси Y (Metric)</label>
+                            <select
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                value={selectedComponent.props.yAxisKey || "id"}
+                                onChange={(e) => updateComponentProps(selectedComponent.id, { yAxisKey: e.target.value })}
+                            >
+                                <option value="id">id (Количество/Id)</option>
+                                {selectedEntityDef?.fields?.map((f: any) => (
+                                    <option key={f.name} value={f.name}>{f.name} ({f.type})</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                )}
+
+                {/* Image Property */}
+                {selectedComponent.type === 'Image' && (
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold text-zinc-400 block pb-1">URL Изображения</label>
+                        <input
+                            type="text"
+                            placeholder="https://example.com/image.png"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                            value={selectedComponent.props.url || ''}
+                            onChange={(e) => updateComponentProps(selectedComponent.id, { url: e.target.value })}
+                        />
+                    </div>
+                )}
+                {/* CSS Styling Property */}
+                <div className="space-y-4 pt-4 border-t border-zinc-800">
+                    <label className="text-xs font-semibold text-zinc-400 block mb-[-8px]">Визуальные стили</label>
+                    
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Цвет фона</span>
+                        <div className="flex flex-wrap gap-2">
+                            {['bg-transparent', 'bg-zinc-900', 'bg-red-500', 'bg-blue-500', 'bg-emerald-500', 'bg-indigo-500', 'bg-purple-500', 'bg-yellow-500'].map(bg => (
+                                <button
+                                    key={bg}
+                                    onClick={() => toggleClass('bg-', bg === 'bg-transparent' ? '' : bg)}
+                                    className={`w-6 h-6 rounded-md border-2 transition-all ${bg === 'bg-transparent' ? 'bg-zinc-950 border-dashed' : bg.replace('-500', '-500/80')} ${activeBgColor === bg ? 'border-white scale-110' : 'border-transparent hover:scale-105'}`}
+                                    title={bg}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Скругление углов</span>
+                        <div className="flex gap-2">
+                            {[
+                                { class: 'rounded-none', label: '0px' },
+                                { class: 'rounded-md', label: '4px' },
+                                { class: 'rounded-xl', label: '12px' },
+                                { class: 'rounded-2xl', label: '16px' },
+                                { class: 'rounded-full', label: 'Max' }
+                            ].map(r => (
+                                <button
+                                    key={r.class}
+                                    onClick={() => toggleClass('rounded-', r.class === 'rounded-none' ? '' : r.class)}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeRadius === r.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                >
+                                    {r.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Отступы (Padding)</span>
+                        <div className="flex gap-2">
+                            {[
+                                { class: 'p-0', label: '0' },
+                                { class: 'p-2', label: 'S' },
+                                { class: 'p-4', label: 'M' },
+                                { class: 'p-6', label: 'L' },
+                                { class: 'p-8', label: 'XL' }
+                            ].map(p => (
+                                <button
+                                    key={p.class}
+                                    onClick={() => toggleClass('p-', p.class === 'p-0' ? '' : p.class)}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activePadding === p.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                >
+                                    {p.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="pt-2">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Tailwind Classes (Вручную)</span>
+                        <input
+                            type="text"
+                            placeholder="Например: opacity-50 shadow-xl"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm font-mono text-zinc-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                            value={selectedComponent.props.className || ''}
+                            onChange={(e) => updateComponentProps(selectedComponent.id, { className: e.target.value })}
+                        />
+                    </div>
+                </div>
+
+                {/* Layout Properties */}
+                <div className="space-y-3 pt-4 border-t border-zinc-800">
+                    <label className="text-xs font-semibold text-zinc-400 block pb-1">Размещение и Размер (Сетка 12)</label>
+                    <div className="grid grid-cols-2 gap-3 pb-2">
+                        {/* W */}
+                        <div>
+                            <label className="text-[10px] text-zinc-500 block mb-1">Ширина (1-12)</label>
+                            <input
+                                type="number"
+                                min="1" max="12"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                value={selectedComponent.layout?.w || 4}
+                                onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), w: Math.min(12, Math.max(1, parseInt(e.target.value) || 1)) })}
+                            />
+                        </div>
+                        {/* H */}
+                        <div>
+                            <label className="text-[10px] text-zinc-500 block mb-1">Высота (Строки)</label>
+                            <input
+                                type="number"
+                                min="1"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                value={selectedComponent.layout?.h || 4}
+                                onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), h: Math.max(1, parseInt(e.target.value) || 1) })}
+                            />
+                        </div>
+                        {/* X */}
+                        <div>
+                            <label className="text-[10px] text-zinc-500 block mb-1">Позиция X (0-11)</label>
+                            <input
+                                type="number"
+                                min="0" max="11"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                value={selectedComponent.layout?.x || 0}
+                                onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), x: Math.min(11, Math.max(0, parseInt(e.target.value) || 0)) })}
+                            />
+                        </div>
+                        {/* Y */}
+                        <div>
+                            <label className="text-[10px] text-zinc-500 block mb-1">Позиция Y (Строки)</label>
+                            <input
+                                type="number"
+                                min="0"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                value={selectedComponent.layout?.y || 0}
+                                onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), y: Math.max(0, parseInt(e.target.value) || 0) })}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

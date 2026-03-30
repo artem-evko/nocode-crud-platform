@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: demodeploy
+    ports:
+      - "5436:5432"
+  backend:
+    build: backend
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/demodeploy
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+    ports:
+      - "8082:8080"
+    depends_on:
+      - db
+  frontend:
+    build: frontend
+    ports:
+      - "5175:80"
+    depends_on:
+      - backend

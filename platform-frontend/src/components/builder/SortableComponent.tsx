@@ -29,11 +29,11 @@ export default function SortableComponent({ component, onDragHandleMouseDown, on
     const renderContent = () => {
         switch (component.type) {
             case 'Heading':
-                return <h2 className="text-2xl font-bold w-full h-full flex items-center">{component.props.text || 'Heading'}</h2>;
+                return <h2 className={`text-2xl font-bold w-full h-full flex items-center ${component.props.className || ''}`}>{component.props.text || 'Heading'}</h2>;
             case 'Text':
-                return <p className="text-zinc-300 w-full h-full overflow-hidden text-ellipsis">{component.props.text || 'Text block'}</p>;
+                return <p className={`text-zinc-300 w-full h-full overflow-hidden text-ellipsis ${component.props.className || ''}`}>{component.props.text || 'Text block'}</p>;
             case 'Button':
-                return <button className="px-4 py-2 bg-indigo-600 rounded-md text-white font-medium w-full h-full">{component.props.text || 'Button'}</button>;
+                return <button className={`px-4 py-2 bg-indigo-600 rounded-md text-white font-medium w-full h-full ${component.props.className || ''}`}>{component.props.text || 'Button'}</button>;
             case 'DataTable':
                 return (
                     <div className={`w-full h-full border-2 border-dashed rounded bg-zinc-800/50 flex items-center justify-center flex-col 
@@ -78,6 +78,22 @@ export default function SortableComponent({ component, onDragHandleMouseDown, on
                 return (
                     <div className="w-full h-full border-2 border-dashed border-amber-700/50 bg-amber-900/5 rounded flex items-center justify-center p-4">
                         <span className="font-mono text-amber-500/40 text-sm">{'<Layout Container />'}</span>
+                    </div>
+                );
+            case 'Image':
+                return (
+                    <div className={`w-full h-full flex items-center justify-center bg-zinc-800/50 rounded overflow-hidden ${component.props.className || ''}`}>
+                        {component.props.url ? (
+                            <img src={component.props.url} alt="Component Image" className="w-full h-full object-cover" />
+                        ) : (
+                            <span className="text-zinc-500 text-sm">No Image</span>
+                        )}
+                    </div>
+                );
+            case 'Divider':
+                return (
+                    <div className="w-full h-full flex items-center px-4">
+                        <hr className={`w-full border-t border-zinc-700 ${component.props.className || ''}`} />
                     </div>
                 );
             default:
