@@ -10,16 +10,54 @@ import CanvasArea from '../components/builder/CanvasArea';
 import PropertiesPanel from '../components/builder/PropertiesPanel';
 import DeploymentModal from '../components/DeploymentModal';
 
+interface ProjectData {
+    id: string;
+    name: string;
+    specText: string;
+    [key: string]: unknown;
+}
+
 export default function UIBuilderPage() {
     const { projectId } = useParams();
     const navigate = useNavigate();
     const { setUser } = useAuthStore();
     const { components, setComponents } = useUIBuilderStore();
-    const [project, setProject] = useState<any>(null);
+    const [project, setProject] = useState<ProjectData | null>(null);
     const [loading, setLoading] = useState(true);
     const [isDeployOpen, setIsDeployOpen] = useState(false);
 
     useEffect(() => {
+        const fetchProject = async () => {
+            try {
+                // Reset components state immediately when loading a new project
+                setComponents([]);
+                
+                const response = await apiClient.get<ProjectData[]>('/projects');
+                const found = response.data.find(p => p.id === projectId);
+                if (found) {
+                    setProject(found);
+
+                    // Hydrate components from specText if possible
+                    if (found.specText && found.specText !== '{}') {
+                        try {
+                            const parsed = JSON.parse(found.specText);
+                            if (parsed.uiSpec && parsed.uiSpec.components && parsed.uiSpec.components.length > 0) {
+                                setComponents(parsed.uiSpec.components);
+                            }
+                        } catch (e) {
+                            console.error("Failed to parse uiSpec", e);
+                        }
+                    }
+                } else {
+                    navigate('/projects');
+                }
+            } catch (error) {
+                console.error("Failed to fetch project", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         apiClient.get('/auth/me')
             .then((res) => {
                 setUser(res.data);
@@ -29,58 +67,19 @@ export default function UIBuilderPage() {
                 setUser(null);
                 navigate('/login');
             });
-    }, [navigate, setUser, projectId]);
-
-    const fetchProject = async () => {
-        try {
-            // Reset components state immediately when loading a new project
-            setComponents([]);
-            
-            const response = await apiClient.get<any[]>('/projects');
-            const found = response.data.find(p => p.id === projectId);
-            if (found) {
-                setProject(found);
-
-                // Hydrate components from specText if possible
-                if (found.specText && found.specText !== '{}') {
-                    try {
-                        const parsed = JSON.parse(found.specText);
-                        if (parsed.uiSpec && parsed.uiSpec.components && parsed.uiSpec.components.length > 0) {
-                            setComponents(parsed.uiSpec.components);
-                        }
-                    } catch (e) {
-                        console.error("Failed to parse uiSpec", e);
-                    }
-                }
-            } else {
-                navigate('/projects');
-            }
-        } catch (error) {
-            console.error("Failed to fetch project", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    }, [navigate, setUser, projectId, setComponents]);
 
     const handleSave = async () => {
         if (!project || !project.id) return;
-
-        // Validation: Block saving if there are unconfigured data components
-        const invalidComponents = components.filter(
-            c => (c.type === 'DataTable' || c.type === 'FormModule') && !c.props.entityName
-        );
-
-        if (invalidComponents.length > 0) {
-            toast.error("Ошибка валидации: Невозможно сохранить слой. Пожалуйста, выберите источник данных (сущность) для всех DataTables и FormModules.");
-            return;
-        }
 
         try {
             let specObj = {};
             if (project.specText && project.specText !== '{}') {
                 try {
                     specObj = JSON.parse(project.specText);
-                } catch (e) { }
+                } catch {
+                    // Ignore JSON parsing errors
+                }
             }
 
             // Combine with existing spec
@@ -183,16 +182,18 @@ export default function UIBuilderPage() {
                         <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Компоненты</h2>
                         <div className="space-y-3">
                             {/* Draggable items */}
-                            <SidebarItem type="Button" label="Кнопка" icon={Play} iconColor="text-indigo-400" />
-                            <SidebarItem type="Heading" label="Заголовок" icon={Heading} iconColor="text-pink-400" />
-                            <SidebarItem type="Text" label="Текст" icon={Type} iconColor="text-zinc-300" />
-                            <SidebarItem type="DataTable" label="Таблица данных" icon={LayoutTemplate} iconColor="text-blue-400" />
-                            <SidebarItem type="FormModule" label="Модуль формы" icon={Settings} iconColor="text-emerald-400" />
-                            <SidebarItem type="BarChart" label="Столбчатая диаграмма" icon={BarChart3} iconColor="text-violet-400" />
-                            <SidebarItem type="LineChart" label="Линейный график" icon={LineChartIcon} iconColor="text-cyan-400" />
-                            <SidebarItem type="Image" label="Изображение" icon={ImageIcon} iconColor="text-rose-400" />
-                            <SidebarItem type="Divider" label="Разделитель" icon={Minus} iconColor="text-zinc-500" />
-                            <SidebarItem type="Container" label="Контейнер Layout" icon={Box} iconColor="text-amber-400" />
+                            <SidebarItem type="Button" label="Кнопка" description="Кликабельный элемент для вызова Action Flow" icon={Play} iconColor="text-indigo-400" />
+                            <SidebarItem type="Heading" label="Заголовок" description="Крупный текст для разделов страницы" icon={Heading} iconColor="text-pink-400" />
+                            <SidebarItem type="Text" label="Текст" description="Обычный многострочный текст или описание" icon={Type} iconColor="text-zinc-300" />
+                            <SidebarItem type="DataTable" label="Таблица данных" description="Отображение списка записей из БД" icon={LayoutTemplate} iconColor="text-blue-400" />
+                            <SidebarItem type="FormModule" label="Модуль формы" description="Форма ввода для создания или ред. записей" icon={Settings} iconColor="text-emerald-400" />
+                            <SidebarItem type="BarChart" label="Столбчатая диаграмма" description="Сравнение числовых значений по категориям" icon={BarChart3} iconColor="text-violet-400" />
+                            <SidebarItem type="LineChart" label="Линейный график" description="Отображение динамики изменений" icon={LineChartIcon} iconColor="text-cyan-400" />
+                            <SidebarItem type="Card" label="Карточка (Card)" description="Блок выделения контента или группировки" icon={Box} iconColor="text-indigo-400" />
+                            <SidebarItem type="Badge" label="Бейдж" description="Цветной ярлык или статус" icon={Type} iconColor="text-emerald-400" />
+                            <SidebarItem type="Image" label="Изображение" description="Вставка картинки по URL" icon={ImageIcon} iconColor="text-rose-400" />
+                            <SidebarItem type="Divider" label="Разделитель" description="Горизонтальная линия для визуального деления" icon={Minus} iconColor="text-zinc-500" />
+                            <SidebarItem type="Container" label="Контейнер Layout" description="Блочная сетка для группировки других элементов" icon={Box} iconColor="text-amber-400" />
                         </div>
 
                     </aside>
@@ -213,7 +214,6 @@ export default function UIBuilderPage() {
                 isOpen={isDeployOpen}
                 onClose={() => setIsDeployOpen(false)}
                 projectId={project?.id || ''}
-                currentUIComponents={components}
             />
         </div>
     );

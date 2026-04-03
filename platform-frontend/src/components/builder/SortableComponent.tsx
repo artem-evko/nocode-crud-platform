@@ -96,6 +96,20 @@ export default function SortableComponent({ component, onDragHandleMouseDown, on
                         <hr className={`w-full border-t border-zinc-700 ${component.props.className || ''}`} />
                     </div>
                 );
+            case 'Card':
+                return (
+                    <div className={`w-full h-full bg-zinc-800/50 rounded flex flex-col justify-center items-center ${component.props.className || ''}`}>
+                        <span className="text-zinc-300 font-medium text-center">{component.props.text || 'Карточка'}</span>
+                    </div>
+                );
+            case 'Badge':
+                return (
+                    <div className="w-full h-full flex items-center justify-center">
+                        <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 w-auto shadow-sm ${component.props.className || ''}`}>
+                            {component.props.text || 'Badge'}
+                        </span>
+                    </div>
+                );
             default:
                 return <div>Unknown component</div>;
         }

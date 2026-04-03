@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 
-export type ComponentType = 'Heading' | 'Text' | 'Button' | 'DataTable' | 'FormModule' | 'Container' | 'BarChart' | 'LineChart' | 'Image' | 'Divider';
+export type ComponentType = 'Heading' | 'Text' | 'Button' | 'DataTable' | 'FormModule' | 'Container' | 'BarChart' | 'LineChart' | 'Image' | 'Divider' | 'Card' | 'Badge';
 
 export interface UIComponent {
     id: string;
     type: ComponentType;
-    props: Record<string, any>;
+    props: Record<string, unknown>;
     layout?: { x: number, y: number, w: number, h: number };
     children?: UIComponent[]; // For nested containers later
 }
@@ -17,7 +17,7 @@ export interface UIBuilderState {
     setComponents: (components: UIComponent[]) => void;
     addComponent: (component: UIComponent, index?: number) => void;
     removeComponent: (id: string) => void;
-    updateComponentProps: (id: string, props: Record<string, any>) => void;
+    updateComponentProps: (id: string, props: Record<string, unknown>) => void;
     updateComponentLayout: (id: string, layout: { x: number, y: number, w: number, h: number }) => void;
     selectComponent: (id: string | null) => void;
     moveComponent: (oldIndex: number, newIndex: number) => void;

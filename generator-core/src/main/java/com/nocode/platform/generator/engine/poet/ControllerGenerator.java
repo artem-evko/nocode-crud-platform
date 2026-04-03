@@ -105,7 +105,7 @@ public class ControllerGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ClassName.get("org.springframework.web.bind.annotation", "RestController"))
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("org.springframework.web.bind.annotation", "RequestMapping"))
-                        .addMember("value", "$S", "/api/" + toSnakeCase(entity.name()) + "s")
+                        .addMember("value", "$S", "/api/" + entity.table())
                         .build())
                 .addField(repoField)
                 .addMethod(constructor)
@@ -128,7 +128,7 @@ public class ControllerGenerator {
             return;
         }
         String[] roles = rolesStr.split(",");
-        StringBuilder expr = new StringBuilder("hasAnyRole(");
+        StringBuilder expr = new StringBuilder("hasAnyAuthority(");
         for (int i = 0; i < roles.length; i++) {
             expr.append("'").append(roles[i].trim()).append("'");
             if (i < roles.length - 1) expr.append(", ");

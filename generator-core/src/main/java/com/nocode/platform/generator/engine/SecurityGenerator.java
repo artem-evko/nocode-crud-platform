@@ -167,6 +167,7 @@ public class SecurityGenerator {
                "import org.springframework.security.authentication.AuthenticationProvider;\n" +
                "import org.springframework.security.authentication.dao.DaoAuthenticationProvider;\n" +
                "import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;\n" +
+               "import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;\n" +
                "import org.springframework.security.config.annotation.web.builders.HttpSecurity;\n" +
                "import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;\n" +
                "import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;\n" +
@@ -179,6 +180,7 @@ public class SecurityGenerator {
                "import java.util.List;\n\n" +
                "@Configuration\n" +
                "@EnableWebSecurity\n" +
+               "@EnableMethodSecurity\n" +
                "public class SecurityConfig {\n" +
                "    private final JwtAuthenticationFilter jwtAuthFilter;\n" +
                "    private final UserDetailsServiceImpl userDetailsService;\n\n" +
@@ -272,6 +274,19 @@ public class SecurityGenerator {
                "    public ResponseEntity<?> login(@RequestBody AuthRequest request) {\n" +
                "        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));\n" +
                "        UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());\n" +
+               "        String token = jwtUtil.generateToken(user);\n" +
+               "        return ResponseEntity.ok(new AuthResponse(token));\n" +
+               "    }\n\n" +
+               "    @PostMapping(\"/register\")\n" +
+               "    public ResponseEntity<?> register(@RequestBody AuthRequest request) {\n" +
+               "        if (userRepository.findByUsername(request.getUsername()).isPresent()) {\n" +
+               "            return ResponseEntity.badRequest().body(\"Username is already taken\");\n" +
+               "        }\n" +
+               "        User user = new User();\n" +
+               "        user.setUsername(request.getUsername());\n" +
+               "        user.setPassword(passwordEncoder.encode(request.getPassword()));\n" +
+               "        user.setRole(\"ROLE_ADMIN\");\n" +
+               "        userRepository.save(user);\n" +
                "        String token = jwtUtil.generateToken(user);\n" +
                "        return ResponseEntity.ok(new AuthResponse(token));\n" +
                "    }\n\n" +

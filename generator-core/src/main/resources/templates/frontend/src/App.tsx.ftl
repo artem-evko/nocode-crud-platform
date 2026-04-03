@@ -5,6 +5,7 @@ import { Navigate } from 'react-router-dom';
 </#if>
 <#if authEnabled>import { useAuthStore } from './store/authStore';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 </#if>
 <#if uiSpec?? && uiSpec.components()?? && uiSpec.components()?size &gt; 0>
 import Dashboard from './pages/Dashboard';
@@ -62,6 +63,7 @@ function App() {
           <Routes>
           <#if authEnabled>
             <Route path="/login" element={!token ? <LoginPage /> : <Navigate to="/" replace />} />
+            <Route path="/register" element={!token ? <RegisterPage /> : <Navigate to="/" replace />} />
           </#if>
             
           <#if entities??>

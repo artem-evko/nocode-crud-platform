@@ -79,12 +79,13 @@ public record Spec(
     ) {}
 
     public enum RelationType {
-        MANY_TO_ONE, ONE_TO_MANY
+        MANY_TO_ONE, ONE_TO_MANY, MANY_TO_MANY
     }
 
     public record Relation(
             String name,
             String targetEntity,
-            RelationType type
+            RelationType type,
+            String mappedBy
     ) {}
 }

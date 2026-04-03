@@ -1,0 +1,80 @@
+package com.example.testapp.service;
+
+import com.example.testapp.domain.Customer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import java.lang.Object;
+import java.lang.String;
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional
+public class ActionFlowService {
+    @Autowired
+    EntityManager entityManager;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    public Map<String, Object> execute_flow_123(Map<String, Object> payload) {
+        Map<String, Object> result = new HashMap<>();
+
+        // --- Flow execution for: CreateCustomerFlow ---
+        // Action: Update Entity
+        try {
+            Object idObj = payload != null ? payload.get("id") : null;
+            if (idObj != null) {
+                Long entityId = Long.valueOf(idObj.toString());
+                Customer existing = entityManager.find(Customer.class, entityId);
+                if (existing != null) {
+                    String mappingTemplate = "{\"firstName\": \"{{payload.name}}\"}";
+                    String resolvedJson = mappingTemplate;
+                    if (payload != null) {
+                        for (Map.Entry<String, Object> entry : payload.entrySet()) {
+                            if (entry.getValue() != null) {
+                                resolvedJson = resolvedJson.replace("{{payload." + entry.getKey() + "}}", String.valueOf(entry.getValue()));
+                            }
+                        }
+                    }
+                    objectMapper.readerForUpdating(existing).readValue(resolvedJson);
+                    entityManager.merge(existing);
+                    System.out.println("Updated entity: " + existing);
+                    result.put("action_" + "node1", "Success");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("error_" + "node1", e.getMessage());
+        }
+        // Action: Delete Entity
+        try {
+            Object idObj = payload != null ? payload.get("id") : null;
+            if (idObj != null) {
+                Long entityId = Long.valueOf(idObj.toString());
+                Customer existing = entityManager.find(Customer.class, entityId);
+                if (existing != null) {
+                    entityManager.remove(existing);
+                    System.out.println("Deleted entity: " + existing);
+                    result.put("action_" + "node2", "Deleted");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("error_" + "node2", e.getMessage());
+        }
+        String toastMessage = "Success! ID={{payload.id}}";
+        if (payload != null) {
+            for (Map.Entry<String, Object> entry : payload.entrySet()) {
+                if (entry.getValue() != null) {
+                    toastMessage = toastMessage.replace("{{payload." + entry.getKey() + "}}", String.valueOf(entry.getValue()));
+                }
+            }
+        }
+        result.put("toast", toastMessage);
+        return result;
+    }
+}

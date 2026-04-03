@@ -16,7 +16,7 @@ const DynamicChart = ({ type, entityName, xAxisKey, yAxisKey, className }) => {
     const [data, setData] = useState([]);
     useEffect(() => {
         if (!entityName) return;
-        api.get(`/${entityName.toLowerCase()}`).then(res => setData(res.data)).catch(console.error);
+        api.get('/' + entityName.toLowerCase()).then(res => setData(res.data)).catch(console.error);
     }, [entityName]);
 
     if (!entityName) return <div className="p-4 border border-red-500/50 bg-red-500/10 text-red-500 rounded my-4">Chart component missing 'entityName' binding.</div>;
@@ -25,7 +25,7 @@ const DynamicChart = ({ type, entityName, xAxisKey, yAxisKey, className }) => {
     const RealElement = type === 'BarChart' ? Bar : Line;
 
     return (
-        <div className={`bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mt-6 mb-6 shadow-md p-6 ${className || ''}`}>
+        <div className={`bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden mt-6 mb-6 shadow-md p-6 ${r"${className || ''}"}`}>
             <h3 className="font-semibold text-white tracking-wide mb-4">{entityName} Chart</h3>
             <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -132,6 +132,14 @@ export default function Dashboard() {
                 <div className="text-zinc-500 text-sm text-center py-4 border-2 border-dashed border-zinc-800 rounded-lg">Empty Container</div>
     </#if>
             </div>
+<#elseif component.type() == "Card">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden p-6 hover:border-zinc-700 transition-colors ${component.props()['className']!''}">
+                <p className="text-zinc-300 whitespace-pre-wrap">${component.props()['text']!'Описание карточки. Настройте текст в свойствах.'}</p>
+            </div>
+<#elseif component.type() == "Badge">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm ${component.props()['className']!''}">
+                ${component.props()['text']!'Badge'}
+            </span>
 <#else>
             <div className="p-4 border border-orange-500/50 bg-orange-500/10 text-orange-500 rounded">
                 Unsupported UI Component: ${component.type()}

@@ -88,13 +88,42 @@ public class EntityGenerator {
                     typeBuilder.addMethod(buildSetter(targetClass, relation.name()));
                 } else if (relation.type() == Spec.RelationType.ONE_TO_MANY) {
                     TypeName listType = ParameterizedTypeName.get(ClassName.get(List.class), targetClass);
+                    String mappedByVal = (relation.mappedBy() != null && !relation.mappedBy().isBlank()) 
+                                            ? relation.mappedBy() 
+                                            : toCamelCase(entity.name());
+
                     FieldSpec relField = FieldSpec.builder(listType, relation.name(), Modifier.PRIVATE)
                             .initializer("new $T<>()", ArrayList.class)
                             .addAnnotation(AnnotationSpec.builder(ClassName.get("jakarta.persistence", "OneToMany"))
-                                    .addMember("mappedBy", "$S", toCamelCase(entity.name()))
+                                    .addMember("mappedBy", "$S", mappedByVal)
                                     .build())
+                            .addAnnotation(ClassName.get("com.fasterxml.jackson.annotation", "JsonIgnore"))
                             .build();
                     typeBuilder.addField(relField);
+                    typeBuilder.addMethod(buildGetter(listType, relation.name()));
+                    typeBuilder.addMethod(buildSetter(listType, relation.name()));
+                } else if (relation.type() == Spec.RelationType.MANY_TO_MANY) {
+                    TypeName listType = ParameterizedTypeName.get(ClassName.get(List.class), targetClass);
+                    AnnotationSpec.Builder m2m = AnnotationSpec.builder(ClassName.get("jakarta.persistence", "ManyToMany"));
+                    FieldSpec.Builder relField = FieldSpec.builder(listType, relation.name(), Modifier.PRIVATE)
+                            .initializer("new $T<>()", ArrayList.class);
+
+                    if (relation.mappedBy() != null && !relation.mappedBy().isBlank()) {
+                        m2m.addMember("mappedBy", "$S", relation.mappedBy());
+                        relField.addAnnotation(m2m.build());
+                        relField.addAnnotation(ClassName.get("com.fasterxml.jackson.annotation", "JsonIgnore"));
+                    } else {
+                        relField.addAnnotation(m2m.build());
+                        String joinTableName = toSnakeCase(entity.name()) + "_" + toSnakeCase(relation.name());
+                        AnnotationSpec joinTable = AnnotationSpec.builder(ClassName.get("jakarta.persistence", "JoinTable"))
+                            .addMember("name", "$S", joinTableName)
+                            .addMember("joinColumns", "@$T(name=$S)", ClassName.get("jakarta.persistence", "JoinColumn"), toSnakeCase(entity.name()) + "_id")
+                            .addMember("inverseJoinColumns", "@$T(name=$S)", ClassName.get("jakarta.persistence", "JoinColumn"), toSnakeCase(relation.targetEntity()) + "_id")
+                            .build();
+                        relField.addAnnotation(joinTable);
+                    }
+                    
+                    typeBuilder.addField(relField.build());
                     typeBuilder.addMethod(buildGetter(listType, relation.name()));
                     typeBuilder.addMethod(buildSetter(listType, relation.name()));
                 }

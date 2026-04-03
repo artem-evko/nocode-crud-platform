@@ -37,8 +37,9 @@ export default function RegisterPage() {
             
             toast.success("Account created successfully!");
             navigate('/login');
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Registration failed');
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error(err.response?.data?.message || 'Registration failed');
         } finally {
             setIsLoading(false);
         }
@@ -46,12 +47,12 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4">
-            <div className="absolute top-4 left-4">
+            <div className="absolute top-6 left-6">
                 <button 
                     onClick={() => navigate('/')}
-                    className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+                    className="flex items-center gap-2 font-medium text-sm text-zinc-400 hover:text-white transition-colors"
                 >
-                    <ArrowLeft size={16} /> Back to Home
+                    <ArrowLeft size={18} /> На главную
                 </button>
             </div>
             

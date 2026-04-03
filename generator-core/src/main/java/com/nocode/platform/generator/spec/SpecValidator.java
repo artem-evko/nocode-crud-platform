@@ -23,12 +23,21 @@ public class SpecValidator {
             List<String> entityNames = spec.entities().stream().map(Spec.Entity::name).toList();
             for (int i = 0; i < spec.entities().size(); i++) {
                 Spec.Entity entity = spec.entities().get(i);
-                if (blank(entity.name())) errors.add("entities[" + i + "].name is required");
+                if (blank(entity.name())) {
+                    errors.add("entities[" + i + "].name is required");
+                } else if (!entity.name().matches("^[a-zA-Z][a-zA-Z0-9]*$")) {
+                    errors.add("entities[" + i + "].name must contain only English letters/numbers and start with a letter: " + entity.name());
+                }
                 
                 if (entity.fields() != null) {
                     for (int j = 0; j < entity.fields().size(); j++) {
                         Spec.Field field = entity.fields().get(j);
-                        if (blank(field.name())) errors.add("entities[" + i + "].fields[" + j + "].name is required");
+                        if (blank(field.name())) {
+                            errors.add("entities[" + i + "].fields[" + j + "].name is required");
+                        } else if (!field.name().matches("^[a-zA-Z][a-zA-Z0-9]*$")) {
+                            errors.add("entities[" + i + "].fields[" + j + "].name must contain only English letters/numbers and start with a letter: " + field.name());
+                        }
+                        
                         if (field.type() == null) errors.add("entities[" + i + "].fields[" + j + "].type is required");
                     }
                 }

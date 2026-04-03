@@ -15,6 +15,8 @@ interface Project {
     version: string;
     basePackage: string;
     specText?: string;
+    deploymentStatus?: string;
+    deploymentUrl?: string;
 }
 
 export default function ProjectsPage() {
@@ -179,7 +181,26 @@ export default function ProjectsPage() {
                                     </button>
                                 </div>
 
-                                <h3 className="text-xl font-bold mb-3 text-white pr-16 truncate">{project.name}</h3>
+                                <div className="flex items-center gap-3 mb-3 pr-16">
+                                    <h3 className="text-xl font-bold text-white truncate">{project.name}</h3>
+                                    {project.deploymentStatus === 'RUNNING' && (
+                                        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                            Запущено
+                                        </span>
+                                    )}
+                                    {project.deploymentStatus === 'IN_PROGRESS' && (
+                                        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                            <span className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></span>
+                                            Развертывание
+                                        </span>
+                                    )}
+                                    {project.deploymentStatus === 'ERROR' && (
+                                        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+                                            Ошибка
+                                        </span>
+                                    )}
+                                </div>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between border-b border-zinc-800/50 pb-2">
                                         <span className="text-zinc-500">Group ID</span>
@@ -194,6 +215,21 @@ export default function ProjectsPage() {
                                         <span className="text-zinc-300 font-mono text-xs">{project.version}</span>
                                     </div>
                                 </div>
+                                
+                                {project.deploymentStatus === 'RUNNING' && (
+                                    <div className="mt-4 pt-4 border-t border-zinc-800/50">
+                                        <a 
+                                            href={`http://proj-${project.id}.localhost`} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 rounded-lg text-sm font-semibold transition-colors border border-emerald-500/20"
+                                        >
+                                            <LayoutTemplate size={16} />
+                                            Открыть приложение
+                                        </a>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

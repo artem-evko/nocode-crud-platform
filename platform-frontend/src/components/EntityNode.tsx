@@ -54,14 +54,16 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
         }
     };
 
+    const isValidEntityName = /^[a-zA-Z][a-zA-Z0-9_]*$/.test(data.name || 'НоваяСущность');
+
     return (
-        <div className="bg-zinc-950/80 backdrop-blur-md border border-zinc-700/50 rounded-xl shadow-xl w-72 overflow-visible">
+        <div className={`bg-zinc-950/80 backdrop-blur-md border rounded-xl shadow-xl w-72 overflow-visible transition-colors ${!isValidEntityName ? 'border-red-500/80 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'border-zinc-700/50'}`}>
             {/* Input Handles for relationships */}
             <Handle type="target" position={Position.Left} className="w-3 h-3 bg-indigo-500 border border-zinc-900" />
             <Handle type="source" position={Position.Right} className="w-3 h-3 bg-fuchsia-500 border border-zinc-900" />
 
             {/* Header: Entity Name */}
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-900 p-3 rounded-t-xl border-b border-zinc-800/80 flex justify-between items-center group cursor-grab active:cursor-grabbing">
+            <div className={`p-3 rounded-t-xl border-b border-zinc-800/80 flex justify-between items-center group cursor-grab active:cursor-grabbing ${!isValidEntityName ? 'bg-red-950/40' : 'bg-gradient-to-r from-zinc-800 to-zinc-900'}`}>
                 {isEditingName ? (
                     <input
                         type="text"
@@ -94,7 +96,8 @@ export default function EntityNode({ id, data }: NodeProps<AppNode>) {
                                 type="text"
                                 value={field.name}
                                 onChange={(e) => data.onFieldChange?.(id, field.id, { name: e.target.value })}
-                                className="bg-transparent text-xs text-zinc-300 focus:text-white font-medium outline-none w-20 flex-1 truncate placeholder-zinc-600"
+                                title={!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(field.name) ? 'Используйте только латинские буквы без пробелов' : ''}
+                                className={`bg-transparent text-xs font-medium outline-none w-20 flex-1 truncate placeholder-zinc-600 px-1 py-0.5 rounded ${!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(field.name) ? 'text-red-400 border border-red-500/50 bg-red-500/10' : 'text-zinc-300 focus:text-white'}`}
                                 placeholder="fieldName"
                             />
 

@@ -25,6 +25,7 @@ export interface BackendSpec {
             name: string;
             targetEntity: string;
             type: string;
+            mappedBy?: string;
         }[];
     }[];
     actionFlows?: {
@@ -92,7 +93,8 @@ export const compileToSpec = (project: ProjectFormData, nodes: AppNode[], edges:
                     return {
                         name: targetNode.data.name.toLowerCase() + 's',
                         targetEntity: targetNode.data.name,
-                        type: 'ONE_TO_MANY'
+                        type: 'ONE_TO_MANY',
+                        mappedBy: node.data.name.toLowerCase()
                     };
                 }).filter(Boolean) as BackendSpec['entities'][0]['relations'];
 

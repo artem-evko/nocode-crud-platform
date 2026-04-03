@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { apiClient } from '../api/client';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
@@ -35,7 +36,16 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-slate-50">
+        <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-slate-50 relative">
+            <div className="absolute top-6 left-6">
+                <button 
+                    onClick={() => navigate('/')}
+                    className="flex items-center gap-2 font-medium text-sm text-zinc-400 hover:text-white transition-colors"
+                >
+                    <ArrowLeft size={18} /> На главную
+                </button>
+            </div>
+
             <div className="w-full max-w-md p-8 space-y-8 bg-zinc-900 rounded-xl shadow-2xl border border-zinc-800">
                 <div className="text-center">
                     <h2 className="text-3xl font-extrabold tracking-tight">С возвращением</h2>

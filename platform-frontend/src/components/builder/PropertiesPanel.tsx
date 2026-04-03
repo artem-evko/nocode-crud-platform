@@ -78,8 +78,15 @@ export default function PropertiesPanel() {
     const activeBgColor = ['bg-zinc-900', 'bg-red-500', 'bg-blue-500', 'bg-emerald-500', 'bg-indigo-500', 'bg-purple-500', 'bg-yellow-500', 'bg-transparent'].find(c => currentClasses.includes(c)) || 'bg-transparent';
     const activeRadius = ['rounded-none', 'rounded-md', 'rounded-xl', 'rounded-2xl', 'rounded-full'].find(c => currentClasses.includes(c)) || 'rounded-none';
     const activePadding = ['p-0', 'p-2', 'p-4', 'p-6', 'p-8'].find(c => currentClasses.includes(c)) || 'p-0';
+    const activeTextColor = ['text-zinc-50', 'text-zinc-400', 'text-zinc-900', 'text-emerald-400', 'text-indigo-400', 'text-rose-400'].find(c => currentClasses.includes(c)) || 'text-zinc-50';
+    const activeTextAlign = ['text-left', 'text-center', 'text-right'].find(c => currentClasses.includes(c)) || 'text-left';
+    const activeTextSize = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl'].find(c => currentClasses.includes(c)) || 'text-base';
+    const activeFontWeight = ['font-normal', 'font-medium', 'font-semibold', 'font-bold'].find(c => currentClasses.includes(c)) || 'font-normal';
+    const activeShadow = ['shadow-none', 'shadow-sm', 'shadow', 'shadow-md', 'shadow-lg', 'shadow-xl'].find(c => currentClasses.includes(c)) || 'shadow-none';
     
     const selectedEntityDef = entities.find(e => e.name === selectedComponent.props.entityName);
+    const hasEmptyFields = selectedEntityDef && (!selectedEntityDef.fields || selectedEntityDef.fields.length === 0);
+    const hasEmptyAction = selectedComponent.type === 'Button' && (!selectedComponent.props.actionFlowId || selectedComponent.props.actionFlowId === 'none');
 
     return (
         <div className="space-y-6">
@@ -140,6 +147,12 @@ export default function PropertiesPanel() {
                         <p className="text-xs text-zinc-500 mt-1">
                             Выберите поток логики, который будет выполняться при клике на кнопку.
                         </p>
+                        {hasEmptyAction && (
+                            <div className="mt-2 text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded p-2 flex gap-2">
+                                <span>⚠️</span>
+                                <span>Кнопке не назначено действие (Action Flow). Она не будет реагировать на нажатия.</span>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -160,6 +173,12 @@ export default function PropertiesPanel() {
                         <p className="text-xs text-zinc-500 mt-1">
                             Свяжите этот компонент с сущностью модели данных для автогенерации API-вызовов.
                         </p>
+                        {selectedComponent.type === 'FormModule' && hasEmptyFields && (
+                            <div className="mt-2 text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded p-2 flex gap-2">
+                                <span>⚠️</span>
+                                <span>В выбранной сущности нет полей. Сгенерированная форма будет абсолютно пустой. Добавьте поля в Модели Данных!</span>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -263,6 +282,91 @@ export default function PropertiesPanel() {
                                     className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activePadding === p.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
                                 >
                                     {p.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Цвет текста</span>
+                        <div className="flex flex-wrap gap-2">
+                            {['text-zinc-50', 'text-zinc-400', 'text-zinc-900', 'text-emerald-400', 'text-indigo-400', 'text-rose-400'].map(tc => (
+                                <button
+                                    key={tc}
+                                    onClick={() => toggleClass('text-', tc)}
+                                    className={`w-6 h-6 rounded-md border-2 transition-all bg-zinc-900 flex items-center justify-center ${activeTextColor === tc ? 'border-indigo-500 scale-110' : 'border-zinc-700 hover:scale-105 hover:border-zinc-500'}`}
+                                    title={tc}
+                                >
+                                    <span className={`${tc} font-bold text-xs`}>A</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Выравнивание & Тень</span>
+                        <div className="flex gap-2 mb-2">
+                            {[
+                                { class: 'text-left', label: 'Left' },
+                                { class: 'text-center', label: 'Center' },
+                                { class: 'text-right', label: 'Right' }
+                            ].map(a => (
+                                <button
+                                    key={a.class}
+                                    onClick={() => toggleClass('text-', a.class)}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeTextAlign === a.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                >
+                                    {a.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
+                            {[
+                                { class: 'shadow-none', label: 'No Shadow' },
+                                { class: 'shadow-md', label: 'Medium' },
+                                { class: 'shadow-xl', label: 'Large' }
+                            ].map(s => (
+                                <button
+                                    key={s.class}
+                                    onClick={() => toggleClass('shadow-', s.class === 'shadow-none' ? '' : s.class)}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeShadow === s.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                >
+                                    {s.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Шрифт (Размер / Вес)</span>
+                        <div className="flex gap-2 mb-2">
+                            {[
+                                { class: 'text-sm', label: 'SM' },
+                                { class: 'text-base', label: 'Base' },
+                                { class: 'text-xl', label: 'XL' },
+                                { class: 'text-3xl', label: '3XL' }
+                            ].map(s => (
+                                <button
+                                    key={s.class}
+                                    onClick={() => toggleClass('text-', s.class)}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeTextSize === s.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                >
+                                    {s.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
+                            {[
+                                { class: 'font-normal', label: 'Regular' },
+                                { class: 'font-medium', label: 'Medium' },
+                                { class: 'font-bold', label: 'Bold' }
+                            ].map(fw => (
+                                <button
+                                    key={fw.class}
+                                    onClick={() => toggleClass('font-', fw.class)}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeFontWeight === fw.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                >
+                                    {fw.label}
                                 </button>
                             ))}
                         </div>

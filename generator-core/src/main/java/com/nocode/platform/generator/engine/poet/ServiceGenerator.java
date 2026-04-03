@@ -74,9 +74,65 @@ public class ServiceGenerator {
 
                         } else if ("DB_UPDATE_RECORD".equals(action)) {
                             mb.addCode("// Action: Update Entity\n");
-                            mb.addStatement("System.out.println(\"Executing DB Update Action: \" + $S)", action);
+                            String entityName = config != null && config.containsKey("entityName") ? (String) config.get("entityName") : "Unknown";
+                            String mappingJson = config != null && config.containsKey("mapping") ? (String) config.get("mapping") : "{}";
+                            ClassName entityClass = ClassName.get(basePackage + ".domain", entityName);
+                            
+                            mb.beginControlFlow("try");
+                            mb.addStatement("Object idObj = payload != null ? payload.get(\"id\") : null");
+                            mb.beginControlFlow("if (idObj != null)");
+                            mb.addStatement("Long entityId = Long.valueOf(idObj.toString())");
+                            mb.addStatement("$T existing = entityManager.find($T.class, entityId)", entityClass, entityClass);
+                            mb.beginControlFlow("if (existing != null)");
+                            
+                            mb.addStatement("String mappingTemplate = $S", mappingJson);
+                            mb.addStatement("String resolvedJson = mappingTemplate");
+                            mb.beginControlFlow("if (payload != null)");
+                            mb.beginControlFlow("for ($T.Entry<String, Object> entry : payload.entrySet())", Map.class);
+                            mb.beginControlFlow("if (entry.getValue() != null)");
+                            mb.addStatement("resolvedJson = resolvedJson.replace(\"{{payload.\" + entry.getKey() + \"}}\", String.valueOf(entry.getValue()))");
+                            mb.endControlFlow(); // if
+                            mb.endControlFlow(); // for
+                            mb.endControlFlow(); // if
+                            
+                            mb.addStatement("objectMapper.readerForUpdating(existing).readValue(resolvedJson)");
+                            mb.addStatement("entityManager.merge(existing)");
+                            mb.addStatement("System.out.println(\"Updated entity: \" + existing)");
+                            mb.addStatement("result.put(\"action_\" + $S, \"Success\")", node.id());
+                            
+                            mb.endControlFlow(); // if existing
+                            mb.endControlFlow(); // if idObj
+                            
+                            mb.nextControlFlow("catch (Exception e)");
+                            mb.addStatement("e.printStackTrace()");
+                            mb.addStatement("result.put(\"error_\" + $S, e.getMessage())", node.id());
+                            mb.endControlFlow();
+
+                        } else if ("DB_DELETE_RECORD".equals(action)) {
+                            mb.addCode("// Action: Delete Entity\n");
+                            String entityName = config != null && config.containsKey("entityName") ? (String) config.get("entityName") : "Unknown";
+                            ClassName entityClass = ClassName.get(basePackage + ".domain", entityName);
+                            
+                            mb.beginControlFlow("try");
+                            mb.addStatement("Object idObj = payload != null ? payload.get(\"id\") : null");
+                            mb.beginControlFlow("if (idObj != null)");
+                            mb.addStatement("Long entityId = Long.valueOf(idObj.toString())");
+                            mb.addStatement("$T existing = entityManager.find($T.class, entityId)", entityClass, entityClass);
+                            mb.beginControlFlow("if (existing != null)");
+                            mb.addStatement("entityManager.remove(existing)");
+                            mb.addStatement("System.out.println(\"Deleted entity: \" + existing)");
+                            mb.addStatement("result.put(\"action_\" + $S, \"Deleted\")", node.id());
+                            mb.endControlFlow(); // if existing
+                            mb.endControlFlow(); // if idObj
+                            
+                            mb.nextControlFlow("catch (Exception e)");
+                            mb.addStatement("e.printStackTrace()");
+                            mb.addStatement("result.put(\"error_\" + $S, e.getMessage())", node.id());
+                            mb.endControlFlow();
+                            
                         } else if ("UI_SHOW_TOAST".equals(action)) {
-                            String toastMessage = config != null && config.containsKey("message") ? (String) config.get("message") : "Success! Action Flow executed.";
+                            String toastMsgTemplate = config != null && config.containsKey("message") ? (String) config.get("message") : "Success! Action Flow executed.";
+                            mb.addStatement("String toastMessage = $S", toastMsgTemplate);
                             mb.beginControlFlow("if (payload != null)");
                             mb.beginControlFlow("for ($T.Entry<String, Object> entry : payload.entrySet())", Map.class);
                             mb.beginControlFlow("if (entry.getValue() != null)");
@@ -84,7 +140,7 @@ public class ServiceGenerator {
                             mb.endControlFlow();
                             mb.endControlFlow();
                             mb.endControlFlow();
-                            mb.addStatement("result.put(\"toast\", $S)", toastMessage); // TODO: dynamic variable resolution for toast
+                            mb.addStatement("result.put(\"toast\", toastMessage)");
                         }
                     }
                 }

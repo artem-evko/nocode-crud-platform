@@ -4,6 +4,7 @@ import com.nocode.platform.project.ProjectEntity;
 import com.nocode.platform.dto.ProjectDto;
 import com.nocode.platform.project.ProjectRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
@@ -24,9 +25,17 @@ public class ProjectController {
         this.deploymentService = deploymentService;
     }
 
+    private String getUsername() {
+        return SecurityContextHolder.getContext().getAuthentication() != null 
+                && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()
+                && !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")
+                ? SecurityContextHolder.getContext().getAuthentication().getName()
+                : "admin"; // Default fallback
+    }
+
     @GetMapping
     public List<ProjectDto> getAllProjects() {
-        return projectRepository.findAll().stream()
+        return projectRepository.findAllByOwnerUsername(getUsername()).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -34,6 +43,7 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDto> getProjectById(@PathVariable UUID id) {
         return projectRepository.findById(id)
+                .filter(p -> p.getOwnerUsername().equals(getUsername()))
                 .map(this::convertToDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -43,6 +53,8 @@ public class ProjectController {
     public ProjectDto createProject(@RequestBody ProjectDto dto) {
         ProjectEntity project = new ProjectEntity();
         project.setId(UUID.randomUUID());
+        
+        project.setOwnerUsername(getUsername());
         project.setName(dto.getName());
         project.setGroupId(dto.getGroupId() != null ? dto.getGroupId() : "com.example");
         project.setArtifactId(dto.getArtifactId() != null ? dto.getArtifactId() : "demo");
@@ -59,6 +71,7 @@ public class ProjectController {
     @PutMapping("/{id}")
     public ResponseEntity<ProjectDto> updateProject(@PathVariable UUID id, @RequestBody ProjectDto dto) {
         return projectRepository.findById(id)
+                .filter(p -> p.getOwnerUsername().equals(getUsername()))
                 .map(project -> {
                     project.setName(dto.getName());
                     project.setGroupId(dto.getGroupId());
@@ -78,22 +91,18 @@ public class ProjectController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
-        if (!projectRepository.existsById(id)) {
-            return ResponseEntity.ok().build();
-        }
-        try {
-            deploymentService.stopDeployment(id);
-        } catch (Exception e) {
-            // Ignore if deployment wasn't actively running
-        }
-        if (projectRepository.existsById(id)) {
-            try {
-                projectRepository.deleteById(id);
-            } catch (Exception e) {
-                // Ignore if it was somehow deleted concurrently
-            }
-        }
-        return ResponseEntity.ok().build();
+        return projectRepository.findById(id)
+                .filter(p -> p.getOwnerUsername().equals(getUsername()))
+                .map(project -> {
+                    try {
+                        deploymentService.stopDeployment(id);
+                    } catch (Exception e) {
+                        // Ignore if deployment wasn't actively running
+                    }
+                    projectRepository.deleteById(id);
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     private ProjectDto convertToDto(ProjectEntity project) {

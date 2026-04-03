@@ -74,7 +74,13 @@ public class DeploymentService {
             
             runCommand(projectRoot.toFile(), "docker", "compose", "-p", projectName, "down", "-v");
             
-            int buildExitCode = runCommand(projectRoot.toFile(), "docker", "compose", "-p", projectName, "build");
+            int buildExitCode = -1;
+            for (int i = 0; i < 3; i++) {
+                buildExitCode = runCommand(projectRoot.toFile(), "docker", "compose", "-p", projectName, "build");
+                if (buildExitCode == 0) break;
+                log.warn("Docker build failed (network error/rate limit), attempt {}/3. Retrying in 5 seconds...", i + 1);
+                Thread.sleep(5000);
+            }
             if (buildExitCode != 0) {
                 throw new RuntimeException("Docker build failed with exit code " + buildExitCode);
             }
@@ -91,8 +97,7 @@ public class DeploymentService {
                 throw new RuntimeException("Docker up failed with exit code " + upExitCode);
             }
 
-            String url = hasFrontend ? "http://localhost:" + frontendPort
-                                     : "http://localhost:" + backendPort + "/swagger-ui/index.html";
+            String url = "http://proj-" + projectId + ".localhost";
             updateStatus(project, "RUNNING", url);
 
         } catch (Exception e) {
@@ -135,10 +140,10 @@ public class DeploymentService {
                     FROM maven:3.9.6-eclipse-temurin-21-alpine AS BUILD
                     WORKDIR /app
                     COPY pom.xml .
-                    # Download dependencies
-                    RUN mvn dependency:go-offline
+                    # Download dependencies with BuildKit Cache
+                    RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline
                     COPY src ./src
-                    RUN mvn clean package -DskipTests
+                    RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests
                     
                     FROM eclipse-temurin:21-jre-alpine
                     WORKDIR /app
@@ -156,9 +161,9 @@ public class DeploymentService {
                     FROM node:20-alpine AS build
                     WORKDIR /app
                     COPY package*.json ./
-                    RUN npm install
+                    RUN --mount=type=cache,target=/root/.npm npm install
                     COPY . .
-                    RUN npm run build
+                    RUN --mount=type=cache,target=/root/.npm npm run build
                     
                     FROM nginx:alpine
                     COPY --from=build /app/dist /usr/share/nginx/html
@@ -173,7 +178,7 @@ public class DeploymentService {
     private void generateDockerCompose(Path root, ProjectEntity project, boolean hasFrontend, int frontendPort, int backendPort, int dbPort) throws IOException {
         String dbUser = "user";
         String dbPass = "password";
-        String dbName = "app";
+        String dbName = project.getArtifactId();
         
         // If hasFrontend, configure nginx to proxy /api to the backend
         if (hasFrontend) {
@@ -197,14 +202,6 @@ public class DeploymentService {
                     }
                     """;
             Files.writeString(nginxConfPath, nginxConf);
-            
-            // Overwrite API BASE URL in api.ts to be relative /api
-            Path apiTsPath = frontendDir.resolve("src/lib/api.ts");
-            if (Files.exists(apiTsPath)) {
-                String apiTs = Files.readString(apiTsPath);
-                apiTs = apiTs.replace("http://localhost:8080/api", "/api");
-                Files.writeString(apiTsPath, apiTs);
-            }
         }
         
         // Overwrite application.yml to use docker network db:
@@ -228,25 +225,45 @@ public class DeploymentService {
         compose.append("      POSTGRES_USER: ").append(dbUser).append("\n");
         compose.append("      POSTGRES_PASSWORD: ").append(dbPass).append("\n");
         compose.append("      POSTGRES_DB: ").append(dbName).append("\n");
-        compose.append("    ports:\n");
-        compose.append("      - \"").append(dbPort).append(":5432\"\n");
+        compose.append("    restart: always\n");
+        compose.append("    networks:\n");
+        compose.append("      - nocode-network\n");
         
         // Backend
         compose.append("  backend:\n");
         compose.append("    build: ./backend\n");
-        compose.append("    ports:\n");
-        compose.append("      - \"").append(backendPort).append(":8080\"\n");
+        compose.append("    restart: always\n");
         compose.append("    depends_on:\n");
         compose.append("      - db\n");
+        if (!hasFrontend) {
+            compose.append("    labels:\n");
+            compose.append("      - \"traefik.enable=true\"\n");
+            compose.append("      - \"traefik.http.routers.proj-").append(project.getId()).append(".rule=Host(`proj-").append(project.getId()).append(".localhost`)\"\n");
+            compose.append("      - \"traefik.http.routers.proj-").append(project.getId()).append(".entrypoints=web\"\n");
+            compose.append("      - \"traefik.http.services.proj-").append(project.getId()).append(".loadbalancer.server.port=8080\"\n");
+        }
+        compose.append("    networks:\n");
+        compose.append("      - nocode-network\n");
         
         if (hasFrontend) {
             compose.append("  frontend:\n");
             compose.append("    build: ./frontend\n");
-            compose.append("    ports:\n");
-            compose.append("      - \"").append(frontendPort).append(":80\"\n");
+            compose.append("    restart: always\n");
             compose.append("    depends_on:\n");
             compose.append("      - backend\n");
+            compose.append("    labels:\n");
+            compose.append("      - \"traefik.enable=true\"\n");
+            compose.append("      - \"traefik.http.routers.proj-").append(project.getId()).append(".rule=Host(`proj-").append(project.getId()).append(".localhost`)\"\n");
+            compose.append("      - \"traefik.http.routers.proj-").append(project.getId()).append(".entrypoints=web\"\n");
+            compose.append("      - \"traefik.http.services.proj-").append(project.getId()).append(".loadbalancer.server.port=80\"\n");
+            compose.append("    networks:\n");
+            compose.append("      - nocode-network\n");
         }
+
+        compose.append("\nnetworks:\n");
+        compose.append("  nocode-network:\n");
+        compose.append("    external: true\n");
+        compose.append("    name: nocode-crud-platform_nocode-network\n");
 
         Files.writeString(root.resolve("docker-compose.yml"), compose.toString());
     }

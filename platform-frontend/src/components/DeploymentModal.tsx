@@ -1,26 +1,37 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, PlayCircle, Loader2, Link as LinkIcon, AlertCircle, ExternalLink } from 'lucide-react';
 import { apiClient } from '../api/client';
+import { validateProject } from '../lib/projectValidator';
+import type { ValidationMessage } from '../lib/projectValidator';
+import { useUIBuilderStore } from '../store/uiBuilderStore';
 
 interface DeploymentModalProps {
     isOpen: boolean;
     onClose: () => void;
     projectId: string;
-    currentUIComponents?: any[]; // optional prop to validate unsaved state
 }
 
-export default function DeploymentModal({ isOpen, onClose, projectId, currentUIComponents }: DeploymentModalProps) {
+export default function DeploymentModal({ isOpen, onClose, projectId }: DeploymentModalProps) {
+    const navigate = useNavigate();
     const [status, setStatus] = useState<string>('NONE'); // NONE, DEPLOYING, RUNNING, FAILED, STOPPING, PORT_OCCUPIED
     const [liveUrl, setLiveUrl] = useState<string | null>(null);
     const [isTriggering, setIsTriggering] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [port, setPort] = useState<string>('');
 
+    // Validation State
+    const [validationErrors, setValidationErrors] = useState<ValidationMessage[]>([]);
+    const [validationWarnings, setValidationWarnings] = useState<ValidationMessage[]>([]);
+    const [ignoreValidation, setIgnoreValidation] = useState<boolean>(false);
+    const { selectComponent } = useUIBuilderStore();
+
     useEffect(() => {
         if (!isOpen || !projectId) return;
         
         // Initial fetch
         fetchStatus();
+        setIgnoreValidation(false);
 
         // Polling if active operation
         const intervalId = setInterval(() => {
@@ -37,6 +48,13 @@ export default function DeploymentModal({ isOpen, onClose, projectId, currentUIC
             if (proj) {
                 if (proj.deploymentStatus) setStatus(proj.deploymentStatus);
                 if (proj.deploymentUrl) setLiveUrl(proj.deploymentUrl);
+                
+                // Validate if specText is available and status is NONE or FAILED
+                if ((!proj.deploymentStatus || proj.deploymentStatus === 'NONE' || proj.deploymentStatus === 'FAILED' || proj.deploymentStatus === 'PORT_OCCUPIED') && proj.specText) {
+                    const { errors, warnings } = validateProject(proj.specText);
+                    setValidationErrors(errors);
+                    setValidationWarnings(warnings);
+                }
             }
         } catch (error) {
             console.error("Failed to fetch deployment status", error);
@@ -47,29 +65,10 @@ export default function DeploymentModal({ isOpen, onClose, projectId, currentUIC
         try {
             setError(null);
             
-            // Validate the UI components before deployment
-            let compsToValidate = currentUIComponents;
-            
-            // If we are deploying via Dashboard, fetch DB spec
-            if (!compsToValidate) {
-                const res = await apiClient.get('/projects');
-                const proj = res.data.find((p: any) => p.id === projectId);
-                if (proj && proj.specText) {
-                    try {
-                        const spec = JSON.parse(proj.specText);
-                        compsToValidate = spec?.uiSpec?.components || [];
-                    } catch (e) {}
-                }
-            }
-
-            if (compsToValidate && compsToValidate.length > 0) {
-                const invalid = compsToValidate.filter((c: any) => 
-                    (c.type === 'DataTable' || c.type === 'FormModule') && !c.props.entityName
-                );
-                if (invalid.length > 0) {
-                    setError("В проекте есть компоненты (Таблица данных или Форма), у которых не выбрана Сущность данных. Пожалуйста, закройте это окно, выберите элемент на холсте и привяжите Сущность в правой панели свойств.");
-                    return;
-                }
+            // If we have validation errors and user hasn't ignored them, block deploy
+            if (validationErrors.length > 0 && !ignoreValidation) {
+                setError("Пожалуйста, исправьте критические ошибки конфигурации перед развертыванием.");
+                return;
             }
 
             setIsTriggering(true);
@@ -126,6 +125,64 @@ export default function DeploymentModal({ isOpen, onClose, projectId, currentUIC
                     <p className="text-zinc-400 text-sm">
                         Разверните ваше приложение в облаке в один клик. Платформа автоматически настроит инфраструктуру, соберёт docker-контейнеры и опубликует ваше приложение.
                     </p>
+
+                    {/* No-Code Doctor Display */}
+                    {(status === 'NONE' || status === 'FAILED' || status === 'PORT_OCCUPIED') && (validationErrors.length > 0 || validationWarnings.length > 0) && (
+                        <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3 max-h-48 overflow-y-auto custom-scrollbar">
+                            <div className="flex items-center gap-2 mb-2">
+                                <AlertCircle size={16} className={validationErrors.length > 0 ? "text-red-400" : "text-amber-400"} />
+                                <span className="text-sm font-semibold text-zinc-300">Доктор No-Code нашел проблемы:</span>
+                            </div>
+                            
+                            {validationErrors.map((err, idx) => (
+                                <div key={idx} className="flex flex-col gap-1 p-2 bg-red-950/20 border-l-2 border-red-500 rounded-r">
+                                    <span className="text-xs text-red-200">{err.message}</span>
+                                    {err.id && err.type === 'component' && (
+                                        <button 
+                                            onClick={() => { navigate(`/projects/${projectId}/builder`); selectComponent(err.id!); onClose(); }}
+                                            className="text-[10px] text-red-400 hover:text-red-300 text-left underline underline-offset-2"
+                                        >
+                                            Фокус на компонент
+                                        </button>
+                                    )}
+                                    {err.type === 'entity' && (
+                                        <button 
+                                            onClick={() => { navigate(`/projects/${projectId}/modeler`); onClose(); }}
+                                            className="text-[10px] text-red-400 hover:text-red-300 text-left underline underline-offset-2"
+                                        >
+                                            Перейти к Моделям данных
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+
+                            {validationWarnings.map((warn, idx) => (
+                                <div key={idx} className="flex flex-col gap-1 p-2 bg-amber-950/20 border-l-2 border-amber-500 rounded-r">
+                                    <span className="text-xs text-amber-200">{warn.message}</span>
+                                    {warn.id && warn.type === 'component' && (
+                                        <button 
+                                            onClick={() => { navigate(`/projects/${projectId}/builder`); selectComponent(warn.id!); onClose(); }}
+                                            className="text-[10px] text-amber-400 hover:text-amber-300 text-left underline underline-offset-2"
+                                        >
+                                            Фокус на компонент
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                            
+                            {validationErrors.length > 0 && (
+                                <label className="flex items-center gap-2 mt-4 cursor-pointer p-2 rounded bg-zinc-900 border border-zinc-700/50 hover:bg-zinc-800 transition-colors">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={ignoreValidation} 
+                                        onChange={(e) => setIgnoreValidation(e.target.checked)}
+                                        className="w-4 h-4 rounded text-red-600 focus:ring-red-500 bg-zinc-800 border-zinc-700"
+                                    />
+                                    <span className="text-xs text-zinc-300 font-medium">Я понимаю риски, игнорировать ошибки и продолжить</span>
+                                </label>
+                            )}
+                        </div>
+                    )}
 
                     {(status === 'NONE' || status === 'FAILED' || status === 'PORT_OCCUPIED') && (
                         <div className="space-y-1">
@@ -190,11 +247,11 @@ export default function DeploymentModal({ isOpen, onClose, projectId, currentUIC
                     {(status === 'NONE' || status === 'FAILED' || status === 'PORT_OCCUPIED') && (
                         <button
                             onClick={handleDeploy}
-                            disabled={isTriggering}
-                            className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isTriggering || (validationErrors.length > 0 && !ignoreValidation)}
+                            className={`flex items-center gap-2 px-5 py-2 text-sm font-medium text-white rounded-lg shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed ${validationErrors.length > 0 && !ignoreValidation ? 'bg-zinc-700' : (validationErrors.length > 0 ? 'bg-red-600 hover:bg-red-500' : 'bg-indigo-600 hover:bg-indigo-500')}`}
                         >
                             <PlayCircle size={16} />
-                            Развернуть
+                            {validationErrors.length > 0 && ignoreValidation ? 'Всё равно развернуть' : 'Развернуть'}
                         </button>
                     )}
 

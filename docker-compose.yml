@@ -35,15 +35,35 @@ services:
     networks:
       - nocode-network
 
+  traefik:
+    image: traefik:v2.10
+    container_name: nocode-traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8081:8080" # Traefik Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - nocode-network
+
   frontend:
     build:
       context: ./platform-frontend
       dockerfile: Dockerfile
     container_name: nocode-frontend
-    ports:
-      - "80:80"
     depends_on:
       - backend
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nocode-frontend.rule=Host(`localhost`) || Host(`127.0.0.1`)"
+      - "traefik.http.routers.nocode-frontend.entrypoints=web"
+      - "traefik.http.services.nocode-frontend.loadbalancer.server.port=80"
     networks:
       - nocode-network
 

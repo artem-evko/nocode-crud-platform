@@ -28,6 +28,12 @@ public class ActionFlowControllerGenerator {
                         .addMember("origins", "$S", "*")
                         .build());
 
+        if (spec.project().authEnabled()) {
+            controllerBuilder.addAnnotation(AnnotationSpec.builder(ClassName.get("org.springframework.security.access.prepost", "PreAuthorize"))
+                    .addMember("value", "$S", "isAuthenticated()")
+                    .build());
+        }
+
         // Inject ActionFlowService
         ClassName serviceClass = ClassName.get(servicePackage, "ActionFlowService");
         controllerBuilder.addField(FieldSpec.builder(serviceClass, "actionFlowService")

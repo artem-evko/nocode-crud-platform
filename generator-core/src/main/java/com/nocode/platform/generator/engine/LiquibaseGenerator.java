@@ -54,7 +54,7 @@ public class LiquibaseGenerator {
             sb.append("                  value: $2a$10$wT0l0jL/qF1pT3.a6h/7XOH6.p/B8qA15sV.0p/o9aP/W3YdG/P6.\n");
             sb.append("              - column:\n");
             sb.append("                  name: role\n");
-            sb.append("                  value: ROLE_ADMIN\n");
+            sb.append("                  value: ADMIN\n");
         }
 
         if (entities != null) {
@@ -123,6 +123,56 @@ public class LiquibaseGenerator {
                         sb.append("            constraintName: fk_").append(entity.table()).append("_").append(toSnakeCase(rel.name())).append("\n");
                         sb.append("            referencedTableName: ").append(targetTable).append("\n");
                         sb.append("            referencedColumnNames: id\n");
+                    }
+                }
+            }
+
+            // ManyToMany Join Tables
+            // ManyToMany Join Tables
+            for (Spec.Entity m2mEntity : entities) {
+                if (m2mEntity.relations() != null) {
+                    for (Spec.Relation rel : m2mEntity.relations()) {
+                        if (rel.type() == Spec.RelationType.MANY_TO_MANY) {
+                            if (rel.mappedBy() == null || rel.mappedBy().isBlank()) {
+                                String joinTableName = toSnakeCase(m2mEntity.name()) + "_" + toSnakeCase(rel.name());
+                                String targetTable = getTargetTable(entities, rel.targetEntity());
+                                String col1 = toSnakeCase(m2mEntity.name()) + "_id";
+                                String col2 = toSnakeCase(rel.targetEntity()) + "_id";
+                                
+                                sb.append("  - changeSet:\n");
+                                sb.append("      id: ").append(authorId++).append("\n");
+                                sb.append("      author: nocode-generator\n");
+                                sb.append("      changes:\n");
+                                sb.append("        - createTable:\n");
+                                sb.append("            tableName: ").append(joinTableName).append("\n");
+                                sb.append("            columns:\n");
+                                sb.append("              - column:\n");
+                                sb.append("                  name: ").append(col1).append("\n");
+                                sb.append("                  type: BIGINT\n");
+                                sb.append("                  constraints:\n");
+                                sb.append("                    nullable: false\n");
+                                sb.append("              - column:\n");
+                                sb.append("                  name: ").append(col2).append("\n");
+                                sb.append("                  type: BIGINT\n");
+                                sb.append("                  constraints:\n");
+                                sb.append("                    nullable: false\n");
+                                
+                                // Foreign Keys
+                                sb.append("        - addForeignKeyConstraint:\n");
+                                sb.append("            baseTableName: ").append(joinTableName).append("\n");
+                                sb.append("            baseColumnNames: ").append(col1).append("\n");
+                                sb.append("            constraintName: fk_jm_").append(joinTableName).append("_1\n");
+                                sb.append("            referencedTableName: ").append(m2mEntity.table()).append("\n");
+                                sb.append("            referencedColumnNames: id\n");
+                                
+                                sb.append("        - addForeignKeyConstraint:\n");
+                                sb.append("            baseTableName: ").append(joinTableName).append("\n");
+                                sb.append("            baseColumnNames: ").append(col2).append("\n");
+                                sb.append("            constraintName: fk_jm_").append(joinTableName).append("_2\n");
+                                sb.append("            referencedTableName: ").append(targetTable).append("\n");
+                                sb.append("            referencedColumnNames: id\n");
+                            }
+                        }
                     }
                 }
             }

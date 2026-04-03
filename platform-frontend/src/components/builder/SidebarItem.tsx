@@ -4,11 +4,12 @@ import { useUIBuilderStore, type ComponentType } from '../../store/uiBuilderStor
 interface SidebarItemProps {
     type: ComponentType;
     label: string;
+    description: string;
     icon: LucideIcon;
     iconColor?: string;
 }
 
-export default function SidebarItem({ type, label, icon: Icon, iconColor }: SidebarItemProps) {
+export default function SidebarItem({ type, label, description, icon: Icon, iconColor }: SidebarItemProps) {
     const { addComponent } = useUIBuilderStore();
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
         const dragData = {
@@ -48,10 +49,14 @@ export default function SidebarItem({ type, label, icon: Icon, iconColor }: Side
             draggable
             onDragStart={handleDragStart}
             onClick={handleClick}
-            className={`border border-zinc-800 bg-zinc-900 rounded-md p-3 flex items-center gap-3 cursor-grab hover:border-zinc-700 transition-colors active:cursor-grabbing hover:bg-zinc-800`}
+            className={`border border-zinc-800 bg-zinc-900 rounded-md p-3 flex items-start gap-3 cursor-grab hover:border-zinc-700 transition-colors active:cursor-grabbing hover:bg-zinc-800`}
+            title="Перетащите или нажмите, чтобы добавить"
         >
-            <Icon className={iconColor || "text-zinc-400"} size={18} />
-            <span className="text-sm font-medium select-none">{label}</span>
+            <Icon className={`mt-0.5 min-w-5 shrink-0 ${iconColor || "text-zinc-400"}`} size={18} />
+            <div className="flex flex-col select-none">
+                <span className="text-sm font-medium text-zinc-200">{label}</span>
+                <span className="text-[10px] text-zinc-500 mt-0.5 leading-tight">{description}</span>
+            </div>
         </div>
     );
 }

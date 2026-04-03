@@ -41,6 +41,8 @@ export default function CanvasArea() {
             if (data.componentType === 'BarChart' || data.componentType === 'LineChart') { w = 6; h = 8; }
             if (data.componentType === 'FormModule') { w = 6; h = 6; }
             if (data.componentType === 'Heading' || data.componentType === 'Text') { w = 4; h = 2; }
+            if (data.componentType === 'Card') { w = 4; h = 4; }
+            if (data.componentType === 'Badge') { w = 2; h = 1; }
 
             addComponent({
                 id: Math.random().toString(36).substr(2, 9),

@@ -42,6 +42,7 @@ public class FrontendGenerator {
         if (spec.project().authEnabled()) {
             putText(zos, root + "src/store/authStore.ts", renderer.render("frontend/src/store/authStore.ts.ftl", model));
             putText(zos, root + "src/pages/LoginPage.tsx", renderer.render("frontend/src/pages/LoginPage.tsx.ftl", model));
+            putText(zos, root + "src/pages/RegisterPage.tsx", renderer.render("frontend/src/pages/RegisterPage.tsx.ftl", model));
         }
 
         if (spec.uiSpec() != null && spec.uiSpec().components() != null && !spec.uiSpec().components().isEmpty()) {
