@@ -147,3 +147,15 @@ databaseChangeLog:
             columns:
               - column:
                   name: owner_username
+  - changeSet:
+      id: 6
+      author: nocode
+      comment: "Add version column for JPA optimistic locking (Bug #7 fix)"
+      changes:
+        - addColumn:
+            tableName: projects
+            columns:
+              - column:
+                  name: entity_version
+                  type: bigint
+                  defaultValueNumeric: 0

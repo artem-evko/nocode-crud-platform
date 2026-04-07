@@ -23,16 +23,22 @@ public class ProjectDownloadController {
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> download(@PathVariable("id") UUID id) {
+    public ResponseEntity<?> download(@PathVariable("id") UUID id) {
         ProjectEntity p = projectService.get(id);
-        byte[] zip = generatorFacade.generateReal(p);
+        try {
+            byte[] zip = generatorFacade.generateReal(p);
 
-        String fileName = p.getArtifactId() + "-" + p.getVersion() + ".zip";
+            String fileName = p.getArtifactId() + "-" + p.getVersion() + ".zip";
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType("application/zip"))
-                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition(fileName))
-                .body(zip);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("application/zip"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition(fileName))
+                    .body(zip);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(java.util.Map.of("message", e.getMessage()));
+        }
     }
 
     private String contentDisposition(String fileName) {

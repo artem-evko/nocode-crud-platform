@@ -97,6 +97,55 @@ public class DeploymentService {
                 throw new RuntimeException("Docker up failed with exit code " + upExitCode);
             }
 
+            // 8. Healthcheck: wait for backend container to be running (not restarting)
+            String backendContainer = projectName + "-backend-1";
+            boolean healthy = false;
+            for (int attempt = 0; attempt < 20; attempt++) {
+                Thread.sleep(3000);
+                try {
+                    ProcessBuilder hcPb = new ProcessBuilder("docker", "inspect",
+                            "--format", "{{.State.Status}}", backendContainer);
+                    hcPb.redirectErrorStream(true);
+                    Process hcProc = hcPb.start();
+                    String status = new String(hcProc.getInputStream().readAllBytes()).trim();
+                    hcProc.waitFor();
+                    log.info("Healthcheck attempt {}/20 for {}: status={}", attempt + 1, backendContainer, status);
+                    if ("running".equals(status)) {
+                        // Additional check: verify container is NOT in a restart loop
+                        ProcessBuilder rcPb = new ProcessBuilder("docker", "inspect",
+                                "--format", "{{.RestartCount}}", backendContainer);
+                        rcPb.redirectErrorStream(true);
+                        Process rcProc = rcPb.start();
+                        String restartCount = new String(rcProc.getInputStream().readAllBytes()).trim();
+                        rcProc.waitFor();
+                        int restarts = 0;
+                        try { restarts = Integer.parseInt(restartCount); } catch (NumberFormatException ignored) {}
+                        if (restarts == 0) {
+                            healthy = true;
+                            break;
+                        } else {
+                            log.warn("Container {} has {} restarts, still unhealthy", backendContainer, restarts);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Healthcheck error: {}", e.getMessage());
+                }
+            }
+
+            if (!healthy) {
+                log.error("Backend container {} failed healthcheck after 60s", backendContainer);
+                // Collect logs for debugging
+                try {
+                    ProcessBuilder logPb = new ProcessBuilder("docker", "logs", "--tail", "20", backendContainer);
+                    logPb.redirectErrorStream(true);
+                    Process logProc = logPb.start();
+                    String containerLogs = new String(logProc.getInputStream().readAllBytes());
+                    logProc.waitFor();
+                    log.error("Container logs: {}", containerLogs);
+                } catch (Exception ignored) {}
+                throw new RuntimeException("Backend container failed to start (healthcheck timeout)");
+            }
+
             String url = "http://proj-" + projectId + ".localhost";
             updateStatus(project, "RUNNING", url);
 
@@ -218,7 +267,7 @@ public class DeploymentService {
         compose.append("version: '3.8'\n");
         compose.append("services:\n");
         
-        // DB
+        // DB — only on internal network (isolated from other projects)
         compose.append("  db:\n");
         compose.append("    image: postgres:15-alpine\n");
         compose.append("    environment:\n");
@@ -227,14 +276,15 @@ public class DeploymentService {
         compose.append("      POSTGRES_DB: ").append(dbName).append("\n");
         compose.append("    restart: always\n");
         compose.append("    networks:\n");
-        compose.append("      - nocode-network\n");
+        compose.append("      - internal\n");
         
-        // Backend
+        // Backend — on both internal (to reach db) and traefik (for routing)
         compose.append("  backend:\n");
         compose.append("    build: ./backend\n");
         compose.append("    restart: always\n");
         compose.append("    depends_on:\n");
-        compose.append("      - db\n");
+        compose.append("      db:\n");
+        compose.append("        condition: service_started\n");
         if (!hasFrontend) {
             compose.append("    labels:\n");
             compose.append("      - \"traefik.enable=true\"\n");
@@ -243,6 +293,7 @@ public class DeploymentService {
             compose.append("      - \"traefik.http.services.proj-").append(project.getId()).append(".loadbalancer.server.port=8080\"\n");
         }
         compose.append("    networks:\n");
+        compose.append("      - internal\n");
         compose.append("      - nocode-network\n");
         
         if (hasFrontend) {
@@ -260,7 +311,10 @@ public class DeploymentService {
             compose.append("      - nocode-network\n");
         }
 
+        // Two networks: internal (db<->backend isolation) + external (Traefik routing)
         compose.append("\nnetworks:\n");
+        compose.append("  internal:\n");
+        compose.append("    driver: bridge\n");
         compose.append("  nocode-network:\n");
         compose.append("    external: true\n");
         compose.append("    name: nocode-crud-platform_nocode-network\n");

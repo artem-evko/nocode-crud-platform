@@ -20,4 +20,5 @@ public class ProjectDto {
     private String deploymentUrl;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private Long entityVersion;
 }

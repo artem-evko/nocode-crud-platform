@@ -3,7 +3,9 @@ package com.nocode.platform.controller;
 import com.nocode.platform.project.ProjectEntity;
 import com.nocode.platform.dto.ProjectDto;
 import com.nocode.platform.project.ProjectRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,7 +52,13 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ProjectDto createProject(@RequestBody ProjectDto dto) {
+    public ResponseEntity<?> createProject(@RequestBody ProjectDto dto) {
+        // Validate project fields
+        List<String> errors = validateProjectFields(dto);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", String.join("; ", errors)));
+        }
+
         ProjectEntity project = new ProjectEntity();
         project.setId(UUID.randomUUID());
         
@@ -65,11 +73,28 @@ public class ProjectController {
         project.setGenerateFrontend(dto.isGenerateFrontend());
         project.setCreatedAt(OffsetDateTime.now());
         project.setUpdatedAt(OffsetDateTime.now());
-        return convertToDto(projectRepository.save(project));
+        return ResponseEntity.ok(convertToDto(projectRepository.save(project)));
+    }
+
+    private List<String> validateProjectFields(ProjectDto dto) {
+        List<String> errors = new java.util.ArrayList<>();
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            errors.add("Project name is required");
+        }
+        if (dto.getGroupId() != null && !dto.getGroupId().matches("^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$")) {
+            errors.add("Group ID must be a valid Java package (e.g. com.example). Only lowercase letters, digits, and dots.");
+        }
+        if (dto.getArtifactId() != null && !dto.getArtifactId().matches("^[a-z][a-z0-9-]*$")) {
+            errors.add("Artifact ID must contain only lowercase letters, digits, and hyphens.");
+        }
+        if (dto.getBasePackage() != null && !dto.getBasePackage().matches("^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$")) {
+            errors.add("Base package must be a valid Java package (e.g. com.example.demo).");
+        }
+        return errors;
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProjectDto> updateProject(@PathVariable UUID id, @RequestBody ProjectDto dto) {
+    public ResponseEntity<?> updateProject(@PathVariable UUID id, @RequestBody ProjectDto dto) {
         return projectRepository.findById(id)
                 .filter(p -> p.getOwnerUsername().equals(getUsername()))
                 .map(project -> {
@@ -84,7 +109,13 @@ public class ProjectController {
                         project.setSpecText(dto.getSpecText());
                     }
                     project.setUpdatedAt(OffsetDateTime.now());
-                    return ResponseEntity.ok(convertToDto(projectRepository.save(project)));
+                    try {
+                        return ResponseEntity.ok(convertToDto(projectRepository.save(project)));
+                    } catch (ObjectOptimisticLockingFailureException e) {
+                        return ResponseEntity.status(HttpStatus.CONFLICT)
+                                .body(java.util.Map.of("message",
+                                        "The project was modified in another window. Please reload and try again."));
+                    }
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -120,6 +151,7 @@ public class ProjectController {
         dto.setDeploymentUrl(project.getDeploymentUrl());
         dto.setCreatedAt(project.getCreatedAt());
         dto.setUpdatedAt(project.getUpdatedAt());
+        dto.setEntityVersion(project.getEntityVersion() != null ? project.getEntityVersion() : 0L);
         return dto;
     }
 }
