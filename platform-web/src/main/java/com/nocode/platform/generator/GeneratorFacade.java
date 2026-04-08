@@ -22,6 +22,18 @@ public class GeneratorFacade {
             Spec spec;
             if (p.getSpecText() != null && !p.getSpecText().isBlank()) {
                spec = mapper.readValue(p.getSpecText(), Spec.class);
+               // Always override project metadata from the authoritative ProjectEntity fields
+               // to prevent stale/corrupted data in specText from breaking generation
+               Spec.Project overridden = new Spec.Project(
+                   p.getGroupId(),
+                   p.getArtifactId(),
+                   p.getName(),
+                   p.getBasePackage(),
+                   p.getVersion(),
+                   p.isAuthEnabled(),
+                   p.isGenerateFrontend()
+               );
+               spec = new Spec(spec.specVersion(), overridden, spec.entities(), spec.uiSpec(), spec.actionFlows());
             } else {
                Spec.Project sp = new Spec.Project(
                    p.getGroupId(),
@@ -29,7 +41,7 @@ public class GeneratorFacade {
                    p.getName(),
                    p.getBasePackage(),
                    p.getVersion(),
-                   false,
+                   p.isAuthEnabled(),
                    p.isGenerateFrontend()
                );
                spec = new Spec(1, sp, new ArrayList<>(), null, new ArrayList<>());

@@ -40,7 +40,7 @@ export default function ${entity.name()}Form() {
       </#if>
       </#list>
       <#if hasFieldsToSet>
-      const response = await api.get(`/${entity.table()}/r${r"${id}"}`);
+      const response = await api.get(`/${entity.table()}/${r"${id}"}`);
       const data = response.data;
       <#list entity.fields() as field>
       <#if field.name()?lower_case != "id">
@@ -48,7 +48,7 @@ export default function ${entity.name()}Form() {
       </#if>
       </#list>
       <#else>
-      await api.get(`/${entity.table()}/r${r"${id}"}`);
+      await api.get(`/${entity.table()}/${r"${id}"}`);
       // No non-id fields to map from response
       </#if>
     } catch (error) {
@@ -74,7 +74,7 @@ export default function ${entity.name()}Form() {
 
     try {
       if (isEditing) {
-        await api.put(`/${entity.table()}/r${r"${id}"}`, payload);
+        await api.put(`/${entity.table()}/${r"${id}"}`, payload);
       } else {
         await api.post('/${entity.table()}', payload);
       }

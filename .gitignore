@@ -49,3 +49,9 @@ platform-web/src/main/frontend/
 # Local generate test artifacts
 generated.zip
 test-generated/
+test-generated-edge-case/
+
+# Diploma draft files
+diploma_*.md
+diploma_*.txt
+extracted_guidelines.txt
