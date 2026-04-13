@@ -24,11 +24,11 @@ export default function LoginPage() {
             navigate('/projects');
         } catch (err: any) {
             if (!err.response) {
-                setError('Cannot connect to server (backend is offline)');
+                setError('Не удалось подключиться к серверу');
             } else if (err.response.status === 401 || err.response.status === 403) {
-                setError('Invalid credentials');
+                setError('Неверное имя пользователя или пароль');
             } else {
-                setError('Login failed due to a server error');
+                setError('Ошибка сервера при входе');
             }
         } finally {
             setLoading(false);
@@ -92,6 +92,13 @@ export default function LoginPage() {
                         {loading ? 'Вход...' : 'Войти'}
                     </button>
                 </form>
+
+                <p className="mt-6 text-center text-sm text-zinc-500">
+                    Ещё нет аккаунта?{' '}
+                    <button onClick={() => navigate('/register')} className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                        Зарегистрироваться
+                    </button>
+                </p>
             </div>
         </div>
     );

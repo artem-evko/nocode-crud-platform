@@ -18,12 +18,12 @@ export default function RegisterPage() {
         e.preventDefault();
         
         if (formData.password !== formData.confirmPassword) {
-            toast.error("Passwords do not match");
+            toast.error("Пароли не совпадают");
             return;
         }
         
         if (formData.username.length < 3 || formData.password.length < 5) {
-            toast.error("Username (min 3) and password (min 5) are required");
+            toast.error("Имя пользователя (мин. 3 символа) и пароль (мин. 5 символов) обязательны");
             return;
         }
 
@@ -35,11 +35,11 @@ export default function RegisterPage() {
                 password: formData.password
             });
             
-            toast.success("Account created successfully!");
+            toast.success("Аккаунт успешно создан!");
             navigate('/login');
         } catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
-            toast.error(err.response?.data?.message || 'Registration failed');
+            toast.error(err.response?.data?.message || 'Ошибка при регистрации');
         } finally {
             setIsLoading(false);
         }
@@ -61,14 +61,14 @@ export default function RegisterPage() {
                     <div className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center mb-4 shadow-2xl">
                         <Blocks className="text-indigo-500" size={32} />
                     </div>
-                    <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">Create your account</h1>
-                    <p className="text-zinc-500">Join the NoCodePlatform community</p>
+                    <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">Создать аккаунт</h1>
+                    <p className="text-zinc-500">Присоединяйтесь к платформе NoCode</p>
                 </div>
 
                 <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 p-8 rounded-2xl shadow-xl">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-zinc-300">Username</label>
+                            <label className="text-sm font-medium text-zinc-300">Имя пользователя</label>
                             <input
                                 type="text"
                                 required
@@ -80,7 +80,7 @@ export default function RegisterPage() {
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-zinc-300">Password</label>
+                            <label className="text-sm font-medium text-zinc-300">Пароль</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
@@ -101,7 +101,7 @@ export default function RegisterPage() {
                         </div>
                         
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-zinc-300">Confirm Password</label>
+                            <label className="text-sm font-medium text-zinc-300">Подтвердите пароль</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
@@ -122,18 +122,18 @@ export default function RegisterPage() {
                             {isLoading ? (
                                 <>
                                     <Loader2 size={18} className="animate-spin" />
-                                    Creating account...
+                                    Создание аккаунта...
                                 </>
                             ) : (
-                                'Sign up'
+                                'Зарегистрироваться'
                             )}
                         </button>
                     </form>
 
                     <p className="mt-8 text-center text-sm text-zinc-500">
-                        Already have an account?{' '}
+                        Уже есть аккаунт?{' '}
                         <button onClick={() => navigate('/login')} className="text-indigo-400 hover:text-indigo-300 font-medium">
-                            Log in instead
+                            Войти
                         </button>
                     </p>
                 </div>

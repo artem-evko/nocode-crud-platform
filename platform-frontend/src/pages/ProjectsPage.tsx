@@ -104,7 +104,12 @@ export default function ProjectsPage() {
     };
 
     if (loading) {
-        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Загрузка...</div>;
+        return (
+            <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white gap-3">
+                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm text-zinc-400">Загрузка проектов...</span>
+            </div>
+        );
     }
 
     return (
@@ -189,7 +194,7 @@ export default function ProjectsPage() {
                                             Запущено
                                         </span>
                                     )}
-                                    {project.deploymentStatus === 'IN_PROGRESS' && (
+                                    {project.deploymentStatus === 'DEPLOYING' && (
                                         <span className="flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                                             <span className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></span>
                                             Развертывание

@@ -54,4 +54,24 @@ test-generated-edge-case/
 # Diploma draft files
 diploma_*.md
 diploma_*.txt
-extracted_guidelines.txt
+extracted_guidelines.txt
+conference_report_*.md
+gemini_prompt_for_VKR.md
+key_code_fragments_for_gemini.md
+project_structure_for_gemini.md
+nocode-platform-article.md
+experiment_results_*.md
+
+# Compiled Java test files
+*.class
+FindVaadinSecurity.java
+TestReflect.java
+
+# Temporary files
+cookies.txt
+deploy.log
+error.log
+run.log
+backend_logs.txt
+read_docs.py
+commit_script.bat

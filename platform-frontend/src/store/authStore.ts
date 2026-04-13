@@ -1,18 +1,23 @@
 import { create } from 'zustand';
+import { apiClient } from '../api/client';
 
 interface AuthState {
     user: string | null;
     isAuthenticated: boolean;
     setUser: (user: string | null) => void;
-    checkAuth: () => void;
+    checkAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     isAuthenticated: false,
     setUser: (user) => set({ user, isAuthenticated: !!user }),
-    // checkAuth will be called on app init to see if we still have a valid session
-    checkAuth: () => {
-        // Here we could call an endpoint (e.g. /api/auth/me) to verify the session
+    checkAuth: async () => {
+        try {
+            const res = await apiClient.get('/auth/me');
+            set({ user: res.data, isAuthenticated: true });
+        } catch {
+            set({ user: null, isAuthenticated: false });
+        }
     }
 }));

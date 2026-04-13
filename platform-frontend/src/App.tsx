@@ -8,6 +8,7 @@ import ModelerPage from './pages/ModelerPage';
 import UIBuilderPage from './pages/UIBuilderPage';
 import ActionFlowPage from './pages/ActionFlowPage';
 import PreviewPage from './pages/PreviewPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/projects/:projectId/builder" element={<UIBuilderPage />} />
         <Route path="/projects/:projectId/flows" element={<ActionFlowPage />} />
         <Route path="/projects/:projectId/preview" element={<PreviewPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
