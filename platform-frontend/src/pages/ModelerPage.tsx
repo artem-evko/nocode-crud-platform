@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useThemeStore } from '../store/themeStore';
 import { apiClient, downloadProjectCode } from '../api/client';
 import {
     ReactFlow,
@@ -21,6 +22,7 @@ import type { AppNode } from '../components/EntityNode';
 import ModelerPropertiesPanel from '../components/ModelerPropertiesPanel';
 import ProjectSettingsModal from '../components/ProjectSettingsModal';
 import DeploymentModal from '../components/DeploymentModal';
+import ThemeToggle from '../components/ThemeToggle';
 
 const nodeTypes = {
     entity: EntityNode,
@@ -33,6 +35,7 @@ export default function ModelerPage() {
     const { projectId } = useParams();
     const navigate = useNavigate();
     const { setUser } = useAuthStore();
+    const { theme } = useThemeStore();
     const [project, setProject] = useState<ProjectFormData | null>(null);
     const [loading, setLoading] = useState(true);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -288,67 +291,68 @@ export default function ModelerPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white gap-3">
+            <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex flex-col items-center justify-center text-gray-900 dark:text-white gap-3">
                 <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-zinc-400">Загрузка проекта...</span>
+                <span className="text-sm text-gray-500 dark:text-zinc-400">Загрузка проекта...</span>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-screen w-screen bg-zinc-950 text-slate-50 overflow-hidden">
-            <header className="flex-none flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md z-10">
+        <div className="flex flex-col h-screen w-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-slate-50 overflow-hidden">
+            <header className="flex-none flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md z-10">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/projects')}
-                        className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
                         title="Назад к проектам"
                     >
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <h1 className="text-xl font-bold">{project?.name} <span className="text-sm font-normal text-zinc-400">Моделирование БД</span></h1>
+                        <h1 className="text-xl font-bold">{project?.name} <span className="text-sm font-normal text-gray-500 dark:text-zinc-400">Моделирование БД</span></h1>
                     </div>
                 </div>
                 <div className="flex gap-3">
+                    <ThemeToggle />
                     <button
                         onClick={() => setIsSettingsOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600"
                     >
                         <Settings size={16} />
                         Настройки
                     </button>
                     <button
                         onClick={() => navigate(`/projects/${projectId}/builder`)}
-                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600"
                     >
                         <LayoutTemplate size={16} />
                         UI Builder
                     </button>
                     <button
                         onClick={() => navigate(`/projects/${projectId}/flows`)}
-                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600"
                     >
                         <Zap size={16} />
                         Логика (Flows)
                     </button>
                     <button
                         onClick={handleGenerate}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 hover:text-emerald-300 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-emerald-600/30"
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-emerald-600/30"
                     >
                         <Download size={16} />
                         Скачать код
                     </button>
                     <button
                         onClick={() => setIsDeployOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 hover:text-indigo-300 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-indigo-600/30"
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-indigo-600/30"
                     >
                         <Rocket size={16} />
                         Развернуть
                     </button>
                     <button
                         onClick={addNewEntity}
-                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700 hover:border-zinc-600"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600"
                     >
                         <PlusCircle size={16} />
                         Добавить сущность
@@ -372,11 +376,11 @@ export default function ModelerPage() {
                         onEdgesChange={onEdgesChange}
                         onConnect={onConnect}
                         nodeTypes={nodeTypes}
-                        colorMode="dark"
+                        colorMode={theme}
                         fitView
                     >
-                        <Background color="#52525b" gap={16} size={1} />
-                        <Controls className="bg-zinc-900 border-zinc-800 fill-white" />
+                        <Background color={theme === 'dark' ? '#52525b' : '#d4d4d8'} gap={16} size={1} />
+                        <Controls className="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 fill-gray-900 dark:fill-white" />
                     </ReactFlow>
                 </div>
                 <ModelerPropertiesPanel 

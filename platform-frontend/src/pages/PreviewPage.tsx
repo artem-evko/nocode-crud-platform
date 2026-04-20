@@ -5,10 +5,12 @@ import { ArrowLeft, Play } from 'lucide-react';
 import type { UIComponent } from '../store/uiBuilderStore';
 import { generateMockData } from '../lib/MockDataEngine';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useThemeStore } from '../store/themeStore';
 
 export default function PreviewPage() {
     const { projectId } = useParams();
     const navigate = useNavigate();
+    const { theme } = useThemeStore();
     const [project, setProject] = useState<any>(null);
     const [components, setComponents] = useState<UIComponent[]>([]);
     const [entities, setEntities] = useState<any[]>([]);
@@ -76,12 +78,17 @@ export default function PreviewPage() {
         return generateMockData(entity, 5);
     };
 
+    const chartGridColor = theme === 'dark' ? '#3f3f46' : '#e5e7eb';
+    const chartAxisColor = theme === 'dark' ? '#a1a1aa' : '#6b7280';
+    const chartTooltipBg = theme === 'dark' ? '#18181b' : '#ffffff';
+    const chartTooltipBorder = theme === 'dark' ? '#27272a' : '#e5e7eb';
+
     const renderComponent = (comp: UIComponent): React.ReactNode => {
         switch (comp.type) {
             case 'Heading':
                 return <h2 key={comp.id} className="text-2xl font-bold mb-4">{comp.props.text || 'Заголовок'}</h2>;
             case 'Text':
-                return <p key={comp.id} className="text-zinc-300 mb-4">{comp.props.text || 'Текстовый блок'}</p>;
+                return <p key={comp.id} className="text-gray-600 dark:text-zinc-300 mb-4">{comp.props.text || 'Текстовый блок'}</p>;
             case 'Button':
                 return <button key={comp.id} className="px-4 py-2 bg-indigo-600 rounded-md text-white font-medium hover:bg-indigo-500 transition-colors mb-4">{comp.props.text || 'Кнопка'}</button>;
             case 'DataTable': {
@@ -89,16 +96,16 @@ export default function PreviewPage() {
                 if (data.length === 0) return null;
                 const columns = Object.keys(data[0]);
                 return (
-                    <div key={comp.id} className="overflow-x-auto bg-zinc-900 rounded-lg border border-zinc-800 mb-6">
-                        <table className="w-full text-left text-sm text-zinc-300">
-                            <thead className="bg-zinc-800/50 text-xs uppercase text-zinc-400">
+                    <div key={comp.id} className="overflow-x-auto bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 mb-6">
+                        <table className="w-full text-left text-sm text-gray-600 dark:text-zinc-300">
+                            <thead className="bg-gray-50 dark:bg-zinc-800/50 text-xs uppercase text-gray-500 dark:text-zinc-400">
                                 <tr>
                                     {columns.map(col => <th key={col} className="px-4 py-3 font-medium">{col}</th>)}
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-zinc-800/50">
+                            <tbody className="divide-y divide-gray-100 dark:divide-zinc-800/50">
                                 {data.map((row, i) => (
-                                    <tr key={i} className="hover:bg-zinc-800/20">
+                                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-zinc-800/20">
                                         {columns.map(col => <td key={col} className="px-4 py-3">{String(row[col])}</td>)}
                                     </tr>
                                 ))}
@@ -109,11 +116,11 @@ export default function PreviewPage() {
             }
             case 'FormModule':
                 return (
-                    <div key={comp.id} className="bg-zinc-900 p-6 rounded-lg border border-zinc-800 mb-6 shadow-sm">
-                        <h3 className="text-lg font-medium text-white mb-4">Создать {comp.props.entityName || 'Запись'}</h3>
+                    <div key={comp.id} className="bg-white dark:bg-zinc-900 p-6 rounded-lg border border-gray-200 dark:border-zinc-800 mb-6 shadow-sm">
+                        <h3 className="text-lg font-medium mb-4">Создать {comp.props.entityName || 'Запись'}</h3>
                         <div className="space-y-4 opacity-50 pointer-events-none">
-                            <div className="flex gap-2"><div className="h-10 bg-zinc-800 rounded flex-1"></div></div>
-                            <div className="flex gap-2"><div className="h-10 bg-zinc-800 rounded flex-1"></div></div>
+                            <div className="flex gap-2"><div className="h-10 bg-gray-100 dark:bg-zinc-800 rounded flex-1"></div></div>
+                            <div className="flex gap-2"><div className="h-10 bg-gray-100 dark:bg-zinc-800 rounded flex-1"></div></div>
                             <div className="h-10 bg-indigo-600/30 rounded w-24 mt-2"></div>
                         </div>
                     </div>
@@ -126,13 +133,13 @@ export default function PreviewPage() {
                 const xKey = keys.length > 1 ? keys[0] : 'name';
                 
                 return (
-                    <div key={comp.id} className="h-64 bg-zinc-900 p-4 rounded-lg border border-zinc-800 mb-6">
+                    <div key={comp.id} className="h-64 bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800 mb-6">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={data}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" vertical={false} />
-                                <XAxis dataKey={xKey} stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-                                <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }} itemStyle={{ color: '#a78bfa' }} />
+                                <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} vertical={false} />
+                                <XAxis dataKey={xKey} stroke={chartAxisColor} fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke={chartAxisColor} fontSize={12} tickLine={false} axisLine={false} />
+                                <Tooltip contentStyle={{ backgroundColor: chartTooltipBg, borderColor: chartTooltipBorder, borderRadius: '8px' }} itemStyle={{ color: '#a78bfa' }} />
                                 <Bar dataKey={yKey} fill="#8b5cf6" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
@@ -147,14 +154,14 @@ export default function PreviewPage() {
                 const xKey = keys.length > 1 ? keys[0] : 'name';
                 
                 return (
-                    <div key={comp.id} className="h-64 bg-zinc-900 p-4 rounded-lg border border-zinc-800 mb-6">
+                    <div key={comp.id} className="h-64 bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800 mb-6">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={data}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" vertical={false} />
-                                <XAxis dataKey={xKey} stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-                                <Tooltip contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '8px' }} itemStyle={{ color: '#2dd4bf' }} />
-                                <Line type="monotone" dataKey={yKey} stroke="#2dd4bf" strokeWidth={3} dot={{ r: 4, fill: '#2dd4bf', strokeWidth: 2, stroke: '#18181b' }} activeDot={{ r: 6 }} />
+                                <CartesianGrid strokeDasharray="3 3" stroke={chartGridColor} vertical={false} />
+                                <XAxis dataKey={xKey} stroke={chartAxisColor} fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke={chartAxisColor} fontSize={12} tickLine={false} axisLine={false} />
+                                <Tooltip contentStyle={{ backgroundColor: chartTooltipBg, borderColor: chartTooltipBorder, borderRadius: '8px' }} itemStyle={{ color: '#2dd4bf' }} />
+                                <Line type="monotone" dataKey={yKey} stroke="#2dd4bf" strokeWidth={3} dot={{ r: 4, fill: '#2dd4bf', strokeWidth: 2, stroke: theme === 'dark' ? '#18181b' : '#ffffff' }} activeDot={{ r: 6 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
@@ -172,25 +179,25 @@ export default function PreviewPage() {
     };
 
     if (loading) {
-        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Загрузка предпросмотра...</div>;
+        return <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center text-gray-900 dark:text-white">Загрузка предпросмотра...</div>;
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-zinc-950 text-slate-50">
+        <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-slate-50">
             {/* Header Navbar */}
-            <header className="flex-none flex items-center justify-between px-6 py-4 border-b border-indigo-500/30 bg-indigo-900/20 shadow-[0_0_15px_rgba(79,70,229,0.1)] z-10 sticky top-0 backdrop-blur-md">
+            <header className="flex-none flex items-center justify-between px-6 py-4 border-b border-indigo-500/30 bg-indigo-50/20 dark:bg-indigo-900/20 shadow-[0_0_15px_rgba(79,70,229,0.1)] z-10 sticky top-0 backdrop-blur-md">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate(`/projects/${projectId}/builder`)}
-                        className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
                         title="Назад в Конструктор"
                     >
                         <ArrowLeft size={20} />
                     </button>
                     <div className="flex items-center gap-2">
                         <Play size={18} className="text-indigo-400 group-hover:text-indigo-300" />
-                        <h1 className="text-xl font-bold tracking-tight text-white shadow-sm">
-                            {project?.name} <span className="text-indigo-400/80 font-normal ml-1">Предпросмотр</span>
+                        <h1 className="text-xl font-bold tracking-tight shadow-sm">
+                            {project?.name} <span className="text-indigo-500 dark:text-indigo-400/80 font-normal ml-1">Предпросмотр</span>
                         </h1>
                     </div>
                 </div>
@@ -199,7 +206,7 @@ export default function PreviewPage() {
             {/* Main Application Area */}
             <main className="flex-1 overflow-y-auto p-8 max-w-7xl mx-auto w-full">
                 {components.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-zinc-500">
+                    <div className="flex items-center justify-center h-full text-gray-400 dark:text-zinc-500">
                         <p>Компоненты пока не добавлены. Вернитесь в Конструктор, чтобы создать страницу.</p>
                     </div>
                 ) : (

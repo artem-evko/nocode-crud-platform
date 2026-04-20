@@ -1,29 +1,31 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Blocks, Zap, Database, ArrowRight, ShieldCheck, Cpu } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function LandingPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-indigo-500/30 font-sans overflow-x-hidden">
+        <div className="min-h-screen bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white selection:bg-indigo-500/30 font-sans overflow-x-hidden">
             {/* Navigation */}
-            <nav className="border-b border-zinc-800/50 backdrop-blur-xl bg-[#0a0a0a]/80 fixed top-0 w-full z-50">
+            <nav className="border-b border-gray-200 dark:border-zinc-800/50 backdrop-blur-xl bg-white/80 dark:bg-[#0a0a0a]/80 fixed top-0 w-full z-50">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
                         <Blocks className="text-indigo-500" />
-                        <span>NoCode<span className="text-zinc-500">Platform</span></span>
+                        <span>NoCode<span className="text-gray-400 dark:text-zinc-500">Platform</span></span>
                     </div>
                     <div className="flex items-center gap-4">
+                        <ThemeToggle />
                         <button 
                             onClick={() => navigate('/login')}
-                            className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+                            className="text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         >
                             Войти
                         </button>
                         <button 
                             onClick={() => navigate('/register')}
-                            className="text-sm font-medium bg-white text-black px-4 py-2 rounded-full hover:bg-zinc-200 transition-colors shadow-lg"
+                            className="text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-black px-4 py-2 rounded-full hover:bg-gray-700 dark:hover:bg-zinc-200 transition-colors shadow-lg"
                         >
                             Регистрация
                         </button>
@@ -42,7 +44,7 @@ export default function LandingPage() {
                             Без Написания Кода.
                         </span>
                     </h1>
-                    <p className="text-xl text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-xl text-gray-500 dark:text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed">
                         Спроектируйте модель данных, настройте визуальную бизнес-логику и интерфейс. Платформа самостоятельно сгенерирует Spring Boot и React код, упакует в Docker и развернёт его для вас.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -54,7 +56,7 @@ export default function LandingPage() {
                         </button>
                         <button 
                             onClick={() => window.scrollTo({ top: document.getElementById('features')?.offsetTop, behavior: 'smooth' })}
-                            className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white px-8 py-4 rounded-full font-semibold text-lg transition-colors"
+                            className="bg-gray-100 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-800 text-gray-900 dark:text-white px-8 py-4 rounded-full font-semibold text-lg transition-colors"
                         >
                             Узнать больше
                         </button>
@@ -63,10 +65,10 @@ export default function LandingPage() {
             </main>
 
             {/* Features Section */}
-            <section id="features" className="py-24 px-6 border-t border-zinc-800/50 bg-black/40">
+            <section id="features" className="py-24 px-6 border-t border-gray-200 dark:border-zinc-800/50 bg-gray-50/50 dark:bg-black/40">
                 <div className="max-w-7xl mx-auto text-center mb-16">
                     <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Архитектура Нового Поколения</h2>
-                    <p className="text-zinc-400 text-lg max-w-2xl mx-auto">Мы не просто визуализируем данные, мы генерируем настоящий масштабируемый исходный код.</p>
+                    <p className="text-gray-500 dark:text-zinc-400 text-lg max-w-2xl mx-auto">Мы не просто визуализируем данные, мы генерируем настоящий масштабируемый исходный код.</p>
                 </div>
                 
                 <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -89,7 +91,7 @@ export default function LandingPage() {
             </section>
 
             {/* How it Works Section */}
-            <section className="py-24 px-6 bg-indigo-950/10 border-t border-zinc-800/50 relative overflow-hidden">
+            <section className="py-24 px-6 bg-indigo-50/50 dark:bg-indigo-950/10 border-t border-gray-200 dark:border-zinc-800/50 relative overflow-hidden">
                 <div className="absolute right-0 bottom-0 w-[600px] h-[600px] bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
                 <div className="max-w-7xl mx-auto flex flex-col items-center">
                     <Zap className="text-cyan-400 mb-6" size={48} />
@@ -105,7 +107,7 @@ export default function LandingPage() {
             </section>
 
             {/* Footer */}
-            <footer className="py-8 text-center text-zinc-500 border-t border-zinc-800/50">
+            <footer className="py-8 text-center text-gray-400 dark:text-zinc-500 border-t border-gray-200 dark:border-zinc-800/50">
                 <p>&copy; 2026 No-Code Platform.</p>
             </footer>
         </div>
@@ -114,22 +116,22 @@ export default function LandingPage() {
 
 function StepCard({ number, title, text }: { number: string, title: string, text: string }) {
     return (
-        <div className="flex-1 bg-zinc-900/60 border border-zinc-800/50 p-6 rounded-2xl relative overflow-hidden group hover:border-indigo-500/30 transition-colors">
-            <div className="text-6xl font-black text-white/5 absolute -top-2 -right-2 group-hover:text-indigo-500/10 transition-colors">{number}</div>
+        <div className="flex-1 bg-white/60 dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-800/50 p-6 rounded-2xl relative overflow-hidden group hover:border-indigo-500/30 transition-colors">
+            <div className="text-6xl font-black text-gray-100 dark:text-white/5 absolute -top-2 -right-2 group-hover:text-indigo-500/10 transition-colors">{number}</div>
             <h3 className="text-xl font-bold mb-3 mt-4">{title}</h3>
-            <p className="text-zinc-400 text-sm leading-relaxed">{text}</p>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm leading-relaxed">{text}</p>
         </div>
     );
 }
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
     return (
-        <div className="p-8 rounded-2xl bg-zinc-900/50 border border-zinc-800 backdrop-blur-sm hover:bg-zinc-900 transition-colors">
-            <div className="w-14 h-14 bg-black rounded-xl border border-zinc-800 flex items-center justify-center mb-6">
+        <div className="p-8 rounded-2xl bg-white/50 dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800 backdrop-blur-sm hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors">
+            <div className="w-14 h-14 bg-gray-100 dark:bg-black rounded-xl border border-gray-200 dark:border-zinc-800 flex items-center justify-center mb-6">
                 {icon}
             </div>
             <h3 className="text-xl font-semibold mb-3">{title}</h3>
-            <p className="text-zinc-400 leading-relaxed">{description}</p>
+            <p className="text-gray-500 dark:text-zinc-400 leading-relaxed">{description}</p>
         </div>
     );
 }

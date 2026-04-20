@@ -57,7 +57,7 @@ export default function CanvasArea() {
 
     return (
         <div
-            className={`w-full bg-zinc-950 border shadow-2xl rounded-lg relative transition-colors ${isDragOver ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-zinc-800 ring-1 ring-white/5'}`}
+            className={`w-full bg-white dark:bg-zinc-950 border shadow-2xl rounded-lg relative transition-colors ${isDragOver ? 'border-indigo-500/50 bg-indigo-50 dark:bg-indigo-500/5' : 'border-gray-200 dark:border-zinc-800 ring-1 ring-black/5 dark:ring-white/5'}`}
             style={{ position: 'relative', minHeight: `${canvasHeight}px` }}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
             onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsDragOver(false); }}
@@ -65,8 +65,8 @@ export default function CanvasArea() {
             onClick={() => selectComponent(null)}
         >
             {components.length === 0 && !isDragOver && (
-                <div className="absolute inset-0 flex items-center justify-center border-2 border-dashed border-zinc-800/50 m-8 rounded-lg pointer-events-none">
-                    <div className="text-zinc-500 flex flex-col items-center gap-2">
+                <div className="absolute inset-0 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-zinc-800/50 m-8 rounded-lg pointer-events-none">
+                    <div className="text-gray-400 dark:text-zinc-500 flex flex-col items-center gap-2">
                         <PlusCircle size={24} className="opacity-50" />
                         <span>Перетащите компоненты сюда</span>
                     </div>
@@ -75,7 +75,7 @@ export default function CanvasArea() {
 
             {/* Background grid lines */}
             <div className="absolute inset-0 pointer-events-none" style={{
-                backgroundImage: 'linear-gradient(to right, rgba(63,63,70,0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(63,63,70,0.3) 1px, transparent 1px)',
+                backgroundImage: 'linear-gradient(to right, rgba(156,163,175,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(156,163,175,0.2) 1px, transparent 1px)',
                 backgroundSize: `${100 / GRID_COLS}% ${ROW_HEIGHT}px`,
             }} />
 

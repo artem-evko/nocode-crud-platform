@@ -31,15 +31,15 @@ export default function SortableComponent({ component, onDragHandleMouseDown, on
             case 'Heading':
                 return <h2 className={`text-2xl font-bold w-full h-full flex items-center ${component.props.className || ''}`}>{component.props.text || 'Heading'}</h2>;
             case 'Text':
-                return <p className={`text-zinc-300 w-full h-full overflow-hidden text-ellipsis ${component.props.className || ''}`}>{component.props.text || 'Text block'}</p>;
+                return <p className={`text-gray-600 dark:text-zinc-300 w-full h-full overflow-hidden text-ellipsis ${component.props.className || ''}`}>{component.props.text || 'Text block'}</p>;
             case 'Button':
                 return <button className={`px-4 py-2 bg-indigo-600 rounded-md text-white font-medium w-full h-full ${component.props.className || ''}`}>{component.props.text || 'Button'}</button>;
             case 'DataTable':
                 return (
-                    <div className={`w-full h-full border-2 border-dashed rounded bg-zinc-800/50 flex items-center justify-center flex-col 
-                        ${isMissingDataSource ? 'border-red-500/50' : 'border-zinc-700'}`}>
-                        <span className="font-mono text-zinc-400">{'<DataTable />'}</span>
-                        <span className={`text-xs mt-1 text-center ${isMissingDataSource ? 'text-red-400 font-semibold' : 'text-zinc-500'}`}>
+                    <div className={`w-full h-full border-2 border-dashed rounded bg-gray-100 dark:bg-zinc-800/50 flex items-center justify-center flex-col 
+                        ${isMissingDataSource ? 'border-red-500/50' : 'border-gray-300 dark:border-zinc-700'}`}>
+                        <span className="font-mono text-gray-400 dark:text-zinc-400">{'<DataTable />'}</span>
+                        <span className={`text-xs mt-1 text-center ${isMissingDataSource ? 'text-red-400 font-semibold' : 'text-gray-400 dark:text-zinc-500'}`}>
                             {isMissingDataSource ? 'Error: Missing Entity Binding' : `Bound to: ${component.props.entityName}`}
                         </span>
                     </div>
@@ -47,7 +47,7 @@ export default function SortableComponent({ component, onDragHandleMouseDown, on
             case 'FormModule':
                 return (
                     <div className={`w-full h-full border-2 border-dashed rounded flex items-center justify-center flex-col 
-                        ${isMissingDataSource ? 'border-red-500/50 bg-red-900/10' : 'border-emerald-700/50 bg-emerald-900/10'}`}>
+                        ${isMissingDataSource ? 'border-red-500/50 bg-red-50 dark:bg-red-900/10' : 'border-emerald-300 dark:border-emerald-700/50 bg-emerald-50 dark:bg-emerald-900/10'}`}>
                         <span className="font-mono text-emerald-500/70">{'<FormModule />'}</span>
                         <span className={`text-xs mt-1 text-center ${isMissingDataSource ? 'text-red-400 font-semibold' : 'text-emerald-500/50'}`}>
                             {isMissingDataSource ? 'Error: Missing Entity Binding' : `Bound to: ${component.props.entityName}`}
@@ -57,7 +57,7 @@ export default function SortableComponent({ component, onDragHandleMouseDown, on
             case 'BarChart':
                 return (
                     <div className={`w-full h-full border-2 border-dashed rounded flex flex-col items-center justify-center
-                        ${isMissingDataSource ? 'border-red-500/50 bg-red-900/10' : 'border-violet-700/50 bg-violet-900/10'}`}>
+                        ${isMissingDataSource ? 'border-red-500/50 bg-red-50 dark:bg-red-900/10' : 'border-violet-300 dark:border-violet-700/50 bg-violet-50 dark:bg-violet-900/10'}`}>
                         <span className="font-mono text-violet-500/70">{'<BarChart />'}</span>
                         <span className={`text-xs mt-1 text-center ${isMissingDataSource ? 'text-red-400 font-semibold' : 'text-violet-500/50'}`}>
                             {isMissingDataSource ? 'Error: Missing Entity Binding' : `Bound to: ${component.props.entityName}`}
@@ -67,7 +67,7 @@ export default function SortableComponent({ component, onDragHandleMouseDown, on
             case 'LineChart':
                 return (
                     <div className={`w-full h-full border-2 border-dashed rounded flex flex-col items-center justify-center
-                        ${isMissingDataSource ? 'border-red-500/50 bg-red-900/10' : 'border-cyan-700/50 bg-cyan-900/10'}`}>
+                        ${isMissingDataSource ? 'border-red-500/50 bg-red-50 dark:bg-red-900/10' : 'border-cyan-300 dark:border-cyan-700/50 bg-cyan-50 dark:bg-cyan-900/10'}`}>
                         <span className="font-mono text-cyan-500/70">{'<LineChart />'}</span>
                         <span className={`text-xs mt-1 text-center ${isMissingDataSource ? 'text-red-400 font-semibold' : 'text-cyan-500/50'}`}>
                             {isMissingDataSource ? 'Error: Missing Entity Binding' : `Bound to: ${component.props.entityName}`}
@@ -76,30 +76,30 @@ export default function SortableComponent({ component, onDragHandleMouseDown, on
                 );
             case 'Container':
                 return (
-                    <div className="w-full h-full border-2 border-dashed border-amber-700/50 bg-amber-900/5 rounded flex items-center justify-center p-4">
+                    <div className="w-full h-full border-2 border-dashed border-amber-300 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/5 rounded flex items-center justify-center p-4">
                         <span className="font-mono text-amber-500/40 text-sm">{'<Layout Container />'}</span>
                     </div>
                 );
             case 'Image':
                 return (
-                    <div className={`w-full h-full flex items-center justify-center bg-zinc-800/50 rounded overflow-hidden ${component.props.className || ''}`}>
+                    <div className={`w-full h-full flex items-center justify-center bg-gray-100 dark:bg-zinc-800/50 rounded overflow-hidden ${component.props.className || ''}`}>
                         {component.props.url ? (
                             <img src={component.props.url} alt="Component Image" className="w-full h-full object-cover" />
                         ) : (
-                            <span className="text-zinc-500 text-sm">No Image</span>
+                            <span className="text-gray-400 dark:text-zinc-500 text-sm">No Image</span>
                         )}
                     </div>
                 );
             case 'Divider':
                 return (
                     <div className="w-full h-full flex items-center px-4">
-                        <hr className={`w-full border-t border-zinc-700 ${component.props.className || ''}`} />
+                        <hr className={`w-full border-t border-gray-300 dark:border-zinc-700 ${component.props.className || ''}`} />
                     </div>
                 );
             case 'Card':
                 return (
-                    <div className={`w-full h-full bg-zinc-800/50 rounded flex flex-col justify-center items-center ${component.props.className || ''}`}>
-                        <span className="text-zinc-300 font-medium text-center">{component.props.text || 'Карточка'}</span>
+                    <div className={`w-full h-full bg-gray-100 dark:bg-zinc-800/50 rounded flex flex-col justify-center items-center ${component.props.className || ''}`}>
+                        <span className="text-gray-600 dark:text-zinc-300 font-medium text-center">{component.props.text || 'Карточка'}</span>
                     </div>
                 );
             case 'Badge':
@@ -118,15 +118,15 @@ export default function SortableComponent({ component, onDragHandleMouseDown, on
     return (
         <div
             onClick={handleSelect}
-            className={`relative w-full h-full rounded-md border-2 bg-zinc-900 shadow-sm group transition-colors overflow-hidden flex flex-col
-                ${isSelected ? 'border-indigo-500' : isMissingDataSource ? 'border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'border-zinc-800 hover:border-zinc-700'}`}
+            className={`relative w-full h-full rounded-md border-2 bg-white dark:bg-zinc-900 shadow-sm group transition-colors overflow-hidden flex flex-col
+                ${isSelected ? 'border-indigo-500' : isMissingDataSource ? 'border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.2)]' : 'border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700'}`}
         >
             {/* Grab handle area */}
             <div
-                className="drag-handle absolute top-0 left-0 w-full h-6 bg-zinc-800/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity cursor-move flex items-center justify-between px-2 z-20"
+                className="drag-handle absolute top-0 left-0 w-full h-6 bg-gray-100/80 dark:bg-zinc-800/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity cursor-move flex items-center justify-between px-2 z-20"
                 onMouseDown={onDragHandleMouseDown}
             >
-                <GripHorizontal size={14} className="text-zinc-500" />
+                <GripHorizontal size={14} className="text-gray-400 dark:text-zinc-500" />
             </div>
 
             {/* Validation Error Icon */}

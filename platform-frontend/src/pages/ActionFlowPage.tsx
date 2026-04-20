@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import { apiClient } from '../api/client';
 import type { ProjectFormData } from '../components/ProjectModal';
 import LogicNode from '../components/flow/LogicNode';
+import { useThemeStore } from '../store/themeStore';
+import ThemeToggle from '../components/ThemeToggle';
 import {
     ReactFlow,
     Background,
@@ -26,6 +28,7 @@ const nodeTypes = {
 function ActionFlowContent({ project, setProject }: { project: ProjectFormData | null, setProject: (p: any) => void }) {
     const { projectId } = useParams();
     const navigate = useNavigate();
+    const { theme } = useThemeStore();
     const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
@@ -203,32 +206,33 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
     };
 
     return (
-        <div className="flex flex-col h-screen w-screen bg-zinc-950 text-slate-50 overflow-hidden">
-            <header className="flex-none flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-md z-10">
+        <div className="flex flex-col h-screen w-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-slate-50 overflow-hidden">
+            <header className="flex-none flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md z-10">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/projects')}
-                        className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
                         title="Назад к проектам"
                     >
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <h1 className="text-xl font-bold">{project?.name || 'Project'} <span className="text-sm font-normal text-zinc-400">Визуальная логика</span></h1>
+                        <h1 className="text-xl font-bold">{project?.name || 'Project'} <span className="text-sm font-normal text-gray-500 dark:text-zinc-400">Визуальная логика</span></h1>
                     </div>
                 </div>
 
                 <div className="flex gap-3">
+                    <ThemeToggle />
                     <button
                         onClick={() => navigate(`/projects/${projectId}/modeler`)}
-                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-gray-200 dark:border-zinc-700"
                     >
                         <Settings size={16} />
                         Модель данных
                     </button>
                     <button
                         onClick={() => navigate(`/projects/${projectId}/builder`)}
-                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-zinc-700"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-sm font-semibold transition-colors shadow-sm border border-gray-200 dark:border-zinc-700"
                     >
                         <Box size={16} />
                         UI Builder
@@ -244,15 +248,15 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
             </header>
 
             <div className="flex flex-1 h-full overflow-hidden">
-                <aside className="w-64 border-r border-zinc-800 bg-zinc-900/40 p-4 flex flex-col gap-6 overflow-y-auto">
+                <aside className="w-64 border-r border-gray-200 dark:border-zinc-800 bg-gray-50/40 dark:bg-zinc-900/40 p-4 flex flex-col gap-6 overflow-y-auto">
                     
                     <div>
-                        <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Состояния (Triggers)</h2>
+                        <h2 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Состояния (Triggers)</h2>
                         <div className="space-y-2">
                             <div 
                                 onClick={() => onAddNodeClick('trigger', 'UI_CLICK', 'On Element Click')}
                                 onDragStart={(e) => onDragStart(e, 'trigger', 'UI_CLICK', 'On Element Click')} draggable
-                                className="flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
+                                className="flex items-center gap-3 p-3 bg-gray-100/50 dark:bg-zinc-800/50 hover:bg-gray-200 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
                             >
                                 <MousePointerClick size={16} className="text-orange-400" />
                                 <span className="text-sm font-medium">Клик в интерфейсе</span>
@@ -261,12 +265,12 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                     </div>
 
                     <div>
-                        <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Действия (Actions)</h2>
+                        <h2 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Действия (Actions)</h2>
                         <div className="space-y-2">
                             <div 
                                 onClick={() => onAddNodeClick('action', 'DB_CREATE_RECORD', 'Create Record')}
                                 onDragStart={(e) => onDragStart(e, 'action', 'DB_CREATE_RECORD', 'Create Record')} draggable
-                                className="flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
+                                className="flex items-center gap-3 p-3 bg-gray-100/50 dark:bg-zinc-800/50 hover:bg-gray-200 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
                             >
                                 <Database size={16} className="text-emerald-400" />
                                 <span className="text-sm font-medium">Создать запись</span>
@@ -274,7 +278,7 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                             <div 
                                 onClick={() => onAddNodeClick('action', 'DB_UPDATE_RECORD', 'Update Record')}
                                 onDragStart={(e) => onDragStart(e, 'action', 'DB_UPDATE_RECORD', 'Update Record')} draggable
-                                className="flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
+                                className="flex items-center gap-3 p-3 bg-gray-100/50 dark:bg-zinc-800/50 hover:bg-gray-200 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
                             >
                                 <Database size={16} className="text-emerald-400" />
                                 <span className="text-sm font-medium">Обновить запись</span>
@@ -282,7 +286,7 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                             <div 
                                 onClick={() => onAddNodeClick('action', 'UI_SHOW_TOAST', 'Show Notification')}
                                 onDragStart={(e) => onDragStart(e, 'action', 'UI_SHOW_TOAST', 'Show Notification')} draggable
-                                className="flex items-center gap-3 p-3 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
+                                className="flex items-center gap-3 p-3 bg-gray-100/50 dark:bg-zinc-800/50 hover:bg-gray-200 dark:hover:bg-zinc-700 border border-gray-200 dark:border-zinc-700 rounded-lg cursor-grab active:cursor-grabbing transition-colors"
                             >
                                 <MessageSquare size={16} className="text-blue-400" />
                                 <span className="text-sm font-medium">Уведомление (Toast)</span>
@@ -292,7 +296,7 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
 
                 </aside>
 
-                <main className="flex-1 bg-zinc-950 relative" ref={reactFlowWrapper}>
+                <main className="flex-1 bg-gray-100 dark:bg-zinc-950 relative" ref={reactFlowWrapper}>
                     <ReactFlow
                         nodes={nodes}
                         edges={edges}
@@ -302,15 +306,16 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                         onDrop={onDrop}
                         onDragOver={onDragOver}
                         nodeTypes={nodeTypes}
+                        colorMode={theme}
                         fitView
                     >
-                        <Background color="#3f3f46" gap={16} />
-                        <Controls className="bg-zinc-800 text-white border-zinc-700" />
+                        <Background color={theme === 'dark' ? '#3f3f46' : '#d4d4d8'} gap={16} />
+                        <Controls className="bg-white dark:bg-zinc-800 text-gray-900 dark:text-white border-gray-200 dark:border-zinc-700" />
                     </ReactFlow>
                 </main>
                 
-                <aside className="w-72 border-l border-zinc-800 bg-zinc-900/40 p-4 flex flex-col overflow-y-auto">
-                    <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">Настройки Ноды</h2>
+                <aside className="w-72 border-l border-gray-200 dark:border-zinc-800 bg-gray-50/40 dark:bg-zinc-900/40 p-4 flex flex-col overflow-y-auto">
+                    <h2 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-4">Настройки Ноды</h2>
                     
                     {(() => {
                         const selectedNode = nodes.find(n => n.id === selectedNodeId);
@@ -323,7 +328,7 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
 
                         if (!selectedNode) {
                             return (
-                                <div className="text-sm text-zinc-400 p-4 bg-zinc-800/30 rounded-lg border border-zinc-800 border-dashed text-center">
+                                <div className="text-sm text-gray-500 dark:text-zinc-400 p-4 bg-gray-100/30 dark:bg-zinc-800/30 rounded-lg border border-gray-200 dark:border-zinc-800 border-dashed text-center">
                                     Выберите узел на холсте для редактирования свойств.
                                 </div>
                             );
@@ -331,52 +336,52 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
 
                         return (
                             <div className="flex flex-col gap-5">
-                                <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800">
-                                    <div className="text-xs text-zinc-500 mb-1">Тип узла</div>
-                                    <div className="font-medium text-white flex items-center gap-2">
+                                <div className="p-3 bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800">
+                                    <div className="text-xs text-gray-400 dark:text-zinc-500 mb-1">Тип узла</div>
+                                    <div className="font-medium flex items-center gap-2">
                                         {String(selectedNode.data.action)}
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3 mb-2">
                                     <div>
-                                        <label className="block text-xs font-medium text-zinc-400 mb-1">Позиция X</label>
+                                        <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">Позиция X</label>
                                         <input 
                                             type="number"
                                             value={Math.round(selectedNode.position.x)}
                                             onChange={(e) => updateNodePosition(selectedNode.id, parseInt(e.target.value) || 0, undefined)}
-                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                            className="w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-zinc-400 mb-1">Позиция Y</label>
+                                        <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">Позиция Y</label>
                                         <input 
                                             type="number"
                                             value={Math.round(selectedNode.position.y)}
                                             onChange={(e) => updateNodePosition(selectedNode.id, undefined, parseInt(e.target.value) || 0)}
-                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                            className="w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-medium text-zinc-400 mb-1">Название (Label)</label>
+                                    <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">Название (Label)</label>
                                     <input 
                                         type="text"
                                         value={selectedNode.data.label as string || ''}
                                         onChange={(e) => updateNodeData(selectedNode.id, { label: e.target.value })}
-                                        className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                        className="w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
                                     />
                                 </div>
 
                                 {selectedNode.data.action === 'DB_CREATE_RECORD' && (
                                     <div className="flex flex-col gap-4">
                                         <div>
-                                            <label className="block text-xs font-medium text-zinc-400 mb-1">Сущность (Entity)</label>
+                                            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">Сущность (Entity)</label>
                                             <select 
                                                 value={(selectedNode.data.config as any)?.entityName || ''}
                                                 onChange={(e) => updateNodeData(selectedNode.id, { config: { ...(selectedNode.data.config as any), entityName: e.target.value } })}
-                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                                className="w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
                                             >
                                                 <option value="">-- Выберите сущность --</option>
                                                 {entities.map((ent: any) => (
@@ -385,13 +390,13 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-zinc-400 mb-1">Маппинг полей (JSON)</label>
-                                            <div className="text-xs text-zinc-500 mb-2">Настройте, откуда брать поля. Используйте {'{{payload.field}}'} для связи с триггером.</div>
+                                            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">Маппинг полей (JSON)</label>
+                                            <div className="text-xs text-gray-400 dark:text-zinc-500 mb-2">Настройте, откуда брать поля. Используйте {'{{payload.field}}'} для связи с триггером.</div>
                                             <textarea 
                                                 value={(selectedNode.data.config as any)?.mapping ?? '{\n  "title": "{{payload.title}}"\n}'}
                                                 onChange={(e) => updateNodeData(selectedNode.id, { config: { ...(selectedNode.data.config as any), mapping: e.target.value } })}
                                                 rows={5}
-                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors font-mono resize-y"
+                                                className="w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm px-3 py-2 outline-none focus:border-indigo-500 transition-colors font-mono resize-y"
                                             />
                                         </div>
                                     </div>
@@ -400,13 +405,13 @@ function ActionFlowContent({ project, setProject }: { project: ProjectFormData |
                                 {selectedNode.data.action === 'UI_SHOW_TOAST' && (
                                     <div className="flex flex-col gap-4">
                                         <div>
-                                            <label className="block text-xs font-medium text-zinc-400 mb-1">Сообщение (Toast)</label>
+                                            <label className="block text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1">Сообщение (Toast)</label>
                                             <input 
                                                 type="text"
                                                 value={(selectedNode.data.config as any)?.message || ''}
                                                 onChange={(e) => updateNodeData(selectedNode.id, { config: { ...(selectedNode.data.config as any), message: e.target.value } })}
                                                 placeholder="{{payload.message}} или Статичный текст"
-                                                className="w-full bg-zinc-900 border border-zinc-700 rounded-md text-sm text-white px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
+                                                className="w-full bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-md text-sm px-3 py-2 outline-none focus:border-indigo-500 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -441,7 +446,7 @@ export default function ActionFlowPage() {
     }, [projectId]);
 
     if (loading) {
-        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">Загрузка...</div>;
+        return <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center text-gray-900 dark:text-white">Загрузка...</div>;
     }
 
     return (

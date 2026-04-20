@@ -98,7 +98,7 @@ public class DeploymentService {
             }
 
             // 8. Healthcheck: wait for backend container to be running (not restarting)
-            String backendContainer = projectName + "-backend-1";
+            String backendContainer = projectName + "-backend-" + project.getArtifactId() + "-1";
             boolean healthy = false;
             for (int attempt = 0; attempt < 20; attempt++) {
                 Thread.sleep(3000);
@@ -235,21 +235,19 @@ public class DeploymentService {
             Files.createDirectories(frontendDir);
 
             Path nginxConfPath = frontendDir.resolve("nginx.conf");
-            String nginxConf = """
-                    server {
-                        listen 80;
-                        location / {
-                            root /usr/share/nginx/html;
-                            index index.html index.htm;
-                            try_files $uri $uri/ /index.html;
-                        }
-                        location /api/ {
-                            proxy_pass http://backend:8080/api/;
-                            proxy_set_header Host $host;
-                            proxy_set_header X-Real-IP $remote_addr;
-                        }
-                    }
-                    """;
+            String nginxConf = "server {\n" +
+                    "    listen 80;\n" +
+                    "    location / {\n" +
+                    "        root /usr/share/nginx/html;\n" +
+                    "        index index.html index.htm;\n" +
+                    "        try_files $uri $uri/ /index.html;\n" +
+                    "    }\n" +
+                    "    location /api/ {\n" +
+                    "        proxy_pass http://backend-" + project.getArtifactId() + ":8080/api/;\n" +
+                    "        proxy_set_header Host $host;\n" +
+                    "        proxy_set_header X-Real-IP $remote_addr;\n" +
+                    "    }\n" +
+                    "}\n";
             Files.writeString(nginxConfPath, nginxConf);
         }
         
@@ -274,17 +272,22 @@ public class DeploymentService {
         compose.append("      POSTGRES_USER: ").append(dbUser).append("\n");
         compose.append("      POSTGRES_PASSWORD: ").append(dbPass).append("\n");
         compose.append("      POSTGRES_DB: ").append(dbName).append("\n");
+        compose.append("    healthcheck:\n");
+        compose.append("      test: [\"CMD-SHELL\", \"pg_isready -U ").append(dbUser).append(" -d ").append(dbName).append(" && PGPASSWORD=").append(dbPass).append(" psql -U ").append(dbUser).append(" -d ").append(dbName).append(" -c 'SELECT 1'\"]\n");
+        compose.append("      interval: 5s\n");
+        compose.append("      timeout: 5s\n");
+        compose.append("      retries: 10\n");
         compose.append("    restart: always\n");
         compose.append("    networks:\n");
         compose.append("      - internal\n");
         
         // Backend — on both internal (to reach db) and traefik (for routing)
-        compose.append("  backend:\n");
+        compose.append("  backend-").append(project.getArtifactId()).append(":\n");
         compose.append("    build: ./backend\n");
         compose.append("    restart: always\n");
         compose.append("    depends_on:\n");
         compose.append("      db:\n");
-        compose.append("        condition: service_started\n");
+        compose.append("        condition: service_healthy\n");
         if (!hasFrontend) {
             compose.append("    labels:\n");
             compose.append("      - \"traefik.enable=true\"\n");
@@ -301,7 +304,7 @@ public class DeploymentService {
             compose.append("    build: ./frontend\n");
             compose.append("    restart: always\n");
             compose.append("    depends_on:\n");
-            compose.append("      - backend\n");
+            compose.append("      - backend-").append(project.getArtifactId()).append("\n");
             compose.append("    labels:\n");
             compose.append("      - \"traefik.enable=true\"\n");
             compose.append("      - \"traefik.http.routers.proj-").append(project.getId()).append(".rule=Host(`proj-").append(project.getId()).append(".localhost`)\"\n");
@@ -323,11 +326,12 @@ public class DeploymentService {
     }
 
     private void updateStatus(ProjectEntity project, String status, String url) {
-        project.setDeploymentStatus(status);
+        ProjectEntity freshProject = projectRepository.findById(project.getId()).orElse(project);
+        freshProject.setDeploymentStatus(status);
         if (url != null) {
-            project.setDeploymentUrl(url);
+            freshProject.setDeploymentUrl(url);
         }
-        projectRepository.save(project);
+        projectRepository.save(freshProject);
     }
 
     private void unzip(byte[] zipData, File destDir) throws IOException {

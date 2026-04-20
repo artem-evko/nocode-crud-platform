@@ -19,14 +19,18 @@ import com.nocode.platform.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Map;
 
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
+import jakarta.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
@@ -53,17 +57,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
         try {
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
 
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            SecurityContext sc = SecurityContextHolder.getContext();
+            SecurityContext sc = SecurityContextHolder.createEmptyContext();
             sc.setAuthentication(authentication);
+            SecurityContextHolder.setContext(sc);
             
-            HttpSession session = request.getSession(true);
-            session.setAttribute(SPRING_SECURITY_CONTEXT_KEY, sc);
+            securityContextRepository.saveContext(sc, request, response);
 
             return ResponseEntity.ok().body("Login successful");
         } catch (Exception e) {

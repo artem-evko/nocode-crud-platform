@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Blocks, EyeOff, Eye, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiClient } from '../api/client';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -46,54 +47,57 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center p-4">
             <div className="absolute top-6 left-6">
                 <button 
                     onClick={() => navigate('/')}
-                    className="flex items-center gap-2 font-medium text-sm text-zinc-400 hover:text-white transition-colors"
+                    className="flex items-center gap-2 font-medium text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                     <ArrowLeft size={18} /> На главную
                 </button>
             </div>
+            <div className="absolute top-6 right-6">
+                <ThemeToggle />
+            </div>
             
             <div className="w-full max-w-md">
                 <div className="flex flex-col items-center mb-8">
-                    <div className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center mb-4 shadow-2xl">
+                    <div className="w-16 h-16 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl flex items-center justify-center mb-4 shadow-2xl">
                         <Blocks className="text-indigo-500" size={32} />
                     </div>
-                    <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">Создать аккаунт</h1>
-                    <p className="text-zinc-500">Присоединяйтесь к платформе NoCode</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">Создать аккаунт</h1>
+                    <p className="text-gray-400 dark:text-zinc-500">Присоединяйтесь к платформе NoCode</p>
                 </div>
 
-                <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 p-8 rounded-2xl shadow-xl">
+                <div className="bg-white dark:bg-zinc-900/50 backdrop-blur-xl border border-gray-200 dark:border-zinc-800 p-8 rounded-2xl shadow-xl">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-zinc-300">Имя пользователя</label>
+                            <label className="text-sm font-medium text-gray-600 dark:text-zinc-300">Имя пользователя</label>
                             <input
                                 type="text"
                                 required
                                 value={formData.username}
                                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
+                                className="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
                                 placeholder="developer123"
                             />
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-zinc-300">Пароль</label>
+                            <label className="text-sm font-medium text-gray-600 dark:text-zinc-300">Пароль</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     required
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-4 pr-12 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
+                                    className="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg pl-4 pr-12 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
                                     placeholder="••••••••"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors bg-zinc-950 pl-2"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:hover:text-zinc-300 transition-colors bg-gray-50 dark:bg-zinc-950 pl-2"
                                 >
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -101,14 +105,14 @@ export default function RegisterPage() {
                         </div>
                         
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-zinc-300">Подтвердите пароль</label>
+                            <label className="text-sm font-medium text-gray-600 dark:text-zinc-300">Подтвердите пароль</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     required
                                     value={formData.confirmPassword}
                                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
+                                    className="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-800 rounded-lg px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-sm"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -130,9 +134,9 @@ export default function RegisterPage() {
                         </button>
                     </form>
 
-                    <p className="mt-8 text-center text-sm text-zinc-500">
+                    <p className="mt-8 text-center text-sm text-gray-400 dark:text-zinc-500">
                         Уже есть аккаунт?{' '}
-                        <button onClick={() => navigate('/login')} className="text-indigo-400 hover:text-indigo-300 font-medium">
+                        <button onClick={() => navigate('/login')} className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-400 dark:hover:text-indigo-300 font-medium">
                             Войти
                         </button>
                     </p>

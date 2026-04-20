@@ -49,13 +49,13 @@ export default function SidebarItem({ type, label, description, icon: Icon, icon
             draggable
             onDragStart={handleDragStart}
             onClick={handleClick}
-            className={`border border-zinc-800 bg-zinc-900 rounded-md p-3 flex items-start gap-3 cursor-grab hover:border-zinc-700 transition-colors active:cursor-grabbing hover:bg-zinc-800`}
+            className={`border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 rounded-md p-3 flex items-start gap-3 cursor-grab hover:border-gray-300 dark:hover:border-zinc-700 transition-colors active:cursor-grabbing hover:bg-gray-50 dark:hover:bg-zinc-800`}
             title="Перетащите или нажмите, чтобы добавить"
         >
-            <Icon className={`mt-0.5 min-w-5 shrink-0 ${iconColor || "text-zinc-400"}`} size={18} />
+            <Icon className={`mt-0.5 min-w-5 shrink-0 ${iconColor || "text-gray-400 dark:text-zinc-400"}`} size={18} />
             <div className="flex flex-col select-none">
-                <span className="text-sm font-medium text-zinc-200">{label}</span>
-                <span className="text-[10px] text-zinc-500 mt-0.5 leading-tight">{description}</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-200">{label}</span>
+                <span className="text-[10px] text-gray-400 dark:text-zinc-500 mt-0.5 leading-tight">{description}</span>
             </div>
         </div>
     );

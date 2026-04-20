@@ -74,4 +74,11 @@ error.log
 run.log
 backend_logs.txt
 read_docs.py
-commit_script.bat
+commit_script.bat
+commit_script.ps1
+start-platform.ps1
+START_GUIDE.md
+
+# Screenshots / diploma materials
+работа платформы
+login_body.json

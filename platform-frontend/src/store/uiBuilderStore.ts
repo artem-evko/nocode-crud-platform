@@ -5,7 +5,7 @@ export type ComponentType = 'Heading' | 'Text' | 'Button' | 'DataTable' | 'FormM
 export interface UIComponent {
     id: string;
     type: ComponentType;
-    props: Record<string, unknown>;
+    props: Record<string, any>;
     layout?: { x: number, y: number, w: number, h: number };
     children?: UIComponent[]; // For nested containers later
 }

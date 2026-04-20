@@ -99,44 +99,44 @@ export default function DeploymentModal({ isOpen, onClose, projectId }: Deployme
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex justify-between items-center p-6 border-b border-zinc-800/60">
-                    <h2 className="text-xl font-bold text-white tracking-tight">Cloud Развёртывание</h2>
-                    <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors p-1">
+            <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-zinc-800/60">
+                    <h2 className="text-xl font-bold tracking-tight">Docker Развёртывание</h2>
+                    <button onClick={onClose} className="text-gray-400 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1">
                         <X size={20} />
                     </button>
                 </div>
 
                 <div className="p-6 space-y-5">
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/40 rounded-lg p-3 text-sm text-red-400 flex items-start gap-2 animate-in fade-in">
+                        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/40 rounded-lg p-3 text-sm text-red-500 dark:text-red-400 flex items-start gap-2 animate-in fade-in">
                             <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                             <span>{error}</span>
                         </div>
                     )}
 
                     {status === 'PORT_OCCUPIED' && (
-                        <div className="bg-amber-500/10 border border-amber-500/40 rounded-lg p-3 text-sm text-amber-400 flex items-start gap-2 animate-in fade-in">
+                        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/40 rounded-lg p-3 text-sm text-amber-600 dark:text-amber-400 flex items-start gap-2 animate-in fade-in">
                             <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                             <span>Этот порт уже занят другим приложением. Укажите вручную другой свободный порт или оставьте поле пустым для автоматического выбора.</span>
                         </div>
                     )}
 
-                    <p className="text-zinc-400 text-sm">
-                        Разверните ваше приложение в облаке в один клик. Платформа автоматически настроит инфраструктуру, соберёт docker-контейнеры и опубликует ваше приложение.
+                    <p className="text-gray-500 dark:text-zinc-400 text-sm">
+                        Разверните ваше приложение в один клик. Платформа автоматически соберёт Docker-контейнеры и запустит приложение на указанном порту.
                     </p>
 
                     {/* No-Code Doctor Display */}
                     {(status === 'NONE' || status === 'FAILED' || status === 'PORT_OCCUPIED') && (validationErrors.length > 0 || validationWarnings.length > 0) && (
-                        <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 space-y-3 max-h-48 overflow-y-auto custom-scrollbar">
+                        <div className="bg-gray-50 dark:bg-zinc-950 p-4 rounded-xl border border-gray-200 dark:border-zinc-800 space-y-3 max-h-48 overflow-y-auto custom-scrollbar">
                             <div className="flex items-center gap-2 mb-2">
                                 <AlertCircle size={16} className={validationErrors.length > 0 ? "text-red-400" : "text-amber-400"} />
-                                <span className="text-sm font-semibold text-zinc-300">Доктор No-Code нашел проблемы:</span>
+                                <span className="text-sm font-semibold text-gray-600 dark:text-zinc-300">Доктор No-Code нашел проблемы:</span>
                             </div>
                             
                             {validationErrors.map((err, idx) => (
-                                <div key={idx} className="flex flex-col gap-1 p-2 bg-red-950/20 border-l-2 border-red-500 rounded-r">
-                                    <span className="text-xs text-red-200">{err.message}</span>
+                                <div key={idx} className="flex flex-col gap-1 p-2 bg-red-50 dark:bg-red-950/20 border-l-2 border-red-500 rounded-r">
+                                    <span className="text-xs text-red-600 dark:text-red-200">{err.message}</span>
                                     {err.id && err.type === 'component' && (
                                         <button 
                                             onClick={() => { navigate(`/projects/${projectId}/builder`); selectComponent(err.id!); onClose(); }}
@@ -157,12 +157,12 @@ export default function DeploymentModal({ isOpen, onClose, projectId }: Deployme
                             ))}
 
                             {validationWarnings.map((warn, idx) => (
-                                <div key={idx} className="flex flex-col gap-1 p-2 bg-amber-950/20 border-l-2 border-amber-500 rounded-r">
-                                    <span className="text-xs text-amber-200">{warn.message}</span>
+                                <div key={idx} className="flex flex-col gap-1 p-2 bg-amber-50 dark:bg-amber-950/20 border-l-2 border-amber-500 rounded-r">
+                                    <span className="text-xs text-amber-600 dark:text-amber-200">{warn.message}</span>
                                     {warn.id && warn.type === 'component' && (
                                         <button 
                                             onClick={() => { navigate(`/projects/${projectId}/builder`); selectComponent(warn.id!); onClose(); }}
-                                            className="text-[10px] text-amber-400 hover:text-amber-300 text-left underline underline-offset-2"
+                                            className="text-[10px] text-amber-500 dark:text-amber-400 hover:text-amber-400 dark:hover:text-amber-300 text-left underline underline-offset-2"
                                         >
                                             Фокус на компонент
                                         </button>
@@ -171,14 +171,14 @@ export default function DeploymentModal({ isOpen, onClose, projectId }: Deployme
                             ))}
                             
                             {validationErrors.length > 0 && (
-                                <label className="flex items-center gap-2 mt-4 cursor-pointer p-2 rounded bg-zinc-900 border border-zinc-700/50 hover:bg-zinc-800 transition-colors">
+                                <label className="flex items-center gap-2 mt-4 cursor-pointer p-2 rounded bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700/50 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
                                     <input 
                                         type="checkbox" 
                                         checked={ignoreValidation} 
                                         onChange={(e) => setIgnoreValidation(e.target.checked)}
-                                        className="w-4 h-4 rounded text-red-600 focus:ring-red-500 bg-zinc-800 border-zinc-700"
+                                        className="w-4 h-4 rounded text-red-600 focus:ring-red-500 bg-white dark:bg-zinc-800 border-gray-300 dark:border-zinc-700"
                                     />
-                                    <span className="text-xs text-zinc-300 font-medium">Я понимаю риски, игнорировать ошибки и продолжить</span>
+                                    <span className="text-xs text-gray-600 dark:text-zinc-300 font-medium">Я понимаю риски, игнорировать ошибки и продолжить</span>
                                 </label>
                             )}
                         </div>
@@ -186,47 +186,47 @@ export default function DeploymentModal({ isOpen, onClose, projectId }: Deployme
 
                     {(status === 'NONE' || status === 'FAILED' || status === 'PORT_OCCUPIED') && (
                         <div className="space-y-1">
-                            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Развернуть на порту</label>
+                            <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Развернуть на порту</label>
                             <input
                                 type="number"
                                 placeholder="Автоматически (оставьте пустым)"
                                 value={port}
                                 onChange={(e) => setPort(e.target.value)}
-                                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm text-white"
+                                className="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-950 border border-gray-300 dark:border-zinc-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
                             />
                         </div>
                     )}
 
-                    <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                    <div className="bg-gray-50 dark:bg-zinc-950 p-4 rounded-xl border border-gray-200 dark:border-zinc-800">
                         <div className="flex items-center justify-between mb-4">
-                            <span className="text-sm font-semibold text-zinc-300">Статус</span>
-                            {status === 'NONE' && <span className="text-sm text-zinc-500 font-medium">Не развёрнуто</span>}
+                            <span className="text-sm font-semibold text-gray-600 dark:text-zinc-300">Статус</span>
+                            {status === 'NONE' && <span className="text-sm text-gray-400 dark:text-zinc-500 font-medium">Не развёрнуто</span>}
                             {status === 'DEPLOYING' && (
-                                <span className="flex items-center gap-2 text-sm text-indigo-400 font-medium">
+                                <span className="flex items-center gap-2 text-sm text-indigo-500 dark:text-indigo-400 font-medium">
                                     <Loader2 size={14} className="animate-spin" /> Развёртывание...
                                 </span>
                             )}
                             {status === 'STOPPING' && (
-                                <span className="flex items-center gap-2 text-sm text-amber-400 font-medium">
+                                <span className="flex items-center gap-2 text-sm text-amber-500 dark:text-amber-400 font-medium">
                                     <Loader2 size={14} className="animate-spin" /> Остановка...
                                 </span>
                             )}
                             {status === 'RUNNING' && (
-                                <span className="flex items-center gap-2 text-sm text-emerald-400 font-medium">
+                                <span className="flex items-center gap-2 text-sm text-emerald-500 dark:text-emerald-400 font-medium">
                                     <PlayCircle size={14} /> Запущено
                                 </span>
                             )}
                             {status === 'FAILED' && (
-                                <span className="flex items-center gap-2 text-sm text-red-400 font-medium">
+                                <span className="flex items-center gap-2 text-sm text-red-500 dark:text-red-400 font-medium">
                                     <AlertCircle size={14} /> Ошибка
                                 </span>
                             )}
                         </div>
 
                         {status === 'RUNNING' && liveUrl && (
-                            <div className="mt-4 p-3 bg-emerald-950/30 border border-emerald-900/50 rounded-lg">
-                                <span className="text-xs text-emerald-500 font-semibold uppercase tracking-wider block mb-1">Live URL</span>
-                                <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-emerald-300 hover:text-emerald-200 text-sm font-medium flex items-center gap-2 break-all">
+                            <div className="mt-4 p-3 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-lg">
+                                <span className="text-xs text-emerald-600 dark:text-emerald-500 font-semibold uppercase tracking-wider block mb-1">Live URL</span>
+                                <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-emerald-600 dark:text-emerald-300 hover:text-emerald-500 dark:hover:text-emerald-200 text-sm font-medium flex items-center gap-2 break-all">
                                     <LinkIcon size={14} />
                                     {liveUrl}
                                     <ExternalLink size={12} className="ml-auto opacity-50" />
@@ -236,10 +236,10 @@ export default function DeploymentModal({ isOpen, onClose, projectId }: Deployme
                     </div>
                 </div>
 
-                <div className="p-6 border-t border-zinc-800/60 bg-zinc-900/50 flex justify-end gap-3">
+                <div className="p-6 border-t border-gray-200 dark:border-zinc-800/60 bg-gray-50/50 dark:bg-zinc-900/50 flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+                        className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                         Закрыть
                     </button>

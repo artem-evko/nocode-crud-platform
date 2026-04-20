@@ -50,7 +50,7 @@ export default function PropertiesPanel() {
 
     if (!selectedComponent) {
         return (
-            <div className="text-sm text-zinc-400 text-center py-10">
+            <div className="text-sm text-gray-400 dark:text-zinc-400 text-center py-10">
                 Выберите компонент на холсте, чтобы настроить его свойства и связи с данными.
             </div>
         );
@@ -91,8 +91,8 @@ export default function PropertiesPanel() {
     return (
         <div className="space-y-6">
             <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
-                    <span className="text-sm font-semibold text-zinc-300">Тип</span>
+                <div className="flex items-center justify-between border-b border-gray-200 dark:border-zinc-800 pb-2">
+                    <span className="text-sm font-semibold text-gray-600 dark:text-zinc-300">Тип</span>
                     <span className="text-xs bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded font-mono">
                         {selectedComponent.type}
                     </span>
@@ -102,40 +102,40 @@ export default function PropertiesPanel() {
                 {(selectedComponent.type === 'Heading' || selectedComponent.type === 'Text' || selectedComponent.type === 'Button') && (
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <label className="text-xs font-semibold text-zinc-400 block">Текстовое содержимое</label>
+                            <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block">Текстовое содержимое</label>
                             <label className="flex items-center gap-2 cursor-pointer">
-                                <span className={`text-[10px] ${!selectedComponent.props.isDynamicText ? 'text-zinc-300' : 'text-zinc-600'}`}>Static</span>
+                                <span className={`text-[10px] ${!selectedComponent.props.isDynamicText ? 'text-gray-600 dark:text-zinc-300' : 'text-gray-400 dark:text-zinc-600'}`}>Static</span>
                                 <input 
                                     type="checkbox" 
                                     checked={selectedComponent.props.isDynamicText || false}
                                     onChange={(e) => updateComponentProps(selectedComponent.id, { isDynamicText: e.target.checked })}
                                     className="hidden" 
                                 />
-                                <div className={`w-7 h-4 rounded-full relative transition-colors ${selectedComponent.props.isDynamicText ? 'bg-indigo-500' : 'bg-zinc-700'}`}>
+                                <div className={`w-7 h-4 rounded-full relative transition-colors ${selectedComponent.props.isDynamicText ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-zinc-700'}`}>
                                     <div className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white transition-transform ${selectedComponent.props.isDynamicText ? 'translate-x-3' : ''}`}></div>
                                 </div>
-                                <span className={`text-[10px] ${selectedComponent.props.isDynamicText ? 'text-indigo-400 font-semibold' : 'text-zinc-600'}`}>Dynamic</span>
+                                <span className={`text-[10px] ${selectedComponent.props.isDynamicText ? 'text-indigo-400 font-semibold' : 'text-gray-400 dark:text-zinc-600'}`}>Dynamic</span>
                             </label>
                         </div>
                         <input
                             type="text"
                             placeholder={selectedComponent.props.isDynamicText ? "{item.title}" : "Текст компонента"}
-                            className={`w-full bg-zinc-900 border rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors ${selectedComponent.props.isDynamicText ? 'border-indigo-600/50 font-mono text-indigo-300' : 'border-zinc-800'}`}
+                            className={`w-full bg-white dark:bg-zinc-900 border rounded p-2 text-sm focus:outline-none focus:border-indigo-500 transition-colors ${selectedComponent.props.isDynamicText ? 'border-indigo-600/50 font-mono text-indigo-500 dark:text-indigo-300' : 'border-gray-300 dark:border-zinc-800'}`}
                             value={selectedComponent.props.text || ''}
                             onChange={handleTextChange}
                         />
                         {selectedComponent.props.isDynamicText && (
-                            <p className="text-[10px] text-zinc-500">Укажите JS выражение в фигурных скобках (например, {'{item.name}'}).</p>
+                            <p className="text-[10px] text-gray-400 dark:text-zinc-500">Укажите JS выражение в фигурных скобках (например, {'{item.name}'}).</p>
                         )}
                     </div>
                 )}
 
                 {/* Logic Binding Property */}
                 {selectedComponent.type === 'Button' && (
-                    <div className="space-y-2 pt-2 border-t border-zinc-800">
-                        <label className="text-xs font-semibold text-zinc-400 block">Выполнить логику (Action Flow)</label>
+                    <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-zinc-800">
+                        <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block">Выполнить логику (Action Flow)</label>
                         <select
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
                             value={selectedComponent.props.actionFlowId || "none"}
                             onChange={(e) => updateComponentProps(selectedComponent.id, { actionFlowId: e.target.value === "none" ? null : e.target.value })}
                         >
@@ -144,7 +144,7 @@ export default function PropertiesPanel() {
                                 <option key={f.id} value={f.id}>{f.name}</option>
                             ))}
                         </select>
-                        <p className="text-xs text-zinc-500 mt-1">
+                        <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1">
                             Выберите поток логики, который будет выполняться при клике на кнопку.
                         </p>
                         {hasEmptyAction && (
@@ -159,9 +159,9 @@ export default function PropertiesPanel() {
                 {/* Data Binding Properties */}
                 {(selectedComponent.type === 'DataTable' || selectedComponent.type === 'FormModule' || selectedComponent.type === 'BarChart' || selectedComponent.type === 'LineChart') && (
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-zinc-400 block">Привязать к сущности</label>
+                        <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block">Привязать к сущности</label>
                         <select
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
                             value={selectedComponent.props.entityName || "none"}
                             onChange={handleEntityBindingChange}
                         >
@@ -170,7 +170,7 @@ export default function PropertiesPanel() {
                                 <option key={e.id} value={e.name}>{e.name}</option>
                             ))}
                         </select>
-                        <p className="text-xs text-zinc-500 mt-1">
+                        <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1">
                             Свяжите этот компонент с сущностью модели данных для автогенерации API-вызовов.
                         </p>
                         {selectedComponent.type === 'FormModule' && hasEmptyFields && (
@@ -184,11 +184,11 @@ export default function PropertiesPanel() {
 
                 {/* Chart Axis Configuration */}
                 {(selectedComponent.type === 'BarChart' || selectedComponent.type === 'LineChart') && selectedComponent.props.entityName && (
-                    <div className="space-y-3 pt-2 border-t border-zinc-800 focus-within:ring-0">
+                    <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-zinc-800 focus-within:ring-0">
                         <div>
-                            <label className="text-xs font-semibold text-zinc-400 block mb-1">Поле для Оси X (Dimension)</label>
+                            <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block mb-1">Поле для Оси X (Dimension)</label>
                             <select
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.props.xAxisKey || "id"}
                                 onChange={(e) => updateComponentProps(selectedComponent.id, { xAxisKey: e.target.value })}
                             >
@@ -199,9 +199,9 @@ export default function PropertiesPanel() {
                             </select>
                         </div>
                         <div>
-                            <label className="text-xs font-semibold text-zinc-400 block mb-1">Поле для Оси Y (Metric)</label>
+                            <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block mb-1">Поле для Оси Y (Metric)</label>
                             <select
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.props.yAxisKey || "id"}
                                 onChange={(e) => updateComponentProps(selectedComponent.id, { yAxisKey: e.target.value })}
                             >
@@ -217,24 +217,24 @@ export default function PropertiesPanel() {
                 {/* Image Property */}
                 {selectedComponent.type === 'Image' && (
                     <div className="space-y-2">
-                        <label className="text-xs font-semibold text-zinc-400 block pb-1">URL Изображения</label>
+                        <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block pb-1">URL Изображения</label>
                         <input
                             type="text"
                             placeholder="https://example.com/image.png"
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
                             value={selectedComponent.props.url || ''}
                             onChange={(e) => updateComponentProps(selectedComponent.id, { url: e.target.value })}
                         />
                     </div>
                 )}
                 {/* CSS Styling Property */}
-                <div className="space-y-4 pt-4 border-t border-zinc-800">
-                    <label className="text-xs font-semibold text-zinc-400 block mb-[-8px]">Визуальные стили</label>
+                <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-zinc-800">
+                    <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block mb-[-8px]">Визуальные стили</label>
                     
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Цвет фона</span>
+                        <span className="text-[10px] text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Цвет фона</span>
                         <div className="flex flex-wrap gap-2">
-                            {['bg-transparent', 'bg-zinc-900', 'bg-red-500', 'bg-blue-500', 'bg-emerald-500', 'bg-indigo-500', 'bg-purple-500', 'bg-yellow-500'].map(bg => (
+                            {['bg-transparent', 'bg-white dark:bg-zinc-900', 'bg-red-500', 'bg-blue-500', 'bg-emerald-500', 'bg-indigo-500', 'bg-purple-500', 'bg-yellow-500'].map(bg => (
                                 <button
                                     key={bg}
                                     onClick={() => toggleClass('bg-', bg === 'bg-transparent' ? '' : bg)}
@@ -246,7 +246,7 @@ export default function PropertiesPanel() {
                     </div>
 
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Скругление углов</span>
+                        <span className="text-[10px] text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Скругление углов</span>
                         <div className="flex gap-2">
                             {[
                                 { class: 'rounded-none', label: '0px' },
@@ -258,7 +258,7 @@ export default function PropertiesPanel() {
                                 <button
                                     key={r.class}
                                     onClick={() => toggleClass('rounded-', r.class === 'rounded-none' ? '' : r.class)}
-                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeRadius === r.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeRadius === r.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-white dark:bg-zinc-900 border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-zinc-500'}`}
                                 >
                                     {r.label}
                                 </button>
@@ -267,7 +267,7 @@ export default function PropertiesPanel() {
                     </div>
                     
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Отступы (Padding)</span>
+                        <span className="text-[10px] text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Отступы (Padding)</span>
                         <div className="flex gap-2">
                             {[
                                 { class: 'p-0', label: '0' },
@@ -279,7 +279,7 @@ export default function PropertiesPanel() {
                                 <button
                                     key={p.class}
                                     onClick={() => toggleClass('p-', p.class === 'p-0' ? '' : p.class)}
-                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activePadding === p.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activePadding === p.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-white dark:bg-zinc-900 border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-zinc-500'}`}
                                 >
                                     {p.label}
                                 </button>
@@ -288,13 +288,13 @@ export default function PropertiesPanel() {
                     </div>
 
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Цвет текста</span>
+                        <span className="text-[10px] text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Цвет текста</span>
                         <div className="flex flex-wrap gap-2">
-                            {['text-zinc-50', 'text-zinc-400', 'text-zinc-900', 'text-emerald-400', 'text-indigo-400', 'text-rose-400'].map(tc => (
+                            {['text-zinc-50', 'text-gray-500 dark:text-zinc-400', 'text-zinc-900', 'text-emerald-400', 'text-indigo-400', 'text-rose-400'].map(tc => (
                                 <button
                                     key={tc}
                                     onClick={() => toggleClass('text-', tc)}
-                                    className={`w-6 h-6 rounded-md border-2 transition-all bg-zinc-900 flex items-center justify-center ${activeTextColor === tc ? 'border-indigo-500 scale-110' : 'border-zinc-700 hover:scale-105 hover:border-zinc-500'}`}
+                                    className={`w-6 h-6 rounded-md border-2 transition-all bg-white dark:bg-zinc-900 flex items-center justify-center ${activeTextColor === tc ? 'border-indigo-500 scale-110' : 'border-zinc-700 hover:scale-105 hover:border-zinc-500'}`}
                                     title={tc}
                                 >
                                     <span className={`${tc} font-bold text-xs`}>A</span>
@@ -304,7 +304,7 @@ export default function PropertiesPanel() {
                     </div>
 
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Выравнивание & Тень</span>
+                        <span className="text-[10px] text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Выравнивание & Тень</span>
                         <div className="flex gap-2 mb-2">
                             {[
                                 { class: 'text-left', label: 'Left' },
@@ -314,7 +314,7 @@ export default function PropertiesPanel() {
                                 <button
                                     key={a.class}
                                     onClick={() => toggleClass('text-', a.class)}
-                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeTextAlign === a.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeTextAlign === a.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-white dark:bg-zinc-900 border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-zinc-500'}`}
                                 >
                                     {a.label}
                                 </button>
@@ -329,7 +329,7 @@ export default function PropertiesPanel() {
                                 <button
                                     key={s.class}
                                     onClick={() => toggleClass('shadow-', s.class === 'shadow-none' ? '' : s.class)}
-                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeShadow === s.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeShadow === s.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-white dark:bg-zinc-900 border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-zinc-500'}`}
                                 >
                                     {s.label}
                                 </button>
@@ -338,7 +338,7 @@ export default function PropertiesPanel() {
                     </div>
 
                     <div className="space-y-1">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Шрифт (Размер / Вес)</span>
+                        <span className="text-[10px] text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Шрифт (Размер / Вес)</span>
                         <div className="flex gap-2 mb-2">
                             {[
                                 { class: 'text-sm', label: 'SM' },
@@ -349,7 +349,7 @@ export default function PropertiesPanel() {
                                 <button
                                     key={s.class}
                                     onClick={() => toggleClass('text-', s.class)}
-                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeTextSize === s.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeTextSize === s.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-white dark:bg-zinc-900 border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-zinc-500'}`}
                                 >
                                     {s.label}
                                 </button>
@@ -364,7 +364,7 @@ export default function PropertiesPanel() {
                                 <button
                                     key={fw.class}
                                     onClick={() => toggleClass('font-', fw.class)}
-                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeFontWeight === fw.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-700 text-zinc-400 hover:border-zinc-500'}`}
+                                    className={`px-2 py-1 flex-1 text-xs border rounded transition-colors ${activeFontWeight === fw.class ? 'bg-indigo-500 border-indigo-500 text-white' : 'bg-white dark:bg-zinc-900 border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-zinc-500'}`}
                                 >
                                     {fw.label}
                                 </button>
@@ -373,11 +373,11 @@ export default function PropertiesPanel() {
                     </div>
 
                     <div className="pt-2">
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider block mb-1">Tailwind Classes (Вручную)</span>
+                        <span className="text-[10px] text-gray-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">Tailwind Classes (Вручную)</span>
                         <input
                             type="text"
                             placeholder="Например: opacity-50 shadow-xl"
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-sm font-mono text-zinc-300 focus:outline-none focus:border-indigo-500 transition-colors"
+                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm font-mono text-gray-600 dark:text-zinc-300 focus:outline-none focus:border-indigo-500 transition-colors"
                             value={selectedComponent.props.className || ''}
                             onChange={(e) => updateComponentProps(selectedComponent.id, { className: e.target.value })}
                         />
@@ -385,49 +385,49 @@ export default function PropertiesPanel() {
                 </div>
 
                 {/* Layout Properties */}
-                <div className="space-y-3 pt-4 border-t border-zinc-800">
-                    <label className="text-xs font-semibold text-zinc-400 block pb-1">Размещение и Размер (Сетка 12)</label>
+                <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-zinc-800">
+                    <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block pb-1">Размещение и Размер (Сетка 12)</label>
                     <div className="grid grid-cols-2 gap-3 pb-2">
                         {/* W */}
                         <div>
-                            <label className="text-[10px] text-zinc-500 block mb-1">Ширина (1-12)</label>
+                            <label className="text-[10px] text-gray-400 dark:text-zinc-500 block mb-1">Ширина (1-12)</label>
                             <input
                                 type="number"
                                 min="1" max="12"
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.layout?.w || 4}
                                 onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), w: Math.min(12, Math.max(1, parseInt(e.target.value) || 1)) })}
                             />
                         </div>
                         {/* H */}
                         <div>
-                            <label className="text-[10px] text-zinc-500 block mb-1">Высота (Строки)</label>
+                            <label className="text-[10px] text-gray-400 dark:text-zinc-500 block mb-1">Высота (Строки)</label>
                             <input
                                 type="number"
                                 min="1"
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.layout?.h || 4}
                                 onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), h: Math.max(1, parseInt(e.target.value) || 1) })}
                             />
                         </div>
                         {/* X */}
                         <div>
-                            <label className="text-[10px] text-zinc-500 block mb-1">Позиция X (0-11)</label>
+                            <label className="text-[10px] text-gray-400 dark:text-zinc-500 block mb-1">Позиция X (0-11)</label>
                             <input
                                 type="number"
                                 min="0" max="11"
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.layout?.x || 0}
                                 onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), x: Math.min(11, Math.max(0, parseInt(e.target.value) || 0)) })}
                             />
                         </div>
                         {/* Y */}
                         <div>
-                            <label className="text-[10px] text-zinc-500 block mb-1">Позиция Y (Строки)</label>
+                            <label className="text-[10px] text-gray-400 dark:text-zinc-500 block mb-1">Позиция Y (Строки)</label>
                             <input
                                 type="number"
                                 min="0"
-                                className="w-full bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.layout?.y || 0}
                                 onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), y: Math.max(0, parseInt(e.target.value) || 0) })}
                             />

@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, LayoutTemplate } from 'lucide-react';
 import { toast } from 'sonner';
 import ProjectModal from '../components/ProjectModal';
 import type { ProjectFormData } from '../components/ProjectModal';
+import ThemeToggle from '../components/ThemeToggle';
 
 interface Project {
     id: string;
@@ -105,31 +106,32 @@ export default function ProjectsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white gap-3">
+            <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex flex-col items-center justify-center text-gray-900 dark:text-white gap-3">
                 <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-zinc-400">Загрузка проектов...</span>
+                <span className="text-sm text-gray-500 dark:text-zinc-400">Загрузка проектов...</span>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-slate-50 p-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-slate-50 p-8">
             <div className="max-w-6xl mx-auto space-y-8">
-                <div className="flex justify-between items-center border-b border-zinc-800 pb-4">
+                <div className="flex justify-between items-center border-b border-gray-200 dark:border-zinc-800 pb-4">
                     <h1 className="text-3xl font-bold tracking-tight">Мои Проекты</h1>
                     <div className="flex items-center gap-4">
                         <button
                             onClick={openCreateModal}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors shadow-sm text-white"
                         >
                             <Plus size={16} />
                             Новый Проект
                         </button>
-                        <div className="h-6 w-px bg-zinc-800 mx-2"></div>
-                        <span className="text-sm text-zinc-400">Пользователь: <strong className="text-white font-medium">{user}</strong></span>
+                        <div className="h-6 w-px bg-gray-200 dark:bg-zinc-800 mx-2"></div>
+                        <span className="text-sm text-gray-500 dark:text-zinc-400">Пользователь: <strong className="text-gray-900 dark:text-white font-medium">{user}</strong></span>
+                        <ThemeToggle />
                         <button
                             onClick={handleLogout}
-                            className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-lg text-sm font-medium transition-colors border border-zinc-800"
+                            className="px-4 py-2 bg-gray-100 dark:bg-zinc-900 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded-lg text-sm font-medium transition-colors border border-gray-200 dark:border-zinc-800"
                         >
                             Выйти
                         </button>
@@ -137,12 +139,12 @@ export default function ProjectsPage() {
                 </div>
 
                 {projects.length === 0 ? (
-                    <div className="text-center py-24 bg-zinc-900/50 rounded-2xl border border-zinc-800 border-dashed">
-                        <h3 className="text-xl font-medium text-white mb-2">Проектов пока нет</h3>
-                        <p className="text-zinc-400 mb-6">Создайте свой первый проект, чтобы начать моделирование.</p>
+                    <div className="text-center py-24 bg-gray-100/50 dark:bg-zinc-900/50 rounded-2xl border border-gray-200 dark:border-zinc-800 border-dashed">
+                        <h3 className="text-xl font-medium mb-2">Проектов пока нет</h3>
+                        <p className="text-gray-500 dark:text-zinc-400 mb-6">Создайте свой первый проект, чтобы начать моделирование.</p>
                         <button
                             onClick={openCreateModal}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-950 focus:ring-indigo-500"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-semibold transition-colors text-white focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 dark:focus:ring-offset-zinc-950 focus:ring-indigo-500"
                         >
                             <Plus size={18} />
                             Создать Проект
@@ -154,7 +156,7 @@ export default function ProjectsPage() {
                             <div
                                 key={project.id}
                                 onClick={() => navigate(`/projects/${project.id}/modeler`)}
-                                className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 hover:shadow-lg hover:-translate-y-1 transition-all group cursor-pointer"
+                                className="relative bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 hover:border-gray-300 dark:hover:border-zinc-700 hover:shadow-lg hover:-translate-y-1 transition-all group cursor-pointer"
                             >
                                 <div className="absolute top-4 right-4 flex opacity-0 group-hover:opacity-100 transition-opacity gap-2">
                                     <button
@@ -169,7 +171,7 @@ export default function ProjectsPage() {
                                     </button>
                                     <button
                                         onClick={(e) => openEditModal(e, project)}
-                                        className="p-1.5 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-md transition-colors"
+                                        className="p-1.5 text-gray-400 dark:text-zinc-400 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-md transition-colors"
                                         title="Изменить проект"
                                     >
                                         <Edit2 size={16} />
@@ -179,7 +181,7 @@ export default function ProjectsPage() {
                                             e.stopPropagation();
                                             setProjectToDelete(project.id);
                                         }}
-                                        className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
+                                        className="p-1.5 text-gray-400 dark:text-zinc-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
                                         title="Удалить проект"
                                     >
                                         <Trash2 size={16} />
@@ -187,7 +189,7 @@ export default function ProjectsPage() {
                                 </div>
 
                                 <div className="flex items-center gap-3 mb-3 pr-16">
-                                    <h3 className="text-xl font-bold text-white truncate">{project.name}</h3>
+                                    <h3 className="text-xl font-bold truncate">{project.name}</h3>
                                     {project.deploymentStatus === 'RUNNING' && (
                                         <span className="flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -207,22 +209,22 @@ export default function ProjectsPage() {
                                     )}
                                 </div>
                                 <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between border-b border-zinc-800/50 pb-2">
-                                        <span className="text-zinc-500">Group ID</span>
-                                        <span className="text-zinc-300 font-mono text-xs">{project.groupId}</span>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-zinc-800/50 pb-2">
+                                        <span className="text-gray-400 dark:text-zinc-500">Group ID</span>
+                                        <span className="text-gray-600 dark:text-zinc-300 font-mono text-xs">{project.groupId}</span>
                                     </div>
-                                    <div className="flex justify-between border-b border-zinc-800/50 pb-2">
-                                        <span className="text-zinc-500">Artifact ID</span>
-                                        <span className="text-zinc-300 font-mono text-xs">{project.artifactId}</span>
+                                    <div className="flex justify-between border-b border-gray-100 dark:border-zinc-800/50 pb-2">
+                                        <span className="text-gray-400 dark:text-zinc-500">Artifact ID</span>
+                                        <span className="text-gray-600 dark:text-zinc-300 font-mono text-xs">{project.artifactId}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-zinc-500">Версия</span>
-                                        <span className="text-zinc-300 font-mono text-xs">{project.version}</span>
+                                        <span className="text-gray-400 dark:text-zinc-500">Версия</span>
+                                        <span className="text-gray-600 dark:text-zinc-300 font-mono text-xs">{project.version}</span>
                                     </div>
                                 </div>
                                 
                                 {project.deploymentStatus === 'RUNNING' && (
-                                    <div className="mt-4 pt-4 border-t border-zinc-800/50">
+                                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800/50">
                                         <a 
                                             href={`http://proj-${project.id}.localhost`} 
                                             target="_blank" 
@@ -250,19 +252,19 @@ export default function ProjectsPage() {
 
             {/* Custom Confirm Modal */}
             {projectToDelete && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-zinc-950/80 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200">
                         <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mb-4">
                             <Trash2 size={24} />
                         </div>
-                        <h3 className="text-lg font-bold text-white mb-2">Удалить проект?</h3>
-                        <p className="text-sm text-zinc-400 mb-6">
+                        <h3 className="text-lg font-bold mb-2">Удалить проект?</h3>
+                        <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">
                             Вы уверены, что хотите безвозвратно удалить этот проект? Это также остановит все запущенные серверы и контейнеры, связанные с ним.
                         </p>
                         <div className="flex gap-3 justify-end">
                             <button
                                 onClick={() => setProjectToDelete(null)}
-                                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg text-sm font-medium transition-colors border border-zinc-700"
+                                className="px-4 py-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg text-sm font-medium transition-colors border border-gray-200 dark:border-zinc-700"
                             >
                                 Отмена
                             </button>

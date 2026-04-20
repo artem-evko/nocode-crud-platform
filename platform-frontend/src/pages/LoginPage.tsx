@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/authStore';
 import { apiClient } from '../api/client';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
@@ -36,49 +37,52 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-slate-50 relative">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-slate-50 relative">
             <div className="absolute top-6 left-6">
                 <button 
                     onClick={() => navigate('/')}
-                    className="flex items-center gap-2 font-medium text-sm text-zinc-400 hover:text-white transition-colors"
+                    className="flex items-center gap-2 font-medium text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                     <ArrowLeft size={18} /> На главную
                 </button>
             </div>
+            <div className="absolute top-6 right-6">
+                <ThemeToggle />
+            </div>
 
-            <div className="w-full max-w-md p-8 space-y-8 bg-zinc-900 rounded-xl shadow-2xl border border-zinc-800">
+            <div className="w-full max-w-md p-8 space-y-8 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-gray-200 dark:border-zinc-800">
                 <div className="text-center">
                     <h2 className="text-3xl font-extrabold tracking-tight">С возвращением</h2>
-                    <p className="mt-2 text-sm text-zinc-400">Войдите в свой аккаунт</p>
+                    <p className="mt-2 text-sm text-gray-500 dark:text-zinc-400">Войдите в свой аккаунт</p>
                 </div>
 
                 <form className="mt-8 space-y-6" onSubmit={handleLogin}>
                     {error && (
-                        <div className="p-3 text-sm text-red-500 bg-red-950/50 rounded-lg text-center border border-red-900/50">
+                        <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950/50 rounded-lg text-center border border-red-200 dark:border-red-900/50">
                             {error}
                         </div>
                     )}
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-zinc-300">Имя пользователя</label>
+                            <label className="block text-sm font-medium text-gray-600 dark:text-zinc-300">Имя пользователя</label>
                             <input
                                 type="text"
                                 required
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-md text-gray-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                 placeholder="admin"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-zinc-300">Пароль</label>
+                            <label className="block text-sm font-medium text-gray-600 dark:text-zinc-300">Пароль</label>
                             <input
                                 type="password"
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                className="mt-1 block w-full px-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-md text-gray-900 dark:text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -87,15 +91,15 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 focus:ring-offset-zinc-900 disabled:opacity-50 transition-colors"
+                        className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 focus:ring-offset-white dark:focus:ring-offset-zinc-900 disabled:opacity-50 transition-colors"
                     >
                         {loading ? 'Вход...' : 'Войти'}
                     </button>
                 </form>
 
-                <p className="mt-6 text-center text-sm text-zinc-500">
+                <p className="mt-6 text-center text-sm text-gray-400 dark:text-zinc-500">
                     Ещё нет аккаунта?{' '}
-                    <button onClick={() => navigate('/register')} className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                    <button onClick={() => navigate('/register')} className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-400 dark:hover:text-indigo-300 font-medium transition-colors">
                         Зарегистрироваться
                     </button>
                 </p>

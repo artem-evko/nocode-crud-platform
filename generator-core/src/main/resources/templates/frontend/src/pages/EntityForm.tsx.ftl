@@ -67,7 +67,11 @@ export default function ${entity.name()}Form() {
     const payload = {
       <#list entity.fields() as field>
       <#if field.name()?lower_case != "id">
+      <#if field.type() != "STRING" && field.type() != "BOOLEAN">
+      ${field.name()}: ${field.name()} === '' ? null : ${field.name()},
+      <#else>
       ${field.name()},
+      </#if>
       </#if>
       </#list>
     };
