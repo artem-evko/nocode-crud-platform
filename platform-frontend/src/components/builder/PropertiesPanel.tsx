@@ -135,7 +135,7 @@ export default function PropertiesPanel() {
                     <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-zinc-800">
                         <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block">Выполнить логику (Action Flow)</label>
                         <select
-                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-indigo-500"
                             value={selectedComponent.props.actionFlowId || "none"}
                             onChange={(e) => updateComponentProps(selectedComponent.id, { actionFlowId: e.target.value === "none" ? null : e.target.value })}
                         >
@@ -161,7 +161,7 @@ export default function PropertiesPanel() {
                     <div className="space-y-2">
                         <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 block">Привязать к сущности</label>
                         <select
-                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-indigo-500"
                             value={selectedComponent.props.entityName || "none"}
                             onChange={handleEntityBindingChange}
                         >
@@ -221,7 +221,7 @@ export default function PropertiesPanel() {
                         <input
                             type="text"
                             placeholder="https://example.com/image.png"
-                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                            className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-2 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
                             value={selectedComponent.props.url || ''}
                             onChange={(e) => updateComponentProps(selectedComponent.id, { url: e.target.value })}
                         />
@@ -394,7 +394,7 @@ export default function PropertiesPanel() {
                             <input
                                 type="number"
                                 min="1" max="12"
-                                className="w-full bg-white dark:bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-1.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.layout?.w || 4}
                                 onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), w: Math.min(12, Math.max(1, parseInt(e.target.value) || 1)) })}
                             />
@@ -405,7 +405,7 @@ export default function PropertiesPanel() {
                             <input
                                 type="number"
                                 min="1"
-                                className="w-full bg-white dark:bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-1.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.layout?.h || 4}
                                 onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), h: Math.max(1, parseInt(e.target.value) || 1) })}
                             />
@@ -416,7 +416,7 @@ export default function PropertiesPanel() {
                             <input
                                 type="number"
                                 min="0" max="11"
-                                className="w-full bg-white dark:bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-1.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.layout?.x || 0}
                                 onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), x: Math.min(11, Math.max(0, parseInt(e.target.value) || 0)) })}
                             />
@@ -427,7 +427,7 @@ export default function PropertiesPanel() {
                             <input
                                 type="number"
                                 min="0"
-                                className="w-full bg-white dark:bg-zinc-900 border border-zinc-800 rounded p-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                                className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded p-1.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-indigo-500"
                                 value={selectedComponent.layout?.y || 0}
                                 onChange={(e) => updateComponentLayout(selectedComponent.id, { ...(selectedComponent.layout || {x:0,y:0,w:4,h:4}), y: Math.max(0, parseInt(e.target.value) || 0) })}
                             />
