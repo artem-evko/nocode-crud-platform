@@ -107,7 +107,49 @@ for ($i = 1; $i -le $maxAttempts; $i++) {
 }
 
 # =============================================================
-# 3. Освобождение занятых портов
+# 3. Запуск Traefik (для маршрутизации деплоев proj-*.localhost)
+# =============================================================
+Write-Step "Запуск Traefik (reverse proxy для деплоя проектов)"
+
+# Создать Docker-сеть, если не существует
+$networkExists = docker network ls --filter "name=^nocode-crud-platform_nocode-network$" --format "{{.Name}}" 2>$null
+if (-not $networkExists) {
+    docker network create nocode-crud-platform_nocode-network | Out-Null
+    Write-Ok "Docker-сеть nocode-crud-platform_nocode-network создана"
+} else {
+    Write-Ok "Docker-сеть уже существует"
+}
+
+# Запустить / создать контейнер Traefik
+$TRAEFIK_CONTAINER = "nocode-traefik"
+$traefikExists = docker ps -a --filter "name=^${TRAEFIK_CONTAINER}$" --format "{{.Names}}" 2>$null
+
+if ($traefikExists -eq $TRAEFIK_CONTAINER) {
+    $traefikRunning = docker ps --filter "name=^${TRAEFIK_CONTAINER}$" --format "{{.Names}}" 2>$null
+    if ($traefikRunning -eq $TRAEFIK_CONTAINER) {
+        Write-Ok "Traefik уже запущен (порт 80)"
+    } else {
+        docker start $TRAEFIK_CONTAINER | Out-Null
+        Write-Ok "Traefik перезапущен (порт 80)"
+    }
+} else {
+    docker run -d `
+        --name $TRAEFIK_CONTAINER `
+        --network nocode-crud-platform_nocode-network `
+        -p "80:80" `
+        -p "8081:8080" `
+        -v //var/run/docker.sock:/var/run/docker.sock:ro `
+        traefik:v2.10 `
+        --api.insecure=true `
+        --providers.docker=true `
+        --providers.docker.exposedbydefault=false `
+        --providers.docker.network=nocode-crud-platform_nocode-network `
+        --entrypoints.web.address=:80 | Out-Null
+    Write-Ok "Traefik создан и запущен (порт 80)"
+}
+
+# =============================================================
+# 4. Освобождение занятых портов
 # =============================================================
 Write-Step "Проверка портов"
 
@@ -127,7 +169,7 @@ Free-Port $BACKEND_PORT
 Free-Port $FRONTEND_PORT
 
 # =============================================================
-# 4. Запуск Backend (в отдельном окне)
+# 5. Запуск Backend (в отдельном окне)
 # =============================================================
 Write-Step "Запуск Backend (Spring Boot, порт $BACKEND_PORT)"
 
@@ -136,7 +178,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd -Windo
 Write-Ok "Backend запущен в отдельном окне"
 
 # =============================================================
-# 5. Установка зависимостей Frontend (если нужно)
+# 6. Установка зависимостей Frontend (если нужно)
 # =============================================================
 Write-Step "Подготовка Frontend"
 
@@ -151,7 +193,7 @@ if (-not (Test-Path (Join-Path $FRONTEND_DIR "node_modules"))) {
 }
 
 # =============================================================
-# 6. Запуск Frontend (в отдельном окне)
+# 7. Запуск Frontend (в отдельном окне)
 # =============================================================
 Write-Step "Запуск Frontend (Vite, порт $FRONTEND_PORT)"
 
@@ -160,7 +202,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", $frontendCmd -Wind
 Write-Ok "Frontend запущен в отдельном окне"
 
 # =============================================================
-# 7. Итог
+# 8. Итог
 # =============================================================
 Start-Sleep -Seconds 2
 
@@ -172,13 +214,15 @@ Write-Host ""
 Write-Host "  Frontend:         http://localhost:$FRONTEND_PORT"      -ForegroundColor White
 Write-Host "  Backend API:      http://localhost:$BACKEND_PORT"       -ForegroundColor White
 Write-Host "  Swagger UI:       http://localhost:$BACKEND_PORT/swagger-ui/index.html" -ForegroundColor White
+Write-Host "  Traefik Dashboard: http://localhost:8081"               -ForegroundColor White
 Write-Host "  PostgreSQL:       localhost:$DB_PORT"                    -ForegroundColor White
+Write-Host "  Деплои:           http://proj-*.localhost (через Traefik)" -ForegroundColor White
 Write-Host ""
 Write-Host "  Логин:  admin" -ForegroundColor Yellow
 Write-Host "  Пароль: admin" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "  Для остановки закройте окна Backend и Frontend," -ForegroundColor DarkGray
-Write-Host "  а затем выполните: docker stop $DB_CONTAINER"       -ForegroundColor DarkGray
+Write-Host "  а затем выполните: docker stop $DB_CONTAINER $TRAEFIK_CONTAINER" -ForegroundColor DarkGray
 Write-Host ""
 
 # Открыть браузер через 8 секунд (backend нужно время на старт)
