@@ -109,12 +109,7 @@ CREATE DATABASE nocode_platform OWNER nocode;
 
 **Шаг 2. Запуск Backend**
 
-В корне проекта выполните скрипт запуска (Windows PowerShell):
-```powershell
-powershell -ExecutionPolicy Bypass -File .\start-platform.ps1
-```
-
-Либо запустите вручную через Maven Wrapper:
+В корне проекта выполните запуск через Maven Wrapper:
 ```bash
 ./mvnw spring-boot:run -pl platform-web
 ```
