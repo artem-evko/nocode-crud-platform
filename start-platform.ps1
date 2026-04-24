@@ -4,6 +4,10 @@ docker compose down
 Write-Host "Building and starting No-Code CRUD Platform (Docker Compose)..."
 docker compose up -d --build
 
+Write-Host "Syncing reverse proxy routes..."
+Start-Sleep -Seconds 3
+docker restart nocode-traefik | Out-Null
+
 Write-Host ""
 Write-Host "Platform is starting! "
 Write-Host "Frontend will be available at: http://localhost"
