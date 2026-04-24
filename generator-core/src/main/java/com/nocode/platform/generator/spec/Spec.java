@@ -4,6 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Корневая модель спецификации проекта (immutable record).
+ *
+ * <p>Описывает полную структуру проекта: метаданные ({@link Project}),
+ * сущности ({@link Entity}) с полями и связями, UI-спецификацию
+ * ({@link UiSpec}) и потоки бизнес-логики ({@link ActionFlow}).</p>
+ *
+ * <p>Спецификация создаётся визуальным редактором на фронтенде
+ * и передаётся в движок генерации кода.</p>
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Spec(
         int specVersion,
@@ -12,6 +22,7 @@ public record Spec(
         UiSpec uiSpec,
         List<ActionFlow> actionFlows
 ) {
+    /** Поток бизнес-логики — граф из узлов и рёбер. */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record ActionFlow(
             String id,
@@ -20,6 +31,7 @@ public record Spec(
             List<FlowEdge> edges
     ) {}
 
+    /** Узел графа бизнес-логики (триггер, действие с БД, уведомление и т.д.). */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record FlowNode(
             String id,
@@ -28,6 +40,7 @@ public record Spec(
             Map<String, Object> config
     ) {}
 
+    /** Ребро графа — связь между двумя узлами. */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record FlowEdge(
             String id,
@@ -35,8 +48,10 @@ public record Spec(
             String target
     ) {}
 
+    /** Спецификация пользовательского интерфейса. */
     public record UiSpec(List<Component> components) {}
 
+    /** UI-компонент (кнопка, таблица, форма и т.д.). */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Component(
             String id,
@@ -44,6 +59,8 @@ public record Spec(
             Map<String, Object> props,
             List<Component> children
     ) {}
+
+    /** Метаданные проекта (Maven-координаты, настройки генерации). */
     public record Project(
             String groupId,
             String artifactId,
@@ -54,6 +71,7 @@ public record Spec(
             boolean generateFrontend
     ) {}
 
+    /** Сущность (модель данных) с полями и связями. */
     public record Entity(
             String name,
             String table,
@@ -65,10 +83,12 @@ public record Spec(
             String deleteRoles
     ) {}
 
+    /** Поддерживаемые типы полей сущности. */
     public enum FieldType {
         STRING, INTEGER, BOOLEAN, DATE, DECIMAL
     }
 
+    /** Поле сущности с типом, валидацией и ограничениями. */
     public record Field(
             String name,
             FieldType type,
@@ -78,10 +98,12 @@ public record Spec(
             String pattern
     ) {}
 
+    /** Поддерживаемые типы связей между сущностями. */
     public enum RelationType {
         MANY_TO_ONE, ONE_TO_MANY, MANY_TO_MANY
     }
 
+    /** Связь между двумя сущностями. */
     public record Relation(
             String name,
             String targetEntity,

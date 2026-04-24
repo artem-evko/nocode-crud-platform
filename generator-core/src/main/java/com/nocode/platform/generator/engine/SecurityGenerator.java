@@ -4,8 +4,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Генератор модуля безопасности (JWT-аутентификация) для сгенерированных проектов.
+ *
+ * <p>Создаёт полный набор классов: User, UserRepository, JwtUtil,
+ * JwtAuthenticationFilter, SecurityConfig, UserDetailsServiceImpl
+ * и AuthController с эндпоинтами /api/auth/login и /api/auth/register.</p>
+ */
 public class SecurityGenerator {
 
+    /**
+     * Генерация файлов модуля безопасности в ZIP-архив.
+     *
+     * @param zos         выходной ZIP-поток
+     * @param rootPath    корневой путь внутри архива (backend/)
+     * @param pkgPath     путь пакета в файловой системе (com/example/app)
+     * @param basePackage базовый Java-пакет (com.example.app)
+     */
     public void generate(ZipOutputStream zos, String rootPath, String pkgPath, String basePackage) throws Exception {
         String secPath = rootPath + "src/main/java/" + pkgPath + "/security/";
 
@@ -78,7 +93,7 @@ public class SecurityGenerator {
                "@Component\n" +
                "public class JwtUtil {\n" +
                "    private static final String SECRET_KEY = \"my-32-character-ultra-secure-and-ultra-long-secret\";\n" +
-               "    private static final long EXPIRATION_TIME = 86400000; // 1 day\n\n" +
+               "    private static final long EXPIRATION_TIME = 86400000;\n\n" +
                "    private SecretKey getSigningKey() {\n" +
                "        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());\n" +
                "    }\n\n" +

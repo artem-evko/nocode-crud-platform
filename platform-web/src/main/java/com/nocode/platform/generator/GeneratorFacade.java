@@ -10,6 +10,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
+/**
+ * Фасад для генерации исходного кода проекта.
+ *
+ * <p>Принимает {@link ProjectEntity}, парсит JSON-спецификацию,
+ * переопределяет метаданные проекта из авторитетных полей сущности,
+ * валидирует спецификацию и запускает кодогенерацию.
+ * Возвращает ZIP-архив с готовым проектом.</p>
+ */
 @Service
 public class GeneratorFacade {
 
@@ -17,13 +25,19 @@ public class GeneratorFacade {
     private final SpecValidator specValidator = new SpecValidator();
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Генерация проекта на основе данных из {@link ProjectEntity}.
+     *
+     * @param p сущность проекта с метаданными и спецификацией
+     * @return ZIP-архив сгенерированного проекта в виде массива байтов
+     * @throws IllegalArgumentException при ошибках валидации спецификации
+     * @throws RuntimeException         при других ошибках генерации
+     */
     public byte[] generateReal(ProjectEntity p) {
         try {
             Spec spec;
             if (p.getSpecText() != null && !p.getSpecText().isBlank()) {
                spec = mapper.readValue(p.getSpecText(), Spec.class);
-               // Always override project metadata from the authoritative ProjectEntity fields
-               // to prevent stale/corrupted data in specText from breaking generation
                Spec.Project overridden = new Spec.Project(
                    p.getGroupId(),
                    p.getArtifactId(),
@@ -46,11 +60,9 @@ public class GeneratorFacade {
                );
                spec = new Spec(1, sp, new ArrayList<>(), null, new ArrayList<>());
             }
-            // Validate spec before generating code
             specValidator.validate(spec);
             return projectGenerator.generate(spec);
         } catch (IllegalArgumentException e) {
-            // Validation errors — rethrow as-is for controller to handle
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate project", e);

@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
+/**
+ * Конфигурация Liquibase для автоматической миграции схемы БД.
+ */
 @Configuration
 public class LiquibaseConfig {
 
@@ -13,13 +16,8 @@ public class LiquibaseConfig {
     public SpringLiquibase liquibase(DataSource dataSource) {
         SpringLiquibase lb = new SpringLiquibase();
         lb.setDataSource(dataSource);
-
-        // путь к твоему master changelog
         lb.setChangeLog("classpath:db/changelog/db.changelog-master.yaml");
-
-        // обязательно запускаем
         lb.setShouldRun(true);
-
         return lb;
     }
 }

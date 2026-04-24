@@ -9,6 +9,12 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Сервис бизнес-логики управления проектами.
+ *
+ * <p>Обеспечивает создание, получение и обновление проектов
+ * с привязкой к текущему аутентифицированному пользователю.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -19,11 +25,18 @@ public class ProjectService {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
+    /** Получение списка всех проектов текущего пользователя. */
     @Transactional(readOnly = true)
     public List<ProjectEntity> list() {
         return repo.findAllByOwnerUsername(getCurrentUsername());
     }
 
+    /**
+     * Создание нового проекта.
+     *
+     * @param req запрос с параметрами проекта
+     * @return сохранённая сущность проекта
+     */
     @Transactional
     public ProjectEntity create(CreateProjectRequest req) {
         ProjectEntity p = new ProjectEntity();
@@ -43,6 +56,13 @@ public class ProjectService {
         return repo.save(p);
     }
 
+    /**
+     * Получение проекта по идентификатору с проверкой владельца.
+     *
+     * @param id идентификатор проекта
+     * @return сущность проекта
+     * @throws IllegalArgumentException если проект не найден или доступ запрещён
+     */
     @Transactional(readOnly = true)
     public ProjectEntity get(UUID id) {
         ProjectEntity p = repo.findById(id)
@@ -53,6 +73,13 @@ public class ProjectService {
         return p;
     }
 
+    /**
+     * Обновление спецификации проекта.
+     *
+     * @param id       идентификатор проекта
+     * @param specText новый текст спецификации (JSON)
+     * @return обновлённая сущность проекта
+     */
     @Transactional
     public ProjectEntity updateSpec(UUID id, String specText) {
         ProjectEntity p = get(id);

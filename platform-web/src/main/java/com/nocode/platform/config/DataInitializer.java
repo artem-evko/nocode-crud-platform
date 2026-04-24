@@ -9,7 +9,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * Seeds the default admin user on first startup if not already present.
+ * Инициализатор начальных данных при запуске приложения.
+ *
+ * <p>Создаёт учётную запись администратора по умолчанию
+ * (admin/admin), если она ещё не существует в базе данных.</p>
  */
 @Component
 public class DataInitializer implements CommandLineRunner {

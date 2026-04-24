@@ -6,8 +6,22 @@ import com.squareup.javapoet.*;
 import javax.lang.model.element.Modifier;
 import java.util.Map;
 
+/**
+ * Генератор REST-контроллера для ActionFlow через библиотеку JavaPoet.
+ *
+ * <p>Создаёт контроллер {@code ActionFlowController} с POST-эндпоинтами
+ * для каждого потока бизнес-логики, делегирующими вызов в
+ * {@code ActionFlowService}.</p>
+ */
 public class ActionFlowControllerGenerator {
 
+    /**
+     * Генерация исходного кода ActionFlowController.
+     *
+     * @param spec        полная спецификация проекта
+     * @param basePackage базовый Java-пакет
+     * @return строка с исходным кодом Java-класса
+     */
     public String generate(Spec spec, String basePackage) {
         String controllerPackage = basePackage + ".controller";
         String servicePackage = basePackage + ".service";
@@ -34,13 +48,11 @@ public class ActionFlowControllerGenerator {
                     .build());
         }
 
-        // Inject ActionFlowService
         ClassName serviceClass = ClassName.get(servicePackage, "ActionFlowService");
         controllerBuilder.addField(FieldSpec.builder(serviceClass, "actionFlowService")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                 .build());
 
-        // Constructor injection
         MethodSpec constructor = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(serviceClass, "actionFlowService")

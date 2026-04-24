@@ -8,6 +8,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
+/**
+ * Глобальный обработчик исключений REST API.
+ *
+ * <p>Перехватывает {@link IllegalArgumentException} (ошибки валидации)
+ * и {@link ObjectOptimisticLockingFailureException} (конфликт версий
+ * при одновременном редактировании проекта).</p>
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

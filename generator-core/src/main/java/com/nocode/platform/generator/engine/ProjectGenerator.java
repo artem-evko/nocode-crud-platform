@@ -13,6 +13,13 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Главный генератор проекта — собирает все части в ZIP-архив.
+ *
+ * <p>Координирует работу всех генераторов: сущности (JavaPoet),
+ * репозитории, контроллеры, Liquibase changelog, модуль безопасности,
+ * ActionFlow-сервисы и React-фронтенд (FreeMarker).</p>
+ */
 public class ProjectGenerator {
 
     private final TemplateRenderer renderer = new TemplateRenderer();
@@ -24,6 +31,12 @@ public class ProjectGenerator {
     private final com.nocode.platform.generator.engine.poet.ServiceGenerator actionFlowServiceGenerator = new com.nocode.platform.generator.engine.poet.ServiceGenerator();
     private final com.nocode.platform.generator.engine.poet.ActionFlowControllerGenerator actionFlowControllerGenerator = new com.nocode.platform.generator.engine.poet.ActionFlowControllerGenerator();
 
+    /**
+     * Генерация полного проекта в виде ZIP-архива.
+     *
+     * @param spec спецификация проекта
+     * @return массив байтов ZIP-архива
+     */
     public byte[] generate(Spec spec) {
         String artifactId = spec.project().artifactId();
         String groupId = spec.project().groupId();
@@ -48,7 +61,7 @@ public class ProjectGenerator {
         String applicationYml = renderer.render("application.yml.ftl", model);
         String changelogYaml = liquibaseGenerator.generateChangelog(spec.entities(), spec.project().authEnabled());
 
-        // путь пакета в файловой системе (com.a.b -> com/a/b)
+        // com.a.b -> com/a/b
         String pkgPath = basePackage.replace('.', '/');
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();

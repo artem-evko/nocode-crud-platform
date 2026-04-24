@@ -7,8 +7,23 @@ import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Генератор JPA-сущностей через библиотеку JavaPoet.
+ *
+ * <p>На основе {@link Spec.Entity} создаёт Java-класс с полями,
+ * аннотациями JPA ({@code @Entity}, {@code @Column}, {@code @ManyToOne} и др.),
+ * валидацией ({@code @NotNull}, {@code @Size}, {@code @Pattern})
+ * и геттерами/сеттерами.</p>
+ */
 public class EntityGenerator {
 
+    /**
+     * Генерация исходного кода JPA-сущности.
+     *
+     * @param entity      описание сущности из спецификации
+     * @param basePackage базовый Java-пакет проекта
+     * @return строка с исходным кодом Java-класса
+     */
     public String generate(Spec.Entity entity, String basePackage) {
         String entityPackage = basePackage + ".domain";
 
@@ -19,7 +34,6 @@ public class EntityGenerator {
                         .addMember("name", "$S", entity.table())
                         .build());
 
-        // Add ID field
         FieldSpec idField = FieldSpec.builder(Long.class, "id", Modifier.PRIVATE)
                 .addAnnotation(ClassName.get("jakarta.persistence", "Id"))
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("jakarta.persistence", "GeneratedValue"))
@@ -28,11 +42,9 @@ public class EntityGenerator {
                 .build();
         typeBuilder.addField(idField);
         
-        // Add Getters/Setters for ID
         typeBuilder.addMethod(buildGetter(Long.class, "id"));
         typeBuilder.addMethod(buildSetter(Long.class, "id"));
 
-        // Add standard fields
         if (entity.fields() != null) {
             for (Spec.Field field : entity.fields()) {
                 if ("id".equalsIgnoreCase(field.name())) {
@@ -41,13 +53,11 @@ public class EntityGenerator {
                 Class<?> fieldClass = getJavaType(field.type());
                 FieldSpec.Builder fieldBuilder = FieldSpec.builder(fieldClass, field.name(), Modifier.PRIVATE);
                 
-                // Add @Column
                 AnnotationSpec.Builder columnBuilder = AnnotationSpec.builder(ClassName.get("jakarta.persistence", "Column"))
                         .addMember("name", "$S", toSnakeCase(field.name()))
                         .addMember("nullable", "$L", !field.required());
                 fieldBuilder.addAnnotation(columnBuilder.build());
 
-                // Add Validation Annotations
                 if (field.required()) {
                     fieldBuilder.addAnnotation(ClassName.get("jakarta.validation.constraints", "NotNull"));
                 }
@@ -71,7 +81,6 @@ public class EntityGenerator {
             }
         }
 
-        // Add Relations
         if (entity.relations() != null) {
             for (Spec.Relation relation : entity.relations()) {
                 ClassName targetClass = ClassName.get(entityPackage, relation.targetEntity());

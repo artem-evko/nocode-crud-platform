@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+/**
+ * REST-контроллер для скачивания сгенерированного проекта в виде ZIP-архива.
+ */
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectDownloadController {
@@ -22,6 +25,12 @@ public class ProjectDownloadController {
         this.generatorFacade = generatorFacade;
     }
 
+    /**
+     * Скачивание ZIP-архива сгенерированного проекта.
+     *
+     * @param id идентификатор проекта
+     * @return ZIP-архив или сообщение об ошибке валидации
+     */
     @GetMapping("/{id}/download")
     public ResponseEntity<?> download(@PathVariable("id") UUID id) {
         ProjectEntity p = projectService.get(id);
@@ -42,7 +51,6 @@ public class ProjectDownloadController {
     }
 
     private String contentDisposition(String fileName) {
-        // корректно для кириллицы/пробелов в имени
         String encoded = java.net.URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
         return "attachment; filename*=UTF-8''" + encoded;
     }

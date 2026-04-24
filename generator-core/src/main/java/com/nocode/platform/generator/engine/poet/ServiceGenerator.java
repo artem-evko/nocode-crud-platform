@@ -6,8 +6,22 @@ import com.squareup.javapoet.*;
 import javax.lang.model.element.Modifier;
 import java.util.Map;
 
+/**
+ * Генератор ActionFlow-сервисов через библиотеку JavaPoet.
+ *
+ * <p>Создаёт Spring-сервис {@code ActionFlowService} с методами
+ * для каждого потока бизнес-логики. Поддерживает действия:
+ * создание/обновление/удаление записей в БД и отображение уведомлений.</p>
+ */
 public class ServiceGenerator {
 
+    /**
+     * Генерация исходного кода ActionFlowService.
+     *
+     * @param spec        полная спецификация проекта
+     * @param basePackage базовый Java-пакет
+     * @return строка с исходным кодом Java-класса
+     */
     public String generate(Spec spec, String basePackage) {
         String servicePackage = basePackage + ".service";
 
@@ -16,7 +30,6 @@ public class ServiceGenerator {
                 .addAnnotation(ClassName.get("org.springframework.stereotype", "Service"))
                 .addAnnotation(ClassName.get("org.springframework.transaction.annotation", "Transactional"));
 
-        // Inject application context or entity manager for dynamic queries
         serviceBuilder.addField(FieldSpec.builder(ClassName.get("jakarta.persistence", "EntityManager"), "entityManager")
                 .addAnnotation(ClassName.get("org.springframework.beans.factory.annotation", "Autowired"))
                 .build());
@@ -44,7 +57,6 @@ public class ServiceGenerator {
                         Map<String, Object> config = node.config();
                         
                         if ("DB_CREATE_RECORD".equals(action)) {
-                            mb.addCode("// Action: Create Entity\n");
                             String entityName = config != null && config.containsKey("entityName") ? (String) config.get("entityName") : "Unknown";
                             String mappingJson = config != null && config.containsKey("mapping") ? (String) config.get("mapping") : "{}";
                             
@@ -56,11 +68,10 @@ public class ServiceGenerator {
                             mb.beginControlFlow("if (payload != null)");
                             mb.beginControlFlow("for ($T.Entry<String, Object> entry : payload.entrySet())", Map.class);
                             mb.beginControlFlow("if (entry.getValue() != null)");
-                            // Simple string replacement for dynamic binding
                             mb.addStatement("resolvedJson = resolvedJson.replace(\"{{payload.\" + entry.getKey() + \"}}\", String.valueOf(entry.getValue()))");
-                            mb.endControlFlow(); // if
-                            mb.endControlFlow(); // for
-                            mb.endControlFlow(); // if
+                            mb.endControlFlow();
+                            mb.endControlFlow();
+                            mb.endControlFlow();
                             
                             mb.addStatement("$T entity = objectMapper.readValue(resolvedJson, $T.class)", entityClass, entityClass);
                             mb.addStatement("entityManager.persist(entity)");
@@ -73,7 +84,6 @@ public class ServiceGenerator {
                             mb.endControlFlow();
 
                         } else if ("DB_UPDATE_RECORD".equals(action)) {
-                            mb.addCode("// Action: Update Entity\n");
                             String entityName = config != null && config.containsKey("entityName") ? (String) config.get("entityName") : "Unknown";
                             String mappingJson = config != null && config.containsKey("mapping") ? (String) config.get("mapping") : "{}";
                             ClassName entityClass = ClassName.get(basePackage + ".domain", entityName);
@@ -91,17 +101,17 @@ public class ServiceGenerator {
                             mb.beginControlFlow("for ($T.Entry<String, Object> entry : payload.entrySet())", Map.class);
                             mb.beginControlFlow("if (entry.getValue() != null)");
                             mb.addStatement("resolvedJson = resolvedJson.replace(\"{{payload.\" + entry.getKey() + \"}}\", String.valueOf(entry.getValue()))");
-                            mb.endControlFlow(); // if
-                            mb.endControlFlow(); // for
-                            mb.endControlFlow(); // if
+                            mb.endControlFlow();
+                            mb.endControlFlow();
+                            mb.endControlFlow();
                             
                             mb.addStatement("objectMapper.readerForUpdating(existing).readValue(resolvedJson)");
                             mb.addStatement("entityManager.merge(existing)");
                             mb.addStatement("System.out.println(\"Updated entity: \" + existing)");
                             mb.addStatement("result.put(\"action_\" + $S, \"Success\")", node.id());
                             
-                            mb.endControlFlow(); // if existing
-                            mb.endControlFlow(); // if idObj
+                            mb.endControlFlow();
+                            mb.endControlFlow();
                             
                             mb.nextControlFlow("catch (Exception e)");
                             mb.addStatement("e.printStackTrace()");
@@ -109,7 +119,6 @@ public class ServiceGenerator {
                             mb.endControlFlow();
 
                         } else if ("DB_DELETE_RECORD".equals(action)) {
-                            mb.addCode("// Action: Delete Entity\n");
                             String entityName = config != null && config.containsKey("entityName") ? (String) config.get("entityName") : "Unknown";
                             ClassName entityClass = ClassName.get(basePackage + ".domain", entityName);
                             
@@ -122,8 +131,8 @@ public class ServiceGenerator {
                             mb.addStatement("entityManager.remove(existing)");
                             mb.addStatement("System.out.println(\"Deleted entity: \" + existing)");
                             mb.addStatement("result.put(\"action_\" + $S, \"Deleted\")", node.id());
-                            mb.endControlFlow(); // if existing
-                            mb.endControlFlow(); // if idObj
+                            mb.endControlFlow();
+                            mb.endControlFlow();
                             
                             mb.nextControlFlow("catch (Exception e)");
                             mb.addStatement("e.printStackTrace()");

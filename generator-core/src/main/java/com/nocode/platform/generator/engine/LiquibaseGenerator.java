@@ -4,8 +4,23 @@ import com.nocode.platform.generator.spec.Spec;
 
 import java.util.List;
 
+/**
+ * Генератор Liquibase changelog (YAML) для миграции схемы БД.
+ *
+ * <p>Создаёт changeSet-ы для каждой сущности: таблицы с колонками,
+ * внешние ключи для ManyToOne-связей и join-таблицы для ManyToMany.
+ * При включённой аутентификации добавляет таблицу users
+ * с предзаполненным администратором.</p>
+ */
 public class LiquibaseGenerator {
 
+    /**
+     * Генерация YAML-содержимого Liquibase changelog.
+     *
+     * @param entities    список сущностей проекта
+     * @param authEnabled включена ли аутентификация
+     * @return строка с YAML-содержимым changelog
+     */
     public String generateChangelog(List<Spec.Entity> entities, boolean authEnabled) {
         StringBuilder sb = new StringBuilder();
         sb.append("databaseChangeLog:\n");
@@ -50,7 +65,6 @@ public class LiquibaseGenerator {
             sb.append("                  value: admin\n");
             sb.append("              - column:\n");
             sb.append("                  name: password\n");
-            // BCrypt hash for "admin"
             sb.append("                  value: $2a$10$wT0l0jL/qF1pT3.a6h/7XOH6.p/B8qA15sV.0p/o9aP/W3YdG/P6.\n");
             sb.append("              - column:\n");
             sb.append("                  name: role\n");
@@ -67,7 +81,6 @@ public class LiquibaseGenerator {
             sb.append("            tableName: ").append(entity.table()).append("\n");
             sb.append("            columns:\n");
 
-            // ID Column
             sb.append("              - column:\n");
             sb.append("                  name: id\n");
             sb.append("                  type: BIGINT\n");
@@ -76,7 +89,6 @@ public class LiquibaseGenerator {
             sb.append("                    primaryKey: true\n");
             sb.append("                    nullable: false\n");
 
-            // Other fields
             if (entity.fields() != null) {
                 for (Spec.Field field : entity.fields()) {
                     if ("id".equalsIgnoreCase(field.name())) {
@@ -93,7 +105,6 @@ public class LiquibaseGenerator {
                 }
             }
 
-            // ManyToOne fields (Foreign Keys)
             if (entity.relations() != null) {
                 for (Spec.Relation rel : entity.relations()) {
                     if (rel.type() == Spec.RelationType.MANY_TO_ONE) {
@@ -106,7 +117,6 @@ public class LiquibaseGenerator {
         }
         }
 
-        // Add Foreign Key Constraints
         if (entities != null) {
             for (Spec.Entity entity : entities) {
                 if (entity.relations() != null) {
@@ -127,8 +137,6 @@ public class LiquibaseGenerator {
                 }
             }
 
-            // ManyToMany Join Tables
-            // ManyToMany Join Tables
             for (Spec.Entity m2mEntity : entities) {
                 if (m2mEntity.relations() != null) {
                     for (Spec.Relation rel : m2mEntity.relations()) {
@@ -157,7 +165,6 @@ public class LiquibaseGenerator {
                                 sb.append("                  constraints:\n");
                                 sb.append("                    nullable: false\n");
                                 
-                                // Foreign Keys
                                 sb.append("        - addForeignKeyConstraint:\n");
                                 sb.append("            baseTableName: ").append(joinTableName).append("\n");
                                 sb.append("            baseColumnNames: ").append(col1).append("\n");
@@ -197,7 +204,7 @@ public class LiquibaseGenerator {
                 .filter(e -> e.name().equals(targetEntityName))
                 .findFirst()
                 .map(Spec.Entity::table)
-                .orElse(targetEntityName.toLowerCase() + "s"); // Fallback
+                .orElse(targetEntityName.toLowerCase() + "s");
     }
 
     private String toSnakeCase(String str) {

@@ -8,6 +8,12 @@ import jakarta.persistence.Table;
 
 import java.util.UUID;
 
+/**
+ * JPA-сущность пользователя платформы.
+ *
+ * <p>Хранит учётные данные (логин, хэш пароля) и роль
+ * для аутентификации через Spring Security.</p>
+ */
 @Entity
 @Table(name = "platform_users")
 public class PlatformUser {

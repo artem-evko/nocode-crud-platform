@@ -11,6 +11,13 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+/**
+ * JPA-сущность проекта, создаваемого пользователем на платформе.
+ *
+ * <p>Хранит метаданные проекта (название, groupId, artifactId),
+ * JSON-спецификацию моделей данных и UI, настройки генерации
+ * (аутентификация, фронтенд), а также статус развёртывания.</p>
+ */
 @Entity
 @Table(name = "projects")
 @Getter

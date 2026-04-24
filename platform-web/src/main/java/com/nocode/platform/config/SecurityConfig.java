@@ -19,6 +19,13 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.http.SessionCreationPolicy;
 import java.util.Arrays;
 
+/**
+ * Конфигурация безопасности платформы.
+ *
+ * <p>Настраивает CORS-политику для взаимодействия с React-фронтендом,
+ * отключает CSRF (REST API), использует сессионную аутентификацию
+ * и определяет публичные эндпоинты ({@code /api/auth/**}).</p>
+ */
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
@@ -45,7 +52,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost")); // React/Vite dev server and Docker frontend
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

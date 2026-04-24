@@ -9,10 +9,24 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Генератор React-фронтенда через шаблонизатор FreeMarker.
+ *
+ * <p>Создаёт полный набор файлов фронтенда: конфигурация (package.json,
+ * vite, tailwind), страницы списков и форм для каждой сущности,
+ * и опционально — страницы аутентификации и дашборд.</p>
+ */
 public class FrontendGenerator {
 
     private final TemplateRenderer renderer = new TemplateRenderer();
 
+    /**
+     * Генерация файлов фронтенда в ZIP-архив.
+     *
+     * @param zos  выходной ZIP-поток
+     * @param root корневой путь внутри архива
+     * @param spec спецификация проекта
+     */
     public void generate(ZipOutputStream zos, String root, Spec spec) throws Exception {
         Map<String, Object> model = new HashMap<>();
         model.put("appName", spec.project().name() != null ? spec.project().name() : "admin-ui");
@@ -23,7 +37,6 @@ public class FrontendGenerator {
             model.put("uiSpec", spec.uiSpec());
         }
 
-        // Basic Scaffolding
         putText(zos, root + "package.json", renderer.render("frontend/package.json.ftl", model));
         putText(zos, root + "vite.config.ts", renderer.render("frontend/vite.config.ts.ftl", model));
         putText(zos, root + "index.html", renderer.render("frontend/index.html.ftl", model));
@@ -32,7 +45,6 @@ public class FrontendGenerator {
         putText(zos, root + "tailwind.config.js", renderer.render("frontend/tailwind.config.js.ftl", model));
         putText(zos, root + "postcss.config.js", renderer.render("frontend/postcss.config.js.ftl", model));
 
-        // Source Files
         putText(zos, root + "src/main.tsx", renderer.render("frontend/src/main.tsx.ftl", model));
         putText(zos, root + "src/App.tsx", renderer.render("frontend/src/App.tsx.ftl", model));
         putText(zos, root + "src/index.css", renderer.render("frontend/src/index.css.ftl", model));

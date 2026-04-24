@@ -3,8 +3,22 @@ package com.nocode.platform.generator.spec;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Валидатор спецификации проекта перед генерацией кода.
+ *
+ * <p>Проверяет обязательные поля, корректность имён сущностей и полей,
+ * уникальность имён, конфликты с зарезервированными именами Java и Spring,
+ * а также корректность связей между сущностями.</p>
+ */
 public class SpecValidator {
 
+    /**
+     * Валидация спецификации. При наличии ошибок выбрасывает
+     * {@link IllegalArgumentException} со списком всех найденных проблем.
+     *
+     * @param spec спецификация для проверки
+     * @throws IllegalArgumentException при ошибках валидации
+     */
     public void validate(Spec spec) {
         List<String> errors = new ArrayList<>();
 
@@ -20,7 +34,6 @@ public class SpecValidator {
         if (spec.entities() == null) {
             errors.add("entities must be present (can be empty list)");
         } else {
-            // Bug #3 fix: Check for duplicate entity names
             List<String> entityNames = spec.entities().stream().map(Spec.Entity::name).toList();
             java.util.Set<String> seenNames = new java.util.HashSet<>();
             for (String name : entityNames) {
@@ -29,14 +42,12 @@ public class SpecValidator {
                 }
             }
 
-            // Bug #4 fix: Reserved names that conflict with Spring Boot / JPA generated classes
             java.util.Set<String> reservedNames = java.util.Set.of(
                     "Application", "Controller", "Service", "Repository",
                     "Config", "Configuration", "Entity", "Model",
                     "Filter", "Interceptor", "Handler", "Advice"
             );
 
-            // Java reserved keywords (for field name validation)
             java.util.Set<String> javaKeywords = java.util.Set.of(
                     "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
                     "class", "const", "continue", "default", "do", "double", "else", "enum",

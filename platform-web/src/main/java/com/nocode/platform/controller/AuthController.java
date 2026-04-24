@@ -23,6 +23,13 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * REST-контроллер аутентификации пользователей.
+ *
+ * <p>Предоставляет эндпоинты для регистрации, входа в систему,
+ * выхода и получения информации о текущем пользователе.
+ * Использует сессионную аутентификацию Spring Security.</p>
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -38,6 +45,12 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Регистрация нового пользователя.
+     *
+     * @param loginRequest данные для регистрации (логин и пароль)
+     * @return сообщение об успешной регистрации или ошибка
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody LoginRequest loginRequest) {
         if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
@@ -50,12 +63,20 @@ public class AuthController {
         PlatformUser newUser = new PlatformUser();
         newUser.setUsername(loginRequest.getUsername());
         newUser.setPassword(passwordEncoder.encode(loginRequest.getPassword()));
-        newUser.setRole("USER"); // Default role
+        newUser.setRole("USER");
         
         userRepository.save(newUser);
         return ResponseEntity.ok(Map.of("message", "User registered successfully"));
     }
 
+    /**
+     * Вход в систему по логину и паролю.
+     *
+     * @param loginRequest данные для входа
+     * @param request      HTTP-запрос (для создания сессии)
+     * @param response     HTTP-ответ
+     * @return сообщение об успешном входе или ошибка 401
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -75,6 +96,9 @@ public class AuthController {
         }
     }
 
+    /**
+     * Выход из системы — инвалидация текущей сессии.
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         SecurityContextHolder.clearContext();
@@ -85,6 +109,9 @@ public class AuthController {
         return ResponseEntity.ok().body("Logged out");
     }
 
+    /**
+     * Получение имени текущего аутентифицированного пользователя.
+     */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {

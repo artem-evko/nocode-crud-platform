@@ -12,46 +12,42 @@
 .DS_Store
 Thumbs.db
 
-# Vaadin (dev mode build artifacts)
+# Node.js / Vaadin
 node_modules/
 /**/node_modules/
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
 
-# Vaadin generated frontend / dev bundle (может появляться в разных местах)
+# Vaadin generated frontend / dev bundle
 frontend/generated/
 /**/frontend/generated/
 src/main/frontend/generated/
 /**/src/main/frontend/generated/
 
-# Vite / Webpack caches (Vaadin 24/25)
+# Vite / Webpack caches
 .vite/
 /**/.vite/
 webpack.generated.js
 stats.json
 
-# Vaadin dev server / copilot plugin artifacts (если появляются)
+# Vaadin dev server
 .vaadin/
 /**/.vaadin/
 
-# IntelliJ
-.idea/
-*.iml
-
-# GIGA ID plugin / local settings
+# GIGA IDE plugin
 .gigaide/
 gigaide.properties
 
-# Vaadin frontend (не коммитим для Flow-only проекта)
+# Vaadin frontend (Flow-only)
 platform-web/src/main/frontend/
 
-# Local generate test artifacts
+# Артефакты генерации
 generated.zip
 test-generated/
 test-generated-edge-case/
 
-# Diploma draft files
+# Материалы дипломной работы
 diploma_*.md
 diploma_*.txt
 extracted_guidelines.txt
@@ -61,13 +57,16 @@ key_code_fragments_for_gemini.md
 project_structure_for_gemini.md
 nocode-platform-article.md
 experiment_results_*.md
+TESTING_PLAN.md
+PLATFORM_ARCHITECTURE.md
+START_GUIDE.md
 
-# Compiled Java test files
+# Скомпилированные тестовые файлы
 *.class
 FindVaadinSecurity.java
 TestReflect.java
 
-# Temporary files
+# Временные файлы
 cookies.txt
 deploy.log
 error.log
@@ -76,10 +75,25 @@ backend_logs.txt
 read_docs.py
 commit_script.bat
 commit_script.ps1
-start-platform.ps1
-START_GUIDE.md
-
-# Screenshots / diploma materials
-работа платформы
 login_body.json
-data_dump.sql
+update_body.json
+temp_spec.json
+data_dump.sql
+*.sql
+
+# Скриншоты / материалы для диплома
+работа платформы
+
+# Отчёты тестов Playwright
+platform-frontend/playwright-report/
+platform-frontend/test-results/
+
+# Тестовые скрипты
+platform-frontend/test-delete.*
+
+# Старый шаблонный код Vaadin
+/src/
+
+# Временные файлы внутри модулей
+platform-web/cp.txt
+platform-web/deploy.log

@@ -14,6 +14,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * REST-контроллер управления проектами пользователя.
+ *
+ * <p>Предоставляет CRUD-операции над проектами: создание, получение,
+ * обновление и удаление. Каждый проект привязан к владельцу
+ * (текущему аутентифицированному пользователю).</p>
+ */
 @RestController
 @RequestMapping("/api/projects")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -32,9 +39,10 @@ public class ProjectController {
                 && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()
                 && !SecurityContextHolder.getContext().getAuthentication().getName().equals("anonymousUser")
                 ? SecurityContextHolder.getContext().getAuthentication().getName()
-                : "admin"; // Default fallback
+                : "admin";
     }
 
+    /** Получение всех проектов текущего пользователя. */
     @GetMapping
     public List<ProjectDto> getAllProjects() {
         return projectRepository.findAllByOwnerUsername(getUsername()).stream()
@@ -42,6 +50,7 @@ public class ProjectController {
                 .collect(Collectors.toList());
     }
 
+    /** Получение проекта по идентификатору. */
     @GetMapping("/{id}")
     public ResponseEntity<ProjectDto> getProjectById(@PathVariable UUID id) {
         return projectRepository.findById(id)
@@ -51,9 +60,14 @@ public class ProjectController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Создание нового проекта.
+     *
+     * @param dto данные проекта (название, groupId, artifactId и т.д.)
+     * @return созданный проект или ошибка валидации
+     */
     @PostMapping
     public ResponseEntity<?> createProject(@RequestBody ProjectDto dto) {
-        // Validate project fields
         List<String> errors = validateProjectFields(dto);
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(java.util.Map.of("message", String.join("; ", errors)));
@@ -93,6 +107,12 @@ public class ProjectController {
         return errors;
     }
 
+    /**
+     * Обновление существующего проекта.
+     *
+     * <p>Поддерживает оптимистичную блокировку: при конфликте версий
+     * возвращается статус 409 (Conflict).</p>
+     */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProject(@PathVariable UUID id, @RequestBody ProjectDto dto) {
         return projectRepository.findById(id)
@@ -120,6 +140,12 @@ public class ProjectController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Удаление проекта по идентификатору.
+     *
+     * <p>Перед удалением из БД останавливает активное развёртывание,
+     * если оно существует.</p>
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
         return projectRepository.findById(id)
@@ -128,7 +154,7 @@ public class ProjectController {
                     try {
                         deploymentService.stopDeployment(id);
                     } catch (Exception e) {
-                        // Ignore if deployment wasn't actively running
+                        // развёртывание могло быть неактивным — игнорируем
                     }
                     projectRepository.deleteById(id);
                     return ResponseEntity.ok().<Void>build();

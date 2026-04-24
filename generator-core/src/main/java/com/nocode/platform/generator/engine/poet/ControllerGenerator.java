@@ -6,8 +6,23 @@ import com.squareup.javapoet.*;
 import javax.lang.model.element.Modifier;
 import java.util.List;
 
+/**
+ * Генератор REST-контроллеров через библиотеку JavaPoet.
+ *
+ * <p>Создаёт CRUD-контроллер для каждой сущности с эндпоинтами
+ * GET (все / по ID), POST, PUT и DELETE. При включённой аутентификации
+ * добавляет аннотации {@code @PreAuthorize} с ролевым доступом.</p>
+ */
 public class ControllerGenerator {
 
+    /**
+     * Генерация исходного кода REST-контроллера для сущности.
+     *
+     * @param entity      описание сущности
+     * @param basePackage базовый Java-пакет
+     * @param authEnabled включена ли аутентификация
+     * @return строка с исходным кодом Java-класса
+     */
     public String generate(Spec.Entity entity, String basePackage, boolean authEnabled) {
         String controllerPackage = basePackage + ".controller";
         String repoPackage = basePackage + ".repository";
@@ -16,10 +31,8 @@ public class ControllerGenerator {
         ClassName entityClass = ClassName.get(entityPackage, entity.name());
         ClassName repoClass = ClassName.get(repoPackage, entity.name() + "Repository");
 
-        // Dependencies
         FieldSpec repoField = FieldSpec.builder(repoClass, "repository", Modifier.PRIVATE, Modifier.FINAL).build();
 
-        // Constructor for DI
         MethodSpec constructor = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(repoClass, "repository")
@@ -34,7 +47,6 @@ public class ControllerGenerator {
         if (authEnabled) addPreAuthorize(getAllMethodBuilder, entity.readRoles());
         MethodSpec getAllMethod = getAllMethodBuilder.build();
 
-        // GET by ID
         MethodSpec.Builder getByIdMethodBuilder = MethodSpec.methodBuilder("getById")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("org.springframework.web.bind.annotation", "GetMapping"))
@@ -50,7 +62,6 @@ public class ControllerGenerator {
         if (authEnabled) addPreAuthorize(getByIdMethodBuilder, entity.readRoles());
         MethodSpec getByIdMethod = getByIdMethodBuilder.build();
 
-        // POST (Create)
         MethodSpec.Builder createMethodBuilder = MethodSpec.methodBuilder("create")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ClassName.get("org.springframework.web.bind.annotation", "PostMapping"))
@@ -63,7 +74,6 @@ public class ControllerGenerator {
         if (authEnabled) addPreAuthorize(createMethodBuilder, entity.createRoles());
         MethodSpec createMethod = createMethodBuilder.build();
 
-        // PUT (Update)
         MethodSpec.Builder updateMethodBuilder = MethodSpec.methodBuilder("update")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("org.springframework.web.bind.annotation", "PutMapping"))
@@ -87,7 +97,6 @@ public class ControllerGenerator {
         if (authEnabled) addPreAuthorize(updateMethodBuilder, entity.updateRoles());
         MethodSpec updateMethod = updateMethodBuilder.build();
 
-        // DELETE
         MethodSpec.Builder deleteMethodBuilder = MethodSpec.methodBuilder("delete")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(AnnotationSpec.builder(ClassName.get("org.springframework.web.bind.annotation", "DeleteMapping"))

@@ -16,6 +16,13 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * Сервис развёртывания сгенерированных проектов через Docker Compose.
+ *
+ * <p>Выполняет полный цикл деплоя: генерация кода → распаковка →
+ * создание Dockerfile и docker-compose.yml → сборка и запуск контейнеров →
+ * проверка здоровья (healthcheck) → маршрутизация через Traefik.</p>
+ */
 @Service
 public class DeploymentService {
 
@@ -29,16 +36,24 @@ public class DeploymentService {
         this.generatorFacade = generatorFacade;
     }
 
+    /**
+     * Асинхронное развёртывание проекта.
+     *
+     * <p>Генерирует исходный код, собирает Docker-образы, запускает контейнеры
+     * и дожидается готовности бэкенда через healthcheck. При успехе обновляет
+     * статус проекта на {@code RUNNING} с URL вида {@code proj-<id>.localhost}.</p>
+     *
+     * @param projectId  идентификатор проекта
+     * @param customPort пользовательский порт (может быть null)
+     */
     @Async
     public void deployProject(UUID projectId, Integer customPort) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow();
         try {
             updateStatus(project, "DEPLOYING", null);
 
-            // 1. Generate project code
             byte[] zipData = generatorFacade.generateReal(project);
 
-            // 2. Prepare temp directory
             String artifactId = project.getArtifactId();
             Path deployDir = Paths.get(System.getProperty("java.io.tmpdir"), "deploy-" + projectId);
             if (Files.exists(deployDir)) {
@@ -49,27 +64,21 @@ public class DeploymentService {
             }
             Files.createDirectories(deployDir);
 
-            // 3. Unzip project code
             unzip(zipData, deployDir.toFile());
 
-            // The root folder inside the zip is named 'artifactId/'
             Path projectRoot = deployDir.resolve(artifactId);
 
-            // 4. Generate Dockerfiles and docker-compose.yml
             generateDockerFiles(projectRoot, project);
 
-            // 5. Check if the generator produced actual frontend code
             boolean hasFrontend = project.isGenerateFrontend()
                     && Files.exists(projectRoot.resolve("frontend/package.json"));
 
-            // 6. Find free port for frontend or backend
             int frontendPort = hasFrontend ? (customPort != null ? customPort : findFreePort()) : -1;
             int backendPort = findFreePort();
             int dbPort = findFreePort();
 
             generateDockerCompose(projectRoot, project, hasFrontend, frontendPort, backendPort, dbPort);
 
-            // 7. Execute docker-compose
             String projectName = "proj-" + projectId;
             
             runCommand(projectRoot.toFile(), "docker", "compose", "-p", projectName, "down", "-v");
@@ -97,7 +106,6 @@ public class DeploymentService {
                 throw new RuntimeException("Docker up failed with exit code " + upExitCode);
             }
 
-            // 8. Healthcheck: wait for backend container to be running (not restarting)
             String backendContainer = projectName + "-backend-" + project.getArtifactId() + "-1";
             boolean healthy = false;
             for (int attempt = 0; attempt < 20; attempt++) {
@@ -111,7 +119,6 @@ public class DeploymentService {
                     hcProc.waitFor();
                     log.info("Healthcheck attempt {}/20 for {}: status={}", attempt + 1, backendContainer, status);
                     if ("running".equals(status)) {
-                        // Additional check: verify container is NOT in a restart loop
                         ProcessBuilder rcPb = new ProcessBuilder("docker", "inspect",
                                 "--format", "{{.RestartCount}}", backendContainer);
                         rcPb.redirectErrorStream(true);
@@ -134,7 +141,6 @@ public class DeploymentService {
 
             if (!healthy) {
                 log.error("Backend container {} failed healthcheck after 60s", backendContainer);
-                // Collect logs for debugging
                 try {
                     ProcessBuilder logPb = new ProcessBuilder("docker", "logs", "--tail", "20", backendContainer);
                     logPb.redirectErrorStream(true);
@@ -159,6 +165,11 @@ public class DeploymentService {
         }
     }
 
+    /**
+     * Остановка развёрнутого проекта и удаление его Docker-контейнеров.
+     *
+     * @param projectId идентификатор проекта
+     */
     public void stopDeployment(UUID projectId) {
         ProjectEntity project = projectRepository.findById(projectId).orElseThrow();
         try {
@@ -171,7 +182,6 @@ public class DeploymentService {
             if (Files.exists(projectRoot)) {
                 runCommand(projectRoot.toFile(), "docker", "compose", "-p", projectName, "down", "-v");
             } else {
-                // If dir doesn't exist, try globally
                 runCommand(new File("."), "docker", "compose", "-p", projectName, "down", "-v");
             }
             updateStatus(project, "NONE", null);
@@ -182,7 +192,6 @@ public class DeploymentService {
     }
 
     private void generateDockerFiles(Path root, ProjectEntity project) throws IOException {
-        // Backend Dockerfile
         Path backendDir = root.resolve("backend");
         if (Files.exists(backendDir)) {
             String backendDockerfile = """
@@ -202,7 +211,6 @@ public class DeploymentService {
             Files.writeString(backendDir.resolve("Dockerfile"), backendDockerfile);
         }
 
-        // Frontend Dockerfile
         Path frontendDir = root.resolve("frontend");
         if (project.isGenerateFrontend()) {
             Files.createDirectories(frontendDir);
@@ -229,7 +237,6 @@ public class DeploymentService {
         String dbPass = "password";
         String dbName = project.getArtifactId();
         
-        // If hasFrontend, configure nginx to proxy /api to the backend
         if (hasFrontend) {
             Path frontendDir = root.resolve("frontend");
             Files.createDirectories(frontendDir);
@@ -251,7 +258,6 @@ public class DeploymentService {
             Files.writeString(nginxConfPath, nginxConf);
         }
         
-        // Overwrite application.yml to use docker network db:
         Path appYmlPath = root.resolve("backend/src/main/resources/application.yml");
         if (Files.exists(appYmlPath)) {
             String appYml = Files.readString(appYmlPath);
@@ -265,7 +271,6 @@ public class DeploymentService {
         compose.append("version: '3.8'\n");
         compose.append("services:\n");
         
-        // DB — only on internal network (isolated from other projects)
         compose.append("  db:\n");
         compose.append("    image: postgres:15-alpine\n");
         compose.append("    environment:\n");
@@ -281,7 +286,6 @@ public class DeploymentService {
         compose.append("    networks:\n");
         compose.append("      - internal\n");
         
-        // Backend — on both internal (to reach db) and traefik (for routing)
         compose.append("  backend-").append(project.getArtifactId()).append(":\n");
         compose.append("    build: ./backend\n");
         compose.append("    restart: always\n");
@@ -314,7 +318,6 @@ public class DeploymentService {
             compose.append("      - nocode-network\n");
         }
 
-        // Two networks: internal (db<->backend isolation) + external (Traefik routing)
         compose.append("\nnetworks:\n");
         compose.append("  internal:\n");
         compose.append("    driver: bridge\n");
