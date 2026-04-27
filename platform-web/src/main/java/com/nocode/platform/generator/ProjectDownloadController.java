@@ -2,6 +2,7 @@ package com.nocode.platform.generator;
 
 import com.nocode.platform.project.ProjectEntity;
 import com.nocode.platform.project.ProjectService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +16,11 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/projects")
+@RequiredArgsConstructor
 public class ProjectDownloadController {
 
     private final ProjectService projectService;
     private final GeneratorFacade generatorFacade;
-
-    public ProjectDownloadController(ProjectService projectService, GeneratorFacade generatorFacade) {
-        this.projectService = projectService;
-        this.generatorFacade = generatorFacade;
-    }
 
     /**
      * Скачивание ZIP-архива сгенерированного проекта.

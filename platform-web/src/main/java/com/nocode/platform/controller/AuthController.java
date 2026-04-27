@@ -1,49 +1,30 @@
 package com.nocode.platform.controller;
 
 import com.nocode.platform.dto.LoginRequest;
+import com.nocode.platform.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.security.web.context.HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
-
-import com.nocode.platform.domain.PlatformUser;
-import com.nocode.platform.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Map;
-
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
-import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * REST-контроллер аутентификации пользователей.
  *
  * <p>Предоставляет эндпоинты для регистрации, входа в систему,
  * выхода и получения информации о текущем пользователе.
- * Использует сессионную аутентификацию Spring Security.</p>
+ * Делегирует бизнес-логику в {@link AuthService}.</p>
  */
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
-
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private final AuthService authService;
 
     /**
      * Регистрация нового пользователя.
@@ -53,20 +34,14 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody LoginRequest loginRequest) {
-        if (loginRequest.getUsername() == null || loginRequest.getPassword() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Username and password required"));
+        try {
+            authService.register(loginRequest);
+            return ResponseEntity.ok(Map.of("message", "User registered successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         }
-        if (userRepository.findByUsername(loginRequest.getUsername()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Username is already taken"));
-        }
-        
-        PlatformUser newUser = new PlatformUser();
-        newUser.setUsername(loginRequest.getUsername());
-        newUser.setPassword(passwordEncoder.encode(loginRequest.getPassword()));
-        newUser.setRole("USER");
-        
-        userRepository.save(newUser);
-        return ResponseEntity.ok(Map.of("message", "User registered successfully"));
     }
 
     /**
@@ -80,16 +55,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
         try {
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
-
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            SecurityContext sc = SecurityContextHolder.createEmptyContext();
-            sc.setAuthentication(authentication);
-            SecurityContextHolder.setContext(sc);
-            
-            securityContextRepository.saveContext(sc, request, response);
-
+            authService.login(loginRequest, request, response);
             return ResponseEntity.ok().body("Login successful");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
@@ -101,11 +67,7 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
-        SecurityContextHolder.clearContext();
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
-        }
+        authService.logout(request);
         return ResponseEntity.ok().body("Logged out");
     }
 

@@ -1,8 +1,8 @@
 package com.nocode.platform.project;
 
 import com.nocode.platform.generator.GeneratorFacade;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -23,18 +23,13 @@ import java.util.zip.ZipInputStream;
  * создание Dockerfile и docker-compose.yml → сборка и запуск контейнеров →
  * проверка здоровья (healthcheck) → маршрутизация через Traefik.</p>
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class DeploymentService {
-
-    private static final Logger log = LoggerFactory.getLogger(DeploymentService.class);
 
     private final ProjectRepository projectRepository;
     private final GeneratorFacade generatorFacade;
-
-    public DeploymentService(ProjectRepository projectRepository, GeneratorFacade generatorFacade) {
-        this.projectRepository = projectRepository;
-        this.generatorFacade = generatorFacade;
-    }
 
     /**
      * Асинхронное развёртывание проекта.

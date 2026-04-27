@@ -1,6 +1,7 @@
 package com.nocode.platform.controller;
 
 import com.nocode.platform.project.DeploymentService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,14 +15,10 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/projects/{id}/deploy")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RequiredArgsConstructor
 public class DeploymentController {
 
     private final DeploymentService deploymentService;
-
-    public DeploymentController(DeploymentService deploymentService) {
-        this.deploymentService = deploymentService;
-    }
 
     /**
      * Запуск развёртывания проекта (асинхронно).
