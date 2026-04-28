@@ -1,11 +1,11 @@
 package com.nocode.platform.generator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.nocode.platform.generator.engine.ProjectGenerator;
 import com.nocode.platform.generator.spec.Spec;
 import com.nocode.platform.generator.spec.SpecValidator;
 import com.nocode.platform.project.ProjectEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,11 +19,12 @@ import java.util.ArrayList;
  * Возвращает ZIP-архив с готовым проектом.</p>
  */
 @Service
+@RequiredArgsConstructor
 public class GeneratorFacade {
 
-    private final ProjectGenerator projectGenerator = new ProjectGenerator();
-    private final SpecValidator specValidator = new SpecValidator();
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ProjectGenerator projectGenerator;
+    private final SpecValidator specValidator;
+    private final ObjectMapper generatorObjectMapper;
 
     /**
      * Генерация проекта на основе данных из {@link ProjectEntity}.
@@ -37,7 +38,7 @@ public class GeneratorFacade {
         try {
             Spec spec;
             if (p.getSpecText() != null && !p.getSpecText().isBlank()) {
-               spec = mapper.readValue(p.getSpecText(), Spec.class);
+               spec = generatorObjectMapper.readValue(p.getSpecText(), Spec.class);
                Spec.Project overridden = new Spec.Project(
                    p.getGroupId(),
                    p.getArtifactId(),
